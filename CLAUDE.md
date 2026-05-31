@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Smart RT is a PWA for administering a single Indonesian neighborhood unit (RT): resident/household data, nightly watch (ronda) scheduling and check-in, daily cash collection (kas) via QR + daily PIN, fines, announcements, resident reports, letters, inventory, and simple voting.
 
-**The application is not scaffolded yet.** This repository currently holds only planning artifacts. The Laravel app gets bootstrapped by executing Phase 01 (see below). When working here, check whether `composer.json`/`artisan` exist before assuming any framework command will run.
+The Laravel application is scaffolded in this repository. Development runs through DDEV, so use `ddev artisan`, `ddev composer`, and `ddev npm` instead of host PHP/Composer/NPM.
 
 ## Document workflow
 

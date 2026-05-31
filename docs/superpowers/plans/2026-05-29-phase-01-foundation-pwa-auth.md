@@ -58,9 +58,11 @@ Expected: `.ddev/`, `artisan`, `composer.json`, `app/`, `routes/`, `database/`, 
 
 ```bash
 ddev composer require livewire/livewire livewire/volt
-ddev composer require pestphp/pest pestphp/pest-plugin-laravel --dev
+ddev composer remove phpunit/phpunit --dev
+ddev composer require pestphp/pest --dev --with-all-dependencies
+ddev composer require pestphp/pest-plugin-laravel --dev
 ddev artisan volt:install
-ddev artisan pest:install
+ddev exec ./vendor/bin/pest --init
 ```
 
 Expected: Composer installs packages and creates Pest configuration.

@@ -1,0 +1,10 @@
+{
+  "name": "Smart RT",
+  "short_name": "Smart RT",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#059669",
+  "description": "Administrasi RT, ronda, kas, dan layanan warga.",
+  "icons": []
+}
