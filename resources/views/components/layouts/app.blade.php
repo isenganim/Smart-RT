@@ -15,7 +15,14 @@
     <div class="min-h-screen">
         <header class="border-b bg-white">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-                <a href="{{ route('dashboard') }}" class="font-semibold text-emerald-700">Smart RT</a>
+                <div class="flex items-center gap-6">
+                    <a href="{{ route('dashboard') }}" class="font-semibold text-emerald-700">Smart RT</a>
+                    <nav class="flex items-center gap-4 text-sm">
+                        <a href="{{ route('dashboard') }}" class="text-slate-600 hover:text-slate-900">Dashboard</a>
+                        <a href="{{ route('households.index') }}" class="text-slate-600 hover:text-slate-900">Rumah/KK</a>
+                        <a href="{{ route('residents.index') }}" class="text-slate-600 hover:text-slate-900">Warga</a>
+                    </nav>
+                </div>
                 <livewire:auth.logout-button />
             </div>
         </header>

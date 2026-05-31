@@ -12,4 +12,8 @@ Volt::route('/login', 'auth.login')->name('login');
 
 Route::middleware(['auth', 'pengurus'])->group(function () {
     Volt::route('/dashboard', 'dashboard.index')->name('dashboard');
+
+    Volt::route('/dashboard/rumah', 'households.index')->name('households.index');
+    Volt::route('/dashboard/rumah/{household}/qr', 'households.qr')->name('households.qr');
+    Volt::route('/dashboard/warga', 'residents.index')->name('residents.index');
 });

@@ -10,13 +10,13 @@
 
 ## Phases
 
-- [ ] **Phase 01 — Foundation PWA & Auth** — `../plans/2026-05-29-phase-01-foundation-pwa-auth.md`
+- [x] **Phase 01 — Foundation PWA & Auth** — `../plans/2026-05-29-phase-01-foundation-pwa-auth.md`
   - Laravel 12 + Livewire/Volt + Tailwind skeleton
   - Pengurus roles (`admin_rt`, `bendahara`), `EnsurePengurus` middleware
   - Login + dashboard access
   - PWA manifest + service worker
   - Audit log foundation (`audit_logs`, `App\Support\Audit`)
-- [ ] **Phase 02 — Data Warga, KK, Rumah** — `../plans/2026-05-30-phase-02-data-warga-kk-rumah.md`
+- [x] **Phase 02 — Data Warga, KK, Rumah** — `../plans/2026-05-30-phase-02-data-warga-kk-rumah.md`
   - `Household` model with auto-generated unique `qr_token`
   - `Resident` model with `PhoneNumber` normalizer + `UniqueActivePhone` rule
   - Household management dashboard + QR (SVG) view
@@ -49,9 +49,9 @@ Mapped to design spec "Testing MVP" → **DT-1** (admin dapat login dan mengelol
 
 ## Definition of done
 
-- [ ] `php artisan test` passes for all Phase 01 + 02 suites
-- [ ] `npm run build` succeeds
-- [ ] Admin/bendahara can log in; guests are redirected to `/login`
-- [ ] Households and residents can be created/edited/toggled from the dashboard
-- [ ] Each household renders a QR token; duplicate active phones are rejected
-- [ ] Audit log records `household.created` and `resident.created`
+- [x] `ddev artisan test` passes for all Phase 01 + 02 suites
+- [x] `ddev npm run build` succeeds
+- [x] Admin/bendahara can log in; guests are redirected to `/login`
+- [x] Households and residents can be created/edited/toggled from the dashboard
+- [x] Each household renders a QR token; duplicate active phones are rejected
+- [x] Audit log records `household.created` and `resident.created`

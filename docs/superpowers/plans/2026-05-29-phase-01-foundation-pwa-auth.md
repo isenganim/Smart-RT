@@ -1,6 +1,6 @@
 # Phase 01 Foundation PWA and Auth Dashboard Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Bootstrap Smart RT as a Laravel 12 PWA with Livewire Volt, Alpine.js, Tailwind CSS, MySQL, authenticated pengurus dashboard, roles, and audit logging foundation.
 
@@ -40,7 +40,7 @@
 - Create: project root Laravel files
 - Modify: `.env.example`
 
-- [ ] **Step 1: Configure DDEV and create the Laravel project in `smart-rt`**
+- [x] **Step 1: Configure DDEV and create the Laravel project in `smart-rt`**
 
 Run from `/home/ageng/Projects/Programming/monorepo/smart-rt`:
 
@@ -54,7 +54,7 @@ rm -rf temp-laravel
 
 Expected: `.ddev/`, `artisan`, `composer.json`, `app/`, `routes/`, `database/`, and `resources/` exist. Commit `.ddev/` with the project; it is the shared local development environment.
 
-- [ ] **Step 2: Install Livewire Volt and Pest**
+- [x] **Step 2: Install Livewire Volt and Pest**
 
 ```bash
 ddev composer require livewire/livewire livewire/volt
@@ -67,7 +67,7 @@ ddev exec ./vendor/bin/pest --init
 
 Expected: Composer installs packages and creates Pest configuration.
 
-- [ ] **Step 3: Install frontend dependencies**
+- [x] **Step 3: Install frontend dependencies**
 
 ```bash
 ddev npm install
@@ -76,7 +76,7 @@ ddev npm install -D tailwindcss @tailwindcss/vite alpinejs
 
 Expected: `package-lock.json` and `node_modules/` are created.
 
-- [ ] **Step 4: Update `.env.example`**
+- [x] **Step 4: Update `.env.example`**
 
 Set these values:
 
@@ -100,7 +100,7 @@ CACHE_STORE=database
 MAIL_MAILER=log
 ```
 
-- [ ] **Step 5: Verify framework boot**
+- [x] **Step 5: Verify framework boot**
 
 ```bash
 cp .env.example .env
@@ -110,7 +110,7 @@ ddev artisan test
 
 Expected: default tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .
@@ -125,7 +125,7 @@ git commit -m "chore: bootstrap Laravel Smart RT application"
 - Modify: `app/Models/User.php`
 - Test: `tests/Feature/Auth/UserRoleTest.php`
 
-- [ ] **Step 1: Write failing role tests**
+- [x] **Step 1: Write failing role tests**
 
 Create `tests/Feature/Auth/UserRoleTest.php`:
 
@@ -150,7 +150,7 @@ it('detects pengurus users', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 ddev artisan test tests/Feature/Auth/UserRoleTest.php
@@ -158,7 +158,7 @@ ddev artisan test tests/Feature/Auth/UserRoleTest.php
 
 Expected: FAIL because `App\Enums\UserRole` does not exist.
 
-- [ ] **Step 3: Create role enum**
+- [x] **Step 3: Create role enum**
 
 Create `app/Enums/UserRole.php`:
 
@@ -182,7 +182,7 @@ enum UserRole: string
 }
 ```
 
-- [ ] **Step 4: Add migration**
+- [x] **Step 4: Add migration**
 
 ```bash
 ddev artisan make:migration add_role_to_users_table --table=users
@@ -206,7 +206,7 @@ public function down(): void
 }
 ```
 
-- [ ] **Step 5: Update user model**
+- [x] **Step 5: Update user model**
 
 In `app/Models/User.php`, add:
 
@@ -232,7 +232,7 @@ public function isPengurus(): bool
 }
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 ddev artisan migrate:fresh --env=testing
@@ -241,7 +241,7 @@ ddev artisan test tests/Feature/Auth/UserRoleTest.php
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add app/Enums/UserRole.php app/Models/User.php database/migrations tests/Feature/Auth/UserRoleTest.php
@@ -258,7 +258,7 @@ git commit -m "feat: add pengurus user roles"
 - Create: `resources/views/livewire/dashboard/index.blade.php`
 - Test: `tests/Feature/Dashboard/DashboardAccessTest.php`
 
-- [ ] **Step 1: Write failing access tests**
+- [x] **Step 1: Write failing access tests**
 
 Create `tests/Feature/Dashboard/DashboardAccessTest.php`:
 
@@ -292,7 +292,7 @@ it('allows bendahara to open dashboard', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 ddev artisan test tests/Feature/Dashboard/DashboardAccessTest.php
@@ -300,7 +300,7 @@ ddev artisan test tests/Feature/Dashboard/DashboardAccessTest.php
 
 Expected: FAIL because routes/views are missing.
 
-- [ ] **Step 3: Create pengurus middleware**
+- [x] **Step 3: Create pengurus middleware**
 
 Create `app/Http/Middleware/EnsurePengurus.php`:
 
@@ -326,7 +326,7 @@ class EnsurePengurus
 }
 ```
 
-- [ ] **Step 4: Register middleware alias**
+- [x] **Step 4: Register middleware alias**
 
 In `bootstrap/app.php`:
 
@@ -352,7 +352,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })->create();
 ```
 
-- [ ] **Step 5: Create routes**
+- [x] **Step 5: Create routes**
 
 Replace `routes/web.php` with:
 
@@ -371,7 +371,7 @@ Route::middleware(['auth', 'pengurus'])->group(function () {
 });
 ```
 
-- [ ] **Step 6: Create dashboard view**
+- [x] **Step 6: Create dashboard view**
 
 Create `resources/views/livewire/dashboard/index.blade.php`:
 
@@ -384,7 +384,7 @@ Create `resources/views/livewire/dashboard/index.blade.php`:
 </x-layouts.app>
 ```
 
-- [ ] **Step 7: Create login Volt page**
+- [x] **Step 7: Create login Volt page**
 
 Create `resources/views/livewire/auth/login.blade.php`:
 
@@ -444,7 +444,7 @@ $login = function () {
 </x-layouts.auth>
 ```
 
-- [ ] **Step 8: Run tests**
+- [x] **Step 8: Run tests**
 
 ```bash
 ddev artisan test tests/Feature/Dashboard/DashboardAccessTest.php
@@ -452,7 +452,7 @@ ddev artisan test tests/Feature/Dashboard/DashboardAccessTest.php
 
 Expected: PASS.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add app/Http/Middleware/EnsurePengurus.php bootstrap/app.php routes/web.php resources/views/livewire tests/Feature/Dashboard
@@ -470,7 +470,7 @@ git commit -m "feat: add pengurus login and dashboard access"
 - Create: `public/sw.js`
 - Test: `tests/Feature/Pwa/PwaAssetsTest.php`
 
-- [ ] **Step 1: Write failing PWA tests**
+- [x] **Step 1: Write failing PWA tests**
 
 Create `tests/Feature/Pwa/PwaAssetsTest.php`:
 
@@ -490,7 +490,7 @@ it('serves service worker', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 ddev artisan test tests/Feature/Pwa/PwaAssetsTest.php
@@ -498,7 +498,7 @@ ddev artisan test tests/Feature/Pwa/PwaAssetsTest.php
 
 Expected: FAIL because files are missing or content does not match.
 
-- [ ] **Step 3: Create app layout**
+- [x] **Step 3: Create app layout**
 
 Create `resources/views/components/layouts/app.blade.php`:
 
@@ -533,7 +533,7 @@ Create `resources/views/components/layouts/app.blade.php`:
 </html>
 ```
 
-- [ ] **Step 4: Create auth layout**
+- [x] **Step 4: Create auth layout**
 
 Create `resources/views/components/layouts/auth.blade.php`:
 
@@ -566,7 +566,7 @@ Create `resources/views/components/layouts/auth.blade.php`:
 </html>
 ```
 
-- [ ] **Step 5: Create logout button**
+- [x] **Step 5: Create logout button**
 
 Create `resources/views/livewire/auth/logout-button.blade.php`:
 
@@ -590,7 +590,7 @@ $logout = function () {
 </button>
 ```
 
-- [ ] **Step 6: Create PWA manifest**
+- [x] **Step 6: Create PWA manifest**
 
 Create `public/manifest.webmanifest`:
 
@@ -607,7 +607,7 @@ Create `public/manifest.webmanifest`:
 }
 ```
 
-- [ ] **Step 7: Create service worker**
+- [x] **Step 7: Create service worker**
 
 Create `public/sw.js`:
 
@@ -625,7 +625,7 @@ self.addEventListener('fetch', (event) => {
 });
 ```
 
-- [ ] **Step 8: Register service worker**
+- [x] **Step 8: Register service worker**
 
 In `resources/js/app.js`:
 
@@ -639,7 +639,7 @@ if ('serviceWorker' in navigator) {
 }
 ```
 
-- [ ] **Step 9: Run tests and build assets**
+- [x] **Step 9: Run tests and build assets**
 
 ```bash
 ddev artisan test tests/Feature/Pwa/PwaAssetsTest.php tests/Feature/Dashboard/DashboardAccessTest.php
@@ -648,7 +648,7 @@ ddev npm run build
 
 Expected: tests PASS and Vite build succeeds.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add resources public tests/Feature/Pwa package.json package-lock.json
@@ -663,7 +663,7 @@ git commit -m "feat: add Smart RT layouts and PWA assets"
 - Create: `app/Support/Audit.php`
 - Test: `tests/Feature/Audit/AuditLogTest.php`
 
-- [ ] **Step 1: Write failing audit tests**
+- [x] **Step 1: Write failing audit tests**
 
 Create `tests/Feature/Audit/AuditLogTest.php`:
 
@@ -694,7 +694,7 @@ it('records an audit log with actor and metadata', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing test**
+- [x] **Step 2: Run failing test**
 
 ```bash
 ddev artisan test tests/Feature/Audit/AuditLogTest.php
@@ -702,7 +702,7 @@ ddev artisan test tests/Feature/Audit/AuditLogTest.php
 
 Expected: FAIL because audit classes do not exist.
 
-- [ ] **Step 3: Create migration**
+- [x] **Step 3: Create migration**
 
 ```bash
 ddev artisan make:migration create_audit_logs_table
@@ -735,7 +735,7 @@ public function down(): void
 }
 ```
 
-- [ ] **Step 4: Create model**
+- [x] **Step 4: Create model**
 
 Create `app/Models/AuditLog.php`:
 
@@ -771,7 +771,7 @@ class AuditLog extends Model
 }
 ```
 
-- [ ] **Step 5: Create audit helper**
+- [x] **Step 5: Create audit helper**
 
 Create `app/Support/Audit.php`:
 
@@ -805,7 +805,7 @@ class Audit
 }
 ```
 
-- [ ] **Step 6: Run audit tests**
+- [x] **Step 6: Run audit tests**
 
 ```bash
 ddev artisan migrate:fresh --env=testing
@@ -814,7 +814,7 @@ ddev artisan test tests/Feature/Audit/AuditLogTest.php
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add app/Models/AuditLog.php app/Support/Audit.php database/migrations tests/Feature/Audit
@@ -823,7 +823,7 @@ git commit -m "feat: add audit log foundation"
 
 ## Final Verification
 
-- [ ] Run all checks:
+- [x] Run all checks:
 
 ```bash
 ddev artisan test
@@ -832,7 +832,7 @@ ddev npm run build
 
 Expected: all tests pass and assets build.
 
-- [ ] Manual smoke test:
+- [x] Manual smoke test:
 
 ```bash
 ddev start
