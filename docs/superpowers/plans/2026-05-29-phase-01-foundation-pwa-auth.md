@@ -12,7 +12,8 @@
 
 ## File Structure
 
-- Create: `composer.json` via Laravel installer or Composer create-project.
+- Create: `.ddev/` via `ddev config` for local Docker-based development.
+- Create: `composer.json` via `ddev composer create-project`.
 - Create: `.env.example` with MySQL, app, queue, session, and mail defaults.
 - Create: `app/Enums/UserRole.php` for `admin_rt` and `bendahara` roles.
 - Create: `database/migrations/*_add_role_to_users_table.php`.
@@ -39,26 +40,27 @@
 - Create: project root Laravel files
 - Modify: `.env.example`
 
-- [ ] **Step 1: Create the Laravel project in `smart-rt`**
+- [ ] **Step 1: Configure DDEV and create the Laravel project in `smart-rt`**
 
-Run from `/home/ageng/Projects/Programming/monorepo`:
+Run from `/home/ageng/Projects/Programming/monorepo/smart-rt`:
 
 ```bash
-composer create-project laravel/laravel smart-rt-temp "^12.0"
-rsync -a smart-rt-temp/ smart-rt/
-rm -rf smart-rt-temp
-cd smart-rt
+ddev config --project-type=laravel --docroot=public --create-docroot
+ddev start
+ddev composer create-project laravel/laravel temp-laravel "^12.0"
+rsync -a temp-laravel/ ./
+rm -rf temp-laravel
 ```
 
-Expected: `artisan`, `composer.json`, `app/`, `routes/`, `database/`, and `resources/` exist.
+Expected: `.ddev/`, `artisan`, `composer.json`, `app/`, `routes/`, `database/`, and `resources/` exist. Commit `.ddev/` with the project; it is the shared local development environment.
 
 - [ ] **Step 2: Install Livewire Volt and Pest**
 
 ```bash
-composer require livewire/livewire livewire/volt
-composer require pestphp/pest pestphp/pest-plugin-laravel --dev
-php artisan volt:install
-php artisan pest:install
+ddev composer require livewire/livewire livewire/volt
+ddev composer require pestphp/pest pestphp/pest-plugin-laravel --dev
+ddev artisan volt:install
+ddev artisan pest:install
 ```
 
 Expected: Composer installs packages and creates Pest configuration.
@@ -66,8 +68,8 @@ Expected: Composer installs packages and creates Pest configuration.
 - [ ] **Step 3: Install frontend dependencies**
 
 ```bash
-npm install
-npm install -D tailwindcss @tailwindcss/vite alpinejs
+ddev npm install
+ddev npm install -D tailwindcss @tailwindcss/vite alpinejs
 ```
 
 Expected: `package-lock.json` and `node_modules/` are created.
@@ -81,14 +83,14 @@ APP_NAME="Smart RT"
 APP_ENV=local
 APP_KEY=
 APP_DEBUG=true
-APP_URL=http://localhost:8000
+APP_URL=https://smart-rt.ddev.site
 
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+DB_HOST=db
 DB_PORT=3306
-DB_DATABASE=smart_rt
-DB_USERNAME=root
-DB_PASSWORD=
+DB_DATABASE=db
+DB_USERNAME=db
+DB_PASSWORD=db
 
 SESSION_DRIVER=database
 QUEUE_CONNECTION=database
@@ -100,8 +102,8 @@ MAIL_MAILER=log
 
 ```bash
 cp .env.example .env
-php artisan key:generate
-php artisan test
+ddev artisan key:generate
+ddev artisan test
 ```
 
 Expected: default tests pass.
@@ -149,7 +151,7 @@ it('detects pengurus users', function () {
 - [ ] **Step 2: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Auth/UserRoleTest.php
+ddev artisan test tests/Feature/Auth/UserRoleTest.php
 ```
 
 Expected: FAIL because `App\Enums\UserRole` does not exist.
@@ -181,7 +183,7 @@ enum UserRole: string
 - [ ] **Step 4: Add migration**
 
 ```bash
-php artisan make:migration add_role_to_users_table --table=users
+ddev artisan make:migration add_role_to_users_table --table=users
 ```
 
 Migration body:
@@ -231,8 +233,8 @@ public function isPengurus(): bool
 - [ ] **Step 6: Run tests**
 
 ```bash
-php artisan migrate:fresh --env=testing
-php artisan test tests/Feature/Auth/UserRoleTest.php
+ddev artisan migrate:fresh --env=testing
+ddev artisan test tests/Feature/Auth/UserRoleTest.php
 ```
 
 Expected: PASS.
@@ -291,7 +293,7 @@ it('allows bendahara to open dashboard', function () {
 - [ ] **Step 2: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Dashboard/DashboardAccessTest.php
+ddev artisan test tests/Feature/Dashboard/DashboardAccessTest.php
 ```
 
 Expected: FAIL because routes/views are missing.
@@ -443,7 +445,7 @@ $login = function () {
 - [ ] **Step 8: Run tests**
 
 ```bash
-php artisan test tests/Feature/Dashboard/DashboardAccessTest.php
+ddev artisan test tests/Feature/Dashboard/DashboardAccessTest.php
 ```
 
 Expected: PASS.
@@ -489,7 +491,7 @@ it('serves service worker', function () {
 - [ ] **Step 2: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Pwa/PwaAssetsTest.php
+ddev artisan test tests/Feature/Pwa/PwaAssetsTest.php
 ```
 
 Expected: FAIL because files are missing or content does not match.
@@ -638,8 +640,8 @@ if ('serviceWorker' in navigator) {
 - [ ] **Step 9: Run tests and build assets**
 
 ```bash
-php artisan test tests/Feature/Pwa/PwaAssetsTest.php tests/Feature/Dashboard/DashboardAccessTest.php
-npm run build
+ddev artisan test tests/Feature/Pwa/PwaAssetsTest.php tests/Feature/Dashboard/DashboardAccessTest.php
+ddev npm run build
 ```
 
 Expected: tests PASS and Vite build succeeds.
@@ -693,7 +695,7 @@ it('records an audit log with actor and metadata', function () {
 - [ ] **Step 2: Run failing test**
 
 ```bash
-php artisan test tests/Feature/Audit/AuditLogTest.php
+ddev artisan test tests/Feature/Audit/AuditLogTest.php
 ```
 
 Expected: FAIL because audit classes do not exist.
@@ -701,7 +703,7 @@ Expected: FAIL because audit classes do not exist.
 - [ ] **Step 3: Create migration**
 
 ```bash
-php artisan make:migration create_audit_logs_table
+ddev artisan make:migration create_audit_logs_table
 ```
 
 Migration body:
@@ -804,8 +806,8 @@ class Audit
 - [ ] **Step 6: Run audit tests**
 
 ```bash
-php artisan migrate:fresh --env=testing
-php artisan test tests/Feature/Audit/AuditLogTest.php
+ddev artisan migrate:fresh --env=testing
+ddev artisan test tests/Feature/Audit/AuditLogTest.php
 ```
 
 Expected: PASS.
@@ -822,8 +824,8 @@ git commit -m "feat: add audit log foundation"
 - [ ] Run all checks:
 
 ```bash
-php artisan test
-npm run build
+ddev artisan test
+ddev npm run build
 ```
 
 Expected: all tests pass and assets build.
@@ -831,7 +833,8 @@ Expected: all tests pass and assets build.
 - [ ] Manual smoke test:
 
 ```bash
-php artisan serve
+ddev start
+ddev launch /login
 ```
 
-Open `http://localhost:8000/login`, login with a seeded/admin user created manually via Tinker, and verify `/dashboard` loads.
+Open `https://smart-rt.ddev.site/login`, login with a seeded/admin user created manually via `ddev artisan tinker`, and verify `/dashboard` loads.

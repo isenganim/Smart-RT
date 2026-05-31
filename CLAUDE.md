@@ -20,23 +20,26 @@ Work is driven by the `superpowers` skill workflow: brainstorm → spec → phas
 
 ## Commands (after Phase 01 scaffolds the app)
 
-The stack is Laravel 12, PHP 8.3, MySQL 8, Livewire 3 + Volt, Alpine.js, Tailwind, Pest, Vite.
+The stack is Laravel 12, PHP 8.3, MySQL 8, Livewire 3 + Volt, Alpine.js, Tailwind, Pest, Vite. The user develops through **DDEV** and does not install PHP/MySQL/Composer directly on the host.
 
 ```bash
-php artisan test                                  # full Pest suite
-php artisan test tests/Feature/Auth/LoginTest.php # single test file
-php artisan test --filter="redirects guests"      # single test by name
-php artisan migrate:fresh --env=testing           # reset the testing DB
-php artisan migrate:fresh --seed                   # reset + demo data (DemoDataSeeder)
-npm run build                                      # Vite production build
-php artisan serve                                  # local server on :8000
+ddev start                                                # start Docker services
+ddev launch                                               # open the app in a browser
+ddev artisan test                                         # full Pest suite
+ddev artisan test tests/Feature/Auth/LoginTest.php        # single test file
+ddev artisan test --filter="redirects guests"             # single test by name
+ddev artisan migrate:fresh --env=testing                  # reset the testing DB
+ddev artisan migrate:fresh --seed                         # reset + demo data (DemoDataSeeder)
+ddev npm run build                                        # Vite production build
+ddev describe                                             # show URLs and DB connection info
+ddev stop                                                 # stop services
 ```
 
 Seeded logins (from `DemoDataSeeder`): `admin@smartrt.test` / `bendahara@smartrt.test`, password `password`.
 
 ### Developing without local PHP
 
-The user does not want PHP installed on the host. Use Laravel Sail (Docker). Bootstrap in Phase 01 Task 1 with `curl -s "https://laravel.build/smart-rt" | bash` instead of `composer create-project`, then run every command through `./vendor/bin/sail` (e.g. `sail artisan test`, `sail npm run build`). Sail bundles the required MySQL 8.
+Use DDEV as the runtime. Bootstrap/configure the repo with `ddev config --project-type=laravel --docroot=public --create-docroot`, run Composer/Artisan/NPM through DDEV (`ddev composer`, `ddev artisan`, `ddev npm`), and commit the generated `.ddev/` directory so future setup is repeatable. DDEV serves the site, so do not use `php artisan serve`.
 
 ## Architecture (from the design spec)
 
