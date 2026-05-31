@@ -11,8 +11,25 @@ it('generates a unique qr token on create', function () {
     expect($a->qr_token)->not->toBe($b->qr_token);
 });
 
-it('does not overwrite an explicitly provided qr token', function () {
-    $household = Household::factory()->create(['qr_token' => 'fixed-token-123']);
+it('does not mass assign an explicitly provided qr token', function () {
+    $household = Household::create([
+        'house_number' => 'No. 98',
+        'address' => 'Jl. Mawar',
+        'head_name' => 'Pengurus',
+        'qr_token' => 'fixed-token-123',
+    ]);
+
+    expect($household->fresh()->qr_token)->not->toBe('fixed-token-123');
+});
+
+it('does not overwrite a system-assigned qr token', function () {
+    $household = new Household([
+        'house_number' => 'No. 99',
+        'address' => 'Jl. Melati',
+        'head_name' => 'Sistem',
+    ]);
+
+    $household->forceFill(['qr_token' => 'fixed-token-123'])->save();
 
     expect($household->fresh()->qr_token)->toBe('fixed-token-123');
 });

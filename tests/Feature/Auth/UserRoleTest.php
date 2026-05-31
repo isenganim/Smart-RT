@@ -16,3 +16,10 @@ it('detects pengurus users', function () {
     expect($admin->isPengurus())->toBeTrue();
     expect($bendahara->isPengurus())->toBeTrue();
 });
+
+it('does not grant pengurus access by default', function () {
+    $user = User::factory()->create();
+
+    expect($user->fresh()->role)->toBeNull();
+    expect($user->isPengurus())->toBeFalse();
+});

@@ -15,7 +15,6 @@ class Household extends Model
         'house_number',
         'address',
         'head_name',
-        'qr_token',
         'is_active',
     ];
 
