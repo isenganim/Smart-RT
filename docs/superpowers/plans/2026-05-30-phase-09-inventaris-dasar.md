@@ -6,7 +6,7 @@
 
 **Architecture:** Continue the single Laravel 12 application. One model: `InventoryItem` (name, condition enum, status enum, location/holder text, notes). Status captures whether an item is available, on loan, or out of service; condition captures physical state. All CRUD lives under the authenticated `pengurus` dashboard and audits through `App\Support\Audit`. A lightweight "lend / return" action toggles status and updates the holder field in one place so the common operational flow is one click. No new services are required; the Volt page composes model queries directly, matching the simple-module pattern from Phases 07–08.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, `x-layouts.app`).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, `x-layouts.app`).
 
 ---
 

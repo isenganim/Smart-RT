@@ -6,14 +6,14 @@
 
 **Architecture:** Continue the single Laravel 12 application from Phase 01. Add two domain models (`Household`, `Resident`) with a one-to-many relationship (one rumah/KK has many warga). Households own a unique `qr_token` generated on create that encodes only the token (no PII), per the design. All write actions live under the authenticated `pengurus` dashboard and write to the Phase 01 `audit_logs` table through `App\Support\Audit`. QR images are rendered as inline SVG so no `imagick`/`gd` extension is required.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest, `simplesoftwareio/simple-qrcode` (SVG backend via `bacon/bacon-qr-code`). Builds on Phase 01 (`UserRole`, `EnsurePengurus` middleware, `Audit` helper, `x-layouts.app`).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest, direct `bacon/bacon-qr-code` SVG rendering through `App\Support\QrCode`. Builds on Phase 01 (`UserRole`, `EnsurePengurus` middleware, `Audit` helper, `x-layouts.app`).
 
 ---
 
 ## Prerequisites
 
 - Phase 01 is complete: Laravel app boots, `auth` + `pengurus` middleware exist, `App\Support\Audit::record()` works, and `x-layouts.app` renders.
-- `php artisan migrate:fresh --env=testing` runs cleanly before starting.
+- `ddev artisan migrate:fresh --env=testing` runs cleanly before starting.
 
 ## File Structure
 
@@ -80,7 +80,7 @@ it('casts is_active to boolean and defaults active', function () {
 - [x] **Step 2: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Households/HouseholdModelTest.php
+ddev artisan test tests/Feature/Households/HouseholdModelTest.php
 ```
 
 Expected: FAIL because `App\Models\Household` does not exist.
@@ -88,7 +88,7 @@ Expected: FAIL because `App\Models\Household` does not exist.
 - [x] **Step 3: Create migration**
 
 ```bash
-php artisan make:migration create_households_table
+ddev artisan make:migration create_households_table
 ```
 
 Migration body:
@@ -203,8 +203,8 @@ class HouseholdFactory extends Factory
 - [x] **Step 6: Run tests**
 
 ```bash
-php artisan migrate:fresh --env=testing
-php artisan test tests/Feature/Households/HouseholdModelTest.php
+ddev artisan migrate:fresh --env=testing
+ddev artisan test tests/Feature/Households/HouseholdModelTest.php
 ```
 
 Expected: PASS.
@@ -292,7 +292,7 @@ it('ignores a given resident id when updating', function () {
 - [x] **Step 2: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Residents/ResidentModelTest.php
+ddev artisan test tests/Feature/Residents/ResidentModelTest.php
 ```
 
 Expected: FAIL because resident classes, helper, and rule do not exist.
@@ -300,7 +300,7 @@ Expected: FAIL because resident classes, helper, and rule do not exist.
 - [x] **Step 3: Create migration**
 
 ```bash
-php artisan make:migration create_residents_table
+ddev artisan make:migration create_residents_table
 ```
 
 Migration body:
@@ -474,8 +474,8 @@ class ResidentFactory extends Factory
 - [x] **Step 8: Run tests**
 
 ```bash
-php artisan migrate:fresh --env=testing
-php artisan test tests/Feature/Residents/ResidentModelTest.php
+ddev artisan migrate:fresh --env=testing
+ddev artisan test tests/Feature/Residents/ResidentModelTest.php
 ```
 
 Expected: PASS.
@@ -499,10 +499,10 @@ git commit -m "feat: add resident model with active phone uniqueness"
 - [x] **Step 1: Install QR package**
 
 ```bash
-composer require simplesoftwareio/simple-qrcode
+ddev composer require bacon/bacon-qr-code:^3.1
 ```
 
-Expected: package installed; SVG rendering works without `imagick`.
+Expected: package installed; SVG rendering works without `imagick`/`gd` through direct `App\Support\QrCode` integration.
 
 - [x] **Step 2: Write failing management tests**
 
@@ -563,7 +563,7 @@ it('renders a qr svg for a household', function () {
 - [x] **Step 3: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Households/HouseholdManagementTest.php
+ddev artisan test tests/Feature/Households/HouseholdManagementTest.php
 ```
 
 Expected: FAIL because routes and Volt views are missing.
@@ -746,7 +746,7 @@ $svg = computed(fn () => (string) QrCode::format('svg')->size(280)->generate($th
 - [x] **Step 7: Run tests**
 
 ```bash
-php artisan test tests/Feature/Households/HouseholdManagementTest.php
+ddev artisan test tests/Feature/Households/HouseholdManagementTest.php
 ```
 
 Expected: PASS.
@@ -836,7 +836,7 @@ it('allows editing a resident keeping its own phone', function () {
 - [x] **Step 2: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Residents/ResidentManagementTest.php
+ddev artisan test tests/Feature/Residents/ResidentManagementTest.php
 ```
 
 Expected: FAIL because route and view are missing.
@@ -997,7 +997,7 @@ $toggleActive = function (int $id) {
 - [x] **Step 5: Run tests**
 
 ```bash
-php artisan test tests/Feature/Residents/ResidentManagementTest.php
+ddev artisan test tests/Feature/Residents/ResidentManagementTest.php
 ```
 
 Expected: PASS.
@@ -1117,8 +1117,8 @@ public function run(): void
 - [x] **Step 5: Verify seeding**
 
 ```bash
-php artisan migrate:fresh --seed
-php artisan test
+ddev artisan migrate:fresh --seed
+ddev artisan test
 ```
 
 Expected: seeding succeeds and the whole suite passes.
@@ -1135,8 +1135,8 @@ git commit -m "feat: add navigation, dashboard summary, and demo seeder"
 - [x] Run all checks:
 
 ```bash
-php artisan test
-npm run build
+ddev artisan test
+ddev npm run build
 ```
 
 Expected: all tests pass and assets build.
@@ -1144,11 +1144,11 @@ Expected: all tests pass and assets build.
 - [x] Manual smoke test:
 
 ```bash
-php artisan migrate:fresh --seed
-php artisan serve
+ddev artisan migrate:fresh --seed
+ddev launch
 ```
 
-- Login at `http://localhost:8000/login` with `admin@smartrt.test` / `password`.
+- Login at the DDEV app URL, for example `https://smart-rt.ddev.site/login`, with `admin@smartrt.test` / `password`.
 - Open `Rumah/KK`, add a household, and confirm a QR token is generated.
 - Open the household QR page and confirm an SVG renders.
 - Open `Warga`, add a resident, confirm the phone normalizes, and confirm a duplicate active phone is rejected.

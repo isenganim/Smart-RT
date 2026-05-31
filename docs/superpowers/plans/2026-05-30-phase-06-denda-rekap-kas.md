@@ -6,7 +6,7 @@
 
 **Architecture:** Continue the single Laravel 12 application. Reuse the Phase 05 `cash_transactions` table and `TransactionType` enum (`iuran_harian`, `denda`, `koreksi`) — no schema changes are needed except adding a nullable self-reference so a `koreksi`/cancellation can point at the transaction it reverses, plus a `cancelled_at` marker. Three new services keep controllers thin: `App\Services\DendaService` (review-gated Rp5.000 denda creation, idempotent per assignment), `App\Services\KasReport` (period sums + unpaid/uncheckedin queries), and `App\Services\TransactionCorrection` (mark a transaction cancelled and write an offsetting `koreksi` row with reason). All actions are pengurus-only and audited through `App\Support\Audit`. The denda follows the spec rule that pengurus review the candidate list before a denda is set, so denda is never automatic.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 04 (`RondaSchedule`, `RondaAssignment`), and Phase 05 (`CashTransaction`, `TransactionType`).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 04 (`RondaSchedule`, `RondaAssignment`), and Phase 05 (`CashTransaction`, `TransactionType`).
 
 ---
 

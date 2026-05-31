@@ -6,7 +6,7 @@
 
 **Architecture:** Use a single Laravel application with server-rendered Livewire/Volt pages. Public warga pages will be added in later phases; this phase creates admin-only dashboard infrastructure, auth, role middleware, layout, test setup, and deployment-ready environment defaults.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest, Vite, Laravel PWA manifest/service worker, spatie/laravel-permission optional via native enum roles for MVP.
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest, Vite, Laravel PWA manifest/service worker, spatie/laravel-permission optional via native enum roles for MVP.
 
 ---
 
@@ -37,6 +37,7 @@
 ## Task 1: Create Laravel Application Skeleton
 
 **Files:**
+
 - Create: project root Laravel files
 - Modify: `.env.example`
 
@@ -120,6 +121,7 @@ git commit -m "chore: bootstrap Laravel Smart RT application"
 ## Task 2: Add User Roles
 
 **Files:**
+
 - Create: `app/Enums/UserRole.php`
 - Create: `database/migrations/*_add_role_to_users_table.php`
 - Modify: `app/Models/User.php`
@@ -251,6 +253,7 @@ git commit -m "feat: add pengurus user roles"
 ## Task 3: Build Login and Dashboard Access
 
 **Files:**
+
 - Create: `app/Http/Middleware/EnsurePengurus.php`
 - Modify: `bootstrap/app.php`
 - Modify: `routes/web.php`
@@ -462,6 +465,7 @@ git commit -m "feat: add pengurus login and dashboard access"
 ## Task 4: Add Layouts and PWA Assets
 
 **Files:**
+
 - Create: `resources/views/components/layouts/app.blade.php`
 - Create: `resources/views/components/layouts/auth.blade.php`
 - Modify: `resources/css/app.css`
@@ -596,14 +600,14 @@ Create `public/manifest.webmanifest`:
 
 ```json
 {
-  "name": "Smart RT",
-  "short_name": "Smart RT",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#059669",
-  "description": "Administrasi RT, ronda, kas, dan layanan warga.",
-  "icons": []
+    "name": "Smart RT",
+    "short_name": "Smart RT",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#059669",
+    "description": "Administrasi RT, ronda, kas, dan layanan warga.",
+    "icons": []
 }
 ```
 
@@ -612,16 +616,20 @@ Create `public/manifest.webmanifest`:
 Create `public/sw.js`:
 
 ```js
-const CACHE_NAME = 'smart-rt-cache-v1';
-const PRECACHE_URLS = ['/', '/manifest.webmanifest'];
+const CACHE_NAME = "smart-rt-cache-v1";
+const PRECACHE_URLS = ["/", "/manifest.webmanifest"];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)));
+self.addEventListener("install", (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)),
+    );
 });
 
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+self.addEventListener("fetch", (event) => {
+    if (event.request.method !== "GET") return;
+    event.respondWith(
+        fetch(event.request).catch(() => caches.match(event.request)),
+    );
 });
 ```
 
@@ -630,12 +638,12 @@ self.addEventListener('fetch', (event) => {
 In `resources/js/app.js`:
 
 ```js
-import './bootstrap';
+import "./bootstrap";
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
+    });
 }
 ```
 
@@ -658,6 +666,7 @@ git commit -m "feat: add Smart RT layouts and PWA assets"
 ## Task 5: Add Audit Log Foundation
 
 **Files:**
+
 - Create: `database/migrations/*_create_audit_logs_table.php`
 - Create: `app/Models/AuditLog.php`
 - Create: `app/Support/Audit.php`

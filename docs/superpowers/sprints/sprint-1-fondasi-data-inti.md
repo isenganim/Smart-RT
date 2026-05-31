@@ -55,3 +55,22 @@ Mapped to design spec "Testing MVP" → **DT-1** (admin dapat login dan mengelol
 - [x] Households and residents can be created/edited/toggled from the dashboard
 - [x] Each household renders a QR token; duplicate active phones are rejected
 - [x] Audit log records `household.created` and `resident.created`
+
+## Best-practice review
+
+Reviewed against Laravel 12 and Livewire 4 documentation using MCP documentation tools.
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| Authenticated dashboard routes | ✅ OK | Dashboard, rumah/KK, QR, and warga routes are protected with `auth` + `pengurus` middleware. |
+| Role-gated pengurus access | ✅ OK | `EnsurePengurus` blocks non-pengurus users with HTTP 403. |
+| Server-side validation | ✅ OK | Household and resident forms validate input before create/update. |
+| Active-phone uniqueness | ✅ OK | `UniqueActivePhone` enforces uniqueness among active residents after canonical phone normalization. |
+| Mass assignment protection | ✅ OK for MVP | Models use explicit `$fillable`; consider removing system-managed `qr_token` from fillable before production hardening. |
+| CSRF protection | ✅ OK | Livewire form submissions run through Laravel/Livewire request protection. |
+| XSS protection | ✅ OK | User-controlled output uses escaped Blade `{{ }}`. QR SVG uses `{!! !!}` only for server-generated SVG from an opaque token. |
+| QR privacy | ✅ OK | QR content is only the per-household opaque token; no PII is encoded. |
+| Audit logging | ✅ OK | Important household/resident create/update/toggle actions record audit logs. |
+| Tests | ✅ OK | `ddev artisan test` passes: 26 tests, 52 assertions. |
+| Production hardening | ⚠️ Follow-up | Add policies/Gates for finer authorization in later modules; add confirmation UI for deactivate/toggle actions if needed. |
+| Documentation consistency | ✅ OK | Phase 02 plan now mentions direct `bacon/bacon-qr-code` SVG rendering and uses DDEV Artisan commands. |

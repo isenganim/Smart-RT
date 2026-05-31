@@ -6,7 +6,7 @@
 
 **Architecture:** Continue the single Laravel 12 application. Introduce the `cash_transactions` table now, designed to carry all transaction types from the spec (`iuran_harian`, `denda`, `koreksi`) so Phase 06 (denda + rekap + koreksi) needs no schema churn; this phase only writes `iuran_harian`. Daily PINs live in `ronda_scan_sessions` (one per date, with a datetime window that may cross midnight). The scan flow is PIN-gated rather than login-gated because regu ronda are warga, not pengurus: a public `portal.scan` page composes two services — `App\Services\PinGate` (validate PIN + active window) and `App\Services\IuranScan` (resolve household by token, enforce once-per-date, record Rp500). PIN unlock is rate limited like other public endpoints. Session creation/regeneration lives under the authenticated `pengurus` dashboard and audits through `App\Support\Audit`.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Household` + `qr_token`), and Phase 03 (`x-layouts.public`, rate-limit pattern).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Household` + `qr_token`), and Phase 03 (`x-layouts.public`, rate-limit pattern).
 
 ---
 

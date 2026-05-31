@@ -6,7 +6,7 @@
 
 **Architecture:** Continue the single Laravel 12 application. Three models: `Vote` (question, period, status), `VoteOption` (belongs to a vote), and `VoteBallot` (one row per phone per vote, recording the chosen option). Casting a ballot reuses the Phase 03 `App\Services\ResidentLookup` to validate the nomor HP and a new `App\Services\VotingService` that enforces the active period, the registered-active-phone rule, and one-vote-per-phone via a unique constraint plus a guarded insert. Pengurus voting management is login-gated and audited; the public vote page is rate limited. Tallies are computed with a grouped count query so results scale without per-ballot iteration. This is the final MVP module; a closing verification step confirms the full test suite is green.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Resident`, `PhoneNumber`), and Phase 03 (`ResidentLookup`, `x-layouts.public`, `x-portal.phone-field`, rate-limit pattern).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Resident`, `PhoneNumber`), and Phase 03 (`ResidentLookup`, `x-layouts.public`, `x-portal.phone-field`, rate-limit pattern).
 
 ---
 
@@ -1204,10 +1204,10 @@ php artisan serve
 - Confirm the dashboard detail page tally matches the public results.
 
 - [ ] MVP review checklist (maps to the design spec testing list):
-  - Admin login + manage warga/rumah (Phase 02).
-  - Public read of pengumuman + jadwal ronda (Phases 04, 07).
-  - Unregistered phone rejected for official actions (Phases 03–10).
-  - PIN-gated scan iuran Rp500, once per rumah per date (Phase 05).
-  - Check-in ronda by scheduled phone, denda Rp5.000 after review (Phases 04, 06).
-  - Kas rekap harian/mingguan/bulanan (Phase 06).
-  - One vote per registered phone (Phase 10).
+    - Admin login + manage warga/rumah (Phase 02).
+    - Public read of pengumuman + jadwal ronda (Phases 04, 07).
+    - Unregistered phone rejected for official actions (Phases 03–10).
+    - PIN-gated scan iuran Rp500, once per rumah per date (Phase 05).
+    - Check-in ronda by scheduled phone, denda Rp5.000 after review (Phases 04, 06).
+    - Kas rekap harian/mingguan/bulanan (Phase 06).
+    - One vote per registered phone (Phase 10).

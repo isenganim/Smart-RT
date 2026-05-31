@@ -6,7 +6,7 @@
 
 **Architecture:** Continue the single Laravel 12 application. Two independent models: `Announcement` (title, body, published flag, published_at) and `Report` (phone, category, description, follow-up status, pengurus notes). Pengumuman public list shows only published rows ordered by publish date. Laporan submission reuses the Phase 03 `App\Services\ResidentLookup` to validate the nomor HP before storing, captures the normalized phone plus the matched resident, and is rate limited like other open write endpoints. Follow-up status is a typed enum with a fixed transition set, surfaced on a pengurus dashboard that audits every status change through `App\Support\Audit`.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Resident`, `PhoneNumber`), and Phase 03 (`ResidentLookup`, `x-layouts.public`, `x-portal.phone-field`, rate-limit pattern).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Resident`, `PhoneNumber`), and Phase 03 (`ResidentLookup`, `x-layouts.public`, `x-portal.phone-field`, rate-limit pattern).
 
 ---
 
