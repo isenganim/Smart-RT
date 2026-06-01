@@ -12,6 +12,6 @@ $logout = function () {
 
 ?>
 
-<button wire:click="logout" class="text-sm font-medium text-slate-600 hover:text-slate-900">
+<button wire:click="logout" class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 shadow-sm transition hover:bg-white/10 hover:text-white">
     Keluar
 </button>
