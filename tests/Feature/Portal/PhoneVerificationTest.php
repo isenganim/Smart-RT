@@ -21,7 +21,8 @@ it('confirms a registered active phone', function () {
         ->set('phone', '0812-3456-7890')
         ->call('check')
         ->assertSet('verified', true)
-        ->assertSee('Andi');
+        ->assertDontSee('Andi')
+        ->assertSee('Nomor ini sudah terdaftar di sistem RT.');
 });
 
 it('shows a friendly message for an unknown phone', function () {

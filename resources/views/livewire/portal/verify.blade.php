@@ -7,7 +7,6 @@ use function Livewire\Volt\{state, rules, layout, title};
 state([
     'phone' => '',
     'verified' => false,
-    'residentName' => null,
     'feedback' => null,
 ]);
 
@@ -25,7 +24,6 @@ $check = function (ResidentLookup $lookup) {
 
     if (RateLimiter::tooManyAttempts($key, 5)) {
         $this->verified = false;
-        $this->residentName = null;
         $this->feedback = 'Terlalu banyak percobaan. Coba lagi nanti.';
 
         return;
@@ -37,11 +35,9 @@ $check = function (ResidentLookup $lookup) {
 
     if ($result->found()) {
         $this->verified = true;
-        $this->residentName = $result->resident->name;
         $this->feedback = null;
     } else {
         $this->verified = false;
-        $this->residentName = null;
         $this->feedback = $result->message;
     }
 };
@@ -68,7 +64,7 @@ $check = function (ResidentLookup $lookup) {
                 <div class="absolute -left-10 -bottom-10 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl"></div>
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 mb-3 ring-1 ring-emerald-500/20">✓</span>
                 <p class="text-xs font-semibold text-emerald-400 tracking-wide uppercase">Nomor HP Terdaftar & Aktif</p>
-                <p class="mt-2 text-xl font-bold text-white">{{ $residentName }}</p>
+                <p class="mt-2 text-sm font-medium text-emerald-100">Nomor ini sudah terdaftar di sistem RT.</p>
             </div>
         @elseif ($feedback)
             <div class="rounded-2xl bg-amber-950/40 border border-amber-500/20 p-6 text-center shadow-lg animate-fade-in">

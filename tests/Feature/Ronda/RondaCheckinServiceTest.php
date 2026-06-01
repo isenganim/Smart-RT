@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AuditLog;
 use App\Models\Household;
 use App\Models\Resident;
 use App\Models\RondaAssignment;
@@ -23,6 +24,28 @@ it('checks in a scheduled active resident', function () {
 
     expect($result->success())->toBeTrue();
     expect($result->assignment->fresh()->hasCheckedIn())->toBeTrue();
+});
+
+it('writes an audit log when a resident checks in', function () {
+    $resident = Resident::factory()->for($this->household)->create([
+        'phone' => '81234567890',
+        'is_active' => true,
+    ]);
+    $assignment = RondaAssignment::factory()->for($this->schedule)->for($resident)->create();
+
+    $result = $this->service->checkIn('0812-3456-7890', $this->schedule->date);
+
+    expect($result->success())->toBeTrue();
+
+    $log = AuditLog::query()
+        ->where('action', 'ronda.assignment.checked_in')
+        ->where('subject_type', 'ronda_assignment')
+        ->where('subject_id', $assignment->id)
+        ->first();
+
+    expect($log)->not->toBeNull()
+        ->and($log->metadata['resident_id'])->toBe($resident->id)
+        ->and($log->metadata['ronda_schedule_id'])->toBe($this->schedule->id);
 });
 
 it('rejects an unregistered phone', function () {

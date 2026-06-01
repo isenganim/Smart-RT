@@ -3,6 +3,7 @@
 use App\Models\Resident;
 use App\Models\RondaSchedule;
 use App\Support\Audit;
+use Illuminate\Validation\Rule;
 use function Livewire\Volt\{state, computed, layout, mount, title};
 
 state(['schedule' => null, 'residentId' => null]);
@@ -17,13 +18,19 @@ mount(function (RondaSchedule $schedule) {
 $assignments = computed(fn () => $this->schedule->assignments()->with('resident.household')->get());
 
 $availableResidents = computed(fn () => Resident::query()
+    ->with('household')
     ->where('is_active', true)
     ->whereNotIn('id', $this->schedule->assignments()->pluck('resident_id'))
     ->orderBy('name')
     ->get());
 
 $assign = function () {
-    $this->validate(['residentId' => ['required', 'exists:residents,id']]);
+    $this->validate([
+        'residentId' => [
+            'required',
+            Rule::exists(Resident::class, 'id')->where('is_active', true),
+        ],
+    ]);
 
     $assignment = $this->schedule->assignments()->firstOrCreate(['resident_id' => $this->residentId]);
 

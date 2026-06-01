@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\RondaAssignment;
 use App\Models\RondaSchedule;
+use App\Support\Audit;
 use Carbon\CarbonInterface;
 
 class RondaCheckin
@@ -41,7 +42,24 @@ class RondaCheckin
             return CheckinResult::fail('Anda sudah check-in untuk tanggal ini.');
         }
 
-        $assignment->update(['checked_in_at' => now()]);
+        $checkedInAt = now();
+
+        $updated = RondaAssignment::query()
+            ->whereKey($assignment->id)
+            ->whereNull('checked_in_at')
+            ->update(['checked_in_at' => $checkedInAt]);
+
+        if ($updated !== 1) {
+            return CheckinResult::fail('Anda sudah check-in untuk tanggal ini.');
+        }
+
+        $assignment->refresh();
+
+        Audit::record(auth()->user(), 'ronda.assignment.checked_in', 'ronda_assignment', $assignment->id, [
+            'ronda_schedule_id' => $schedule->id,
+            'resident_id' => $lookup->resident->id,
+            'checked_in_at' => $checkedInAt->toIso8601String(),
+        ]);
 
         return CheckinResult::done($assignment);
     }

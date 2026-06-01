@@ -10,7 +10,7 @@ layout('components.layouts.app');
 title('Jadwal Ronda');
 
 rules([
-    'date' => ['required', 'date', 'unique:ronda_schedules,date'],
+    'date' => ['required', 'date'],
     'notes' => ['nullable', 'string', 'max:500'],
 ]);
 
@@ -20,11 +20,15 @@ $schedules = computed(fn () => RondaSchedule::query()
     ->get());
 
 $save = function () {
-    if ($this->date) {
-        $this->date = \Illuminate\Support\Carbon::parse($this->date)->startOfDay()->toDateTimeString();
+    $data = $this->validate();
+    $data['date'] = \Illuminate\Support\Carbon::parse($data['date'])->toDateString();
+
+    if (RondaSchedule::query()->whereDate('date', $data['date'])->exists()) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'date' => 'Jadwal ronda untuk tanggal ini sudah ada.',
+        ]);
     }
 
-    $data = $this->validate();
     $data['created_by'] = auth()->id();
 
     $schedule = RondaSchedule::create($data);

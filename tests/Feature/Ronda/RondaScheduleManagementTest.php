@@ -43,6 +43,15 @@ it('rejects a duplicate schedule date', function () {
         ->assertHasErrors('date');
 });
 
+it('rejects an invalid schedule date without throwing', function () {
+    $this->actingAs($this->admin);
+
+    Volt::test('dashboard.ronda.index')
+        ->set('date', 'bukan-tanggal')
+        ->call('save')
+        ->assertHasErrors('date');
+});
+
 it('assigns an active resident to a schedule', function () {
     $schedule = RondaSchedule::factory()->create();
     $resident = Resident::factory()->for($this->household)->create(['is_active' => true]);
@@ -56,6 +65,20 @@ it('assigns an active resident to a schedule', function () {
 
     expect($schedule->assignments()->where('resident_id', $resident->id)->exists())->toBeTrue();
     expect(AuditLog::query()->where('action', 'ronda.assignment.added')->exists())->toBeTrue();
+});
+
+it('rejects assigning an inactive resident to a schedule', function () {
+    $schedule = RondaSchedule::factory()->create();
+    $resident = Resident::factory()->for($this->household)->create(['is_active' => false]);
+
+    $this->actingAs($this->admin);
+
+    Volt::test('dashboard.ronda.show', ['schedule' => $schedule])
+        ->set('residentId', $resident->id)
+        ->call('assign')
+        ->assertHasErrors('residentId');
+
+    expect($schedule->assignments()->where('resident_id', $resident->id)->exists())->toBeFalse();
 });
 
 it('assigns an active resident through the livewire update endpoint', function () {
