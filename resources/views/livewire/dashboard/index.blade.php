@@ -11,7 +11,7 @@ $residentCount = computed(fn () => Resident::query()->where('is_active', true)->
 
 <x-layouts.app title="Dashboard Pengurus">
     <div class="space-y-6 sm:space-y-8">
-        <div class="grid gap-4 sm:grid-cols-2 lg:hidden">
+        <div class="grid gap-4 sm:hidden">
             <a href="{{ route('households.index') }}" class="rounded-[1.25rem] bg-white p-5 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200">
                 <p class="text-sm font-semibold text-slate-500">Rumah/KK Aktif</p>
                 <p class="mt-2 text-4xl font-bold tracking-tight text-slate-950">{{ $this->householdCount }}</p>
@@ -53,7 +53,7 @@ $residentCount = computed(fn () => Resident::query()->where('is_active', true)->
             </div>
         </section>
 
-        <div class="grid gap-5 sm:grid-cols-2">
+        <div class="hidden gap-5 sm:grid sm:grid-cols-2">
             <div class="group rounded-[1.5rem] bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-900/10">
                 <div class="flex items-center justify-between">
                     <p class="text-sm font-semibold text-slate-500">Rumah/KK Aktif</p>
