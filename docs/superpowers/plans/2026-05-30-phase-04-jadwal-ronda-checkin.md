@@ -6,7 +6,7 @@
 
 **Architecture:** Continue the single Laravel 12 application. Model ronda as two tables: `ronda_schedules` (one row per date) and `ronda_assignments` (one row per warga assigned to a schedule, carrying `checked_in_at`). Check-in is the public warga action, so it reuses the Phase 03 `App\Services\ResidentLookup` to resolve an active resident and then a new `App\Services\RondaCheckin` service that enforces the scheduling and once-only rules and returns a typed result. Admin scheduling lives under the authenticated `pengurus` dashboard and audits every mutation through `App\Support\Audit`. Public check-in is rate limited like the Phase 03 verification page. The list of "warga terjadwal yang belum check-in" (calon denda) is exposed as a query helper here but the denda transaction itself is deferred to Phase 06.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Resident`, `Household`, `PhoneNumber`), and Phase 03 (`ResidentLookup`, `x-layouts.public`, `x-portal.phone-field`).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Resident`, `Household`, `PhoneNumber`), and Phase 03 (`ResidentLookup`, `x-layouts.public`, `x-portal.phone-field`).
 
 ---
 

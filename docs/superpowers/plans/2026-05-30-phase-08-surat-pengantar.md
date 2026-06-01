@@ -6,7 +6,7 @@
 
 **Architecture:** Continue the single Laravel 12 application. One model: `LetterRequest` (phone, resident, letter type, purpose, status, pengurus notes). Submission reuses the Phase 03 `App\Services\ResidentLookup` for phone validation and is rate limited like other open write endpoints. Letter types are a small fixed enum so warga pick from a known list, and request status is a typed enum surfaced on a pengurus dashboard that audits every status change through `App\Support\Audit`. This phase mirrors the Phase 07 laporan structure closely; the difference is the domain fields (letter type/purpose) and the approval-oriented status set.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Resident`, `PhoneNumber`), and Phase 03 (`ResidentLookup`, `x-layouts.public`, `x-portal.phone-field`, rate-limit pattern).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`pengurus` middleware, `Audit`, layouts), Phase 02 (`Resident`, `PhoneNumber`), and Phase 03 (`ResidentLookup`, `x-layouts.public`, `x-portal.phone-field`, rate-limit pattern).
 
 ---
 

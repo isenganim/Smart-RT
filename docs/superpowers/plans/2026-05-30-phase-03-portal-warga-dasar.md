@@ -6,7 +6,7 @@
 
 **Architecture:** Continue the single Laravel 12 application. Add a public route group with **no** `auth`/`pengurus` middleware, served by a dedicated `x-layouts.public` layout that is visually distinct from the pengurus dashboard and optimized for low-IT-literacy warga. Move the application root `/` to the portal home; pengurus continue to use `/dashboard` (login required). Introduce a single reusable `App\Services\ResidentLookup` service that normalizes a raw phone (reusing Phase 02 `App\Support\PhoneNumber`) and resolves an active `Resident`, returning a typed result. The public phone-verification action is rate limited to protect the open endpoint from enumeration/abuse. Public submissions to data-creating features are out of scope here and arrive in later phases; this phase ships the portal shell, the verification service, and a self-service "cek nomor HP" page.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`x-layouts.app`, routing) and Phase 02 (`Resident`, `App\Support\PhoneNumber`).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`x-layouts.app`, routing) and Phase 02 (`Resident`, `App\Support\PhoneNumber`).
 
 ---
 
@@ -553,14 +553,14 @@ In `public/manifest.webmanifest`, confirm `start_url` is `/` so installing the P
 
 ```json
 {
-  "name": "Smart RT",
-  "short_name": "Smart RT",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#059669",
-  "description": "Administrasi RT, ronda, kas, dan layanan warga.",
-  "icons": []
+    "name": "Smart RT",
+    "short_name": "Smart RT",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#059669",
+    "description": "Administrasi RT, ronda, kas, dan layanan warga.",
+    "icons": []
 }
 ```
 

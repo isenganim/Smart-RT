@@ -10,13 +10,13 @@
 
 ## Phases
 
-- [ ] **Phase 01 — Foundation PWA & Auth** — `../plans/2026-05-29-phase-01-foundation-pwa-auth.md`
+- [x] **Phase 01 — Foundation PWA & Auth** — `../plans/2026-05-29-phase-01-foundation-pwa-auth.md`
   - Laravel 12 + Livewire/Volt + Tailwind skeleton
   - Pengurus roles (`admin_rt`, `bendahara`), `EnsurePengurus` middleware
   - Login + dashboard access
   - PWA manifest + service worker
   - Audit log foundation (`audit_logs`, `App\Support\Audit`)
-- [ ] **Phase 02 — Data Warga, KK, Rumah** — `../plans/2026-05-30-phase-02-data-warga-kk-rumah.md`
+- [x] **Phase 02 — Data Warga, KK, Rumah** — `../plans/2026-05-30-phase-02-data-warga-kk-rumah.md`
   - `Household` model with auto-generated unique `qr_token`
   - `Resident` model with `PhoneNumber` normalizer + `UniqueActivePhone` rule
   - Household management dashboard + QR (SVG) view
@@ -49,9 +49,28 @@ Mapped to design spec "Testing MVP" → **DT-1** (admin dapat login dan mengelol
 
 ## Definition of done
 
-- [ ] `php artisan test` passes for all Phase 01 + 02 suites
-- [ ] `npm run build` succeeds
-- [ ] Admin/bendahara can log in; guests are redirected to `/login`
-- [ ] Households and residents can be created/edited/toggled from the dashboard
-- [ ] Each household renders a QR token; duplicate active phones are rejected
-- [ ] Audit log records `household.created` and `resident.created`
+- [x] `ddev artisan test` passes for all Phase 01 + 02 suites
+- [x] `ddev npm run build` succeeds
+- [x] Admin/bendahara can log in; guests are redirected to `/login`
+- [x] Households and residents can be created/edited/toggled from the dashboard
+- [x] Each household renders a QR token; duplicate active phones are rejected
+- [x] Audit log records `household.created` and `resident.created`
+
+## Best-practice review
+
+Reviewed against Laravel 12 and Livewire 4 documentation using MCP documentation tools.
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| Authenticated dashboard routes | ✅ OK | Dashboard, rumah/KK, QR, and warga routes are protected with `auth` + `pengurus` middleware. |
+| Role-gated pengurus access | ✅ OK | `EnsurePengurus` blocks non-pengurus users with HTTP 403. |
+| Server-side validation | ✅ OK | Household and resident forms validate input before create/update. |
+| Active-phone uniqueness | ✅ OK | `UniqueActivePhone` enforces uniqueness among active residents after canonical phone normalization. |
+| Mass assignment protection | ✅ OK for MVP | Models use explicit `$fillable`; consider removing system-managed `qr_token` from fillable before production hardening. |
+| CSRF protection | ✅ OK | Livewire form submissions run through Laravel/Livewire request protection. |
+| XSS protection | ✅ OK | User-controlled output uses escaped Blade `{{ }}`. QR SVG uses `{!! !!}` only for server-generated SVG from an opaque token. |
+| QR privacy | ✅ OK | QR content is only the per-household opaque token; no PII is encoded. |
+| Audit logging | ✅ OK | Important household/resident create/update/toggle actions record audit logs. |
+| Tests | ✅ OK | `ddev artisan test` passes: 26 tests, 52 assertions. |
+| Production hardening | ⚠️ Follow-up | Add policies/Gates for finer authorization in later modules; add confirmation UI for deactivate/toggle actions if needed. |
+| Documentation consistency | ✅ OK | Phase 02 plan now mentions direct `bacon/bacon-qr-code` SVG rendering and uses DDEV Artisan commands. |

@@ -1,19 +1,19 @@
 # Phase 02 Data Warga, KK, dan Rumah Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build the core master data module for Smart RT: rumah/KK (households), warga (residents), and unique QR tokens per rumah. Provide Admin RT dashboard CRUD for households and residents, enforce unique phone numbers for active warga, render the per-rumah QR, and audit every mutation.
 
 **Architecture:** Continue the single Laravel 12 application from Phase 01. Add two domain models (`Household`, `Resident`) with a one-to-many relationship (one rumah/KK has many warga). Households own a unique `qr_token` generated on create that encodes only the token (no PII), per the design. All write actions live under the authenticated `pengurus` dashboard and write to the Phase 01 `audit_logs` table through `App\Support\Audit`. QR images are rendered as inline SVG so no `imagick`/`gd` extension is required.
 
-**Tech Stack:** Laravel 12, PHP 8.3, MySQL 8, Livewire 3, Volt, Alpine.js, Tailwind CSS, Pest, `simplesoftwareio/simple-qrcode` (SVG backend via `bacon/bacon-qr-code`). Builds on Phase 01 (`UserRole`, `EnsurePengurus` middleware, `Audit` helper, `x-layouts.app`).
+**Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest, direct `bacon/bacon-qr-code` SVG rendering through `App\Support\QrCode`. Builds on Phase 01 (`UserRole`, `EnsurePengurus` middleware, `Audit` helper, `x-layouts.app`).
 
 ---
 
 ## Prerequisites
 
 - Phase 01 is complete: Laravel app boots, `auth` + `pengurus` middleware exist, `App\Support\Audit::record()` works, and `x-layouts.app` renders.
-- `php artisan migrate:fresh --env=testing` runs cleanly before starting.
+- `ddev artisan migrate:fresh --env=testing` runs cleanly before starting.
 
 ## File Structure
 
@@ -46,7 +46,7 @@
 - Create: `database/factories/HouseholdFactory.php`
 - Test: `tests/Feature/Households/HouseholdModelTest.php`
 
-- [ ] **Step 1: Write failing household model tests**
+- [x] **Step 1: Write failing household model tests**
 
 Create `tests/Feature/Households/HouseholdModelTest.php`:
 
@@ -77,18 +77,18 @@ it('casts is_active to boolean and defaults active', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Households/HouseholdModelTest.php
+ddev artisan test tests/Feature/Households/HouseholdModelTest.php
 ```
 
 Expected: FAIL because `App\Models\Household` does not exist.
 
-- [ ] **Step 3: Create migration**
+- [x] **Step 3: Create migration**
 
 ```bash
-php artisan make:migration create_households_table
+ddev artisan make:migration create_households_table
 ```
 
 Migration body:
@@ -115,7 +115,7 @@ public function down(): void
 }
 ```
 
-- [ ] **Step 4: Create model with auto QR token**
+- [x] **Step 4: Create model with auto QR token**
 
 Create `app/Models/Household.php`:
 
@@ -167,7 +167,7 @@ class Household extends Model
 }
 ```
 
-- [ ] **Step 5: Create factory**
+- [x] **Step 5: Create factory**
 
 Create `database/factories/HouseholdFactory.php`:
 
@@ -200,16 +200,16 @@ class HouseholdFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
-php artisan migrate:fresh --env=testing
-php artisan test tests/Feature/Households/HouseholdModelTest.php
+ddev artisan migrate:fresh --env=testing
+ddev artisan test tests/Feature/Households/HouseholdModelTest.php
 ```
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add app/Models/Household.php database/migrations database/factories/HouseholdFactory.php tests/Feature/Households/HouseholdModelTest.php
@@ -227,7 +227,7 @@ git commit -m "feat: add household model with unique qr token"
 - Create: `app/Rules/UniqueActivePhone.php`
 - Test: `tests/Feature/Residents/ResidentModelTest.php`
 
-- [ ] **Step 1: Write failing resident tests**
+- [x] **Step 1: Write failing resident tests**
 
 Create `tests/Feature/Residents/ResidentModelTest.php`:
 
@@ -289,18 +289,18 @@ it('ignores a given resident id when updating', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Residents/ResidentModelTest.php
+ddev artisan test tests/Feature/Residents/ResidentModelTest.php
 ```
 
 Expected: FAIL because resident classes, helper, and rule do not exist.
 
-- [ ] **Step 3: Create migration**
+- [x] **Step 3: Create migration**
 
 ```bash
-php artisan make:migration create_residents_table
+ddev artisan make:migration create_residents_table
 ```
 
 Migration body:
@@ -330,7 +330,7 @@ public function down(): void
 
 > Note: The design requires phone uniqueness only for active warga, so uniqueness is enforced in the application layer (`UniqueActivePhone`) rather than a DB unique index, which cannot express the active-only condition portably.
 
-- [ ] **Step 4: Create phone normalizer**
+- [x] **Step 4: Create phone normalizer**
 
 Create `app/Support/PhoneNumber.php`:
 
@@ -356,7 +356,7 @@ class PhoneNumber
 }
 ```
 
-- [ ] **Step 5: Create resident model**
+- [x] **Step 5: Create resident model**
 
 Create `app/Models/Resident.php`:
 
@@ -399,7 +399,7 @@ class Resident extends Model
 }
 ```
 
-- [ ] **Step 6: Create active-phone rule**
+- [x] **Step 6: Create active-phone rule**
 
 Create `app/Rules/UniqueActivePhone.php`:
 
@@ -436,7 +436,7 @@ class UniqueActivePhone implements ValidationRule
 }
 ```
 
-- [ ] **Step 7: Create factory**
+- [x] **Step 7: Create factory**
 
 Create `database/factories/ResidentFactory.php`:
 
@@ -471,16 +471,16 @@ class ResidentFactory extends Factory
 }
 ```
 
-- [ ] **Step 8: Run tests**
+- [x] **Step 8: Run tests**
 
 ```bash
-php artisan migrate:fresh --env=testing
-php artisan test tests/Feature/Residents/ResidentModelTest.php
+ddev artisan migrate:fresh --env=testing
+ddev artisan test tests/Feature/Residents/ResidentModelTest.php
 ```
 
 Expected: PASS.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add app/Models/Resident.php app/Support/PhoneNumber.php app/Rules/UniqueActivePhone.php database/migrations database/factories/ResidentFactory.php tests/Feature/Residents/ResidentModelTest.php
@@ -496,15 +496,15 @@ git commit -m "feat: add resident model with active phone uniqueness"
 - Create: `resources/views/livewire/households/qr.blade.php`
 - Test: `tests/Feature/Households/HouseholdManagementTest.php`
 
-- [ ] **Step 1: Install QR package**
+- [x] **Step 1: Install QR package**
 
 ```bash
-composer require simplesoftwareio/simple-qrcode
+ddev composer require bacon/bacon-qr-code:^3.1
 ```
 
-Expected: package installed; SVG rendering works without `imagick`.
+Expected: package installed; SVG rendering works without `imagick`/`gd` through direct `App\Support\QrCode` integration.
 
-- [ ] **Step 2: Write failing management tests**
+- [x] **Step 2: Write failing management tests**
 
 Create `tests/Feature/Households/HouseholdManagementTest.php`:
 
@@ -560,15 +560,15 @@ it('renders a qr svg for a household', function () {
 });
 ```
 
-- [ ] **Step 3: Run failing tests**
+- [x] **Step 3: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Households/HouseholdManagementTest.php
+ddev artisan test tests/Feature/Households/HouseholdManagementTest.php
 ```
 
 Expected: FAIL because routes and Volt views are missing.
 
-- [ ] **Step 4: Add routes**
+- [x] **Step 4: Add routes**
 
 In `routes/web.php`, inside the existing `auth` + `pengurus` group:
 
@@ -581,7 +581,7 @@ Route::middleware(['auth', 'pengurus'])->group(function () {
 });
 ```
 
-- [ ] **Step 5: Create household management Volt page**
+- [x] **Step 5: Create household management Volt page**
 
 Create `resources/views/livewire/households/index.blade.php`:
 
@@ -707,7 +707,7 @@ $toggleActive = function (int $id) {
 </x-layouts.app>
 ```
 
-- [ ] **Step 6: Create QR Volt page**
+- [x] **Step 6: Create QR Volt page**
 
 Create `resources/views/livewire/households/qr.blade.php`:
 
@@ -743,15 +743,15 @@ $svg = computed(fn () => (string) QrCode::format('svg')->size(280)->generate($th
 </x-layouts.app>
 ```
 
-- [ ] **Step 7: Run tests**
+- [x] **Step 7: Run tests**
 
 ```bash
-php artisan test tests/Feature/Households/HouseholdManagementTest.php
+ddev artisan test tests/Feature/Households/HouseholdManagementTest.php
 ```
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add composer.json composer.lock routes/web.php resources/views/livewire/households tests/Feature/Households/HouseholdManagementTest.php
@@ -766,7 +766,7 @@ git commit -m "feat: add household management dashboard and qr view"
 - Create: `resources/views/livewire/residents/index.blade.php`
 - Test: `tests/Feature/Residents/ResidentManagementTest.php`
 
-- [ ] **Step 1: Write failing management tests**
+- [x] **Step 1: Write failing management tests**
 
 Create `tests/Feature/Residents/ResidentManagementTest.php`:
 
@@ -833,15 +833,15 @@ it('allows editing a resident keeping its own phone', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
-php artisan test tests/Feature/Residents/ResidentManagementTest.php
+ddev artisan test tests/Feature/Residents/ResidentManagementTest.php
 ```
 
 Expected: FAIL because route and view are missing.
 
-- [ ] **Step 3: Add route**
+- [x] **Step 3: Add route**
 
 In `routes/web.php`, inside the `auth` + `pengurus` group:
 
@@ -849,7 +849,7 @@ In `routes/web.php`, inside the `auth` + `pengurus` group:
 Volt::route('/dashboard/warga', 'residents.index')->name('residents.index');
 ```
 
-- [ ] **Step 4: Create resident management Volt page**
+- [x] **Step 4: Create resident management Volt page**
 
 Create `resources/views/livewire/residents/index.blade.php`:
 
@@ -994,15 +994,15 @@ $toggleActive = function (int $id) {
 </x-layouts.app>
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 ```bash
-php artisan test tests/Feature/Residents/ResidentManagementTest.php
+ddev artisan test tests/Feature/Residents/ResidentManagementTest.php
 ```
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add routes/web.php resources/views/livewire/residents tests/Feature/Residents/ResidentManagementTest.php
@@ -1018,7 +1018,7 @@ git commit -m "feat: add resident management dashboard"
 - Create: `database/seeders/DemoDataSeeder.php`
 - Modify: `database/seeders/DatabaseSeeder.php`
 
-- [ ] **Step 1: Add nav links to app layout**
+- [x] **Step 1: Add nav links to app layout**
 
 In `resources/views/components/layouts/app.blade.php`, add navigation links beside the brand in the header:
 
@@ -1030,7 +1030,7 @@ In `resources/views/components/layouts/app.blade.php`, add navigation links besi
 </nav>
 ```
 
-- [ ] **Step 2: Show summary counts on the dashboard**
+- [x] **Step 2: Show summary counts on the dashboard**
 
 Replace `resources/views/livewire/dashboard/index.blade.php`:
 
@@ -1065,7 +1065,7 @@ $residentCount = computed(fn () => Resident::query()->where('is_active', true)->
 </x-layouts.app>
 ```
 
-- [ ] **Step 3: Create demo seeder**
+- [x] **Step 3: Create demo seeder**
 
 Create `database/seeders/DemoDataSeeder.php`:
 
@@ -1103,7 +1103,7 @@ class DemoDataSeeder extends Seeder
 }
 ```
 
-- [ ] **Step 4: Register seeder**
+- [x] **Step 4: Register seeder**
 
 In `database/seeders/DatabaseSeeder.php`, call the demo seeder:
 
@@ -1114,16 +1114,16 @@ public function run(): void
 }
 ```
 
-- [ ] **Step 5: Verify seeding**
+- [x] **Step 5: Verify seeding**
 
 ```bash
-php artisan migrate:fresh --seed
-php artisan test
+ddev artisan migrate:fresh --seed
+ddev artisan test
 ```
 
 Expected: seeding succeeds and the whole suite passes.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add resources/views database/seeders
@@ -1132,23 +1132,23 @@ git commit -m "feat: add navigation, dashboard summary, and demo seeder"
 
 ## Final Verification
 
-- [ ] Run all checks:
+- [x] Run all checks:
 
 ```bash
-php artisan test
-npm run build
+ddev artisan test
+ddev npm run build
 ```
 
 Expected: all tests pass and assets build.
 
-- [ ] Manual smoke test:
+- [x] Manual smoke test:
 
 ```bash
-php artisan migrate:fresh --seed
-php artisan serve
+ddev artisan migrate:fresh --seed
+ddev launch
 ```
 
-- Login at `http://localhost:8000/login` with `admin@smartrt.test` / `password`.
+- Login at the DDEV app URL, for example `https://smart-rt.ddev.site/login`, with `admin@smartrt.test` / `password`.
 - Open `Rumah/KK`, add a household, and confirm a QR token is generated.
 - Open the household QR page and confirm an SVG renders.
 - Open `Warga`, add a resident, confirm the phone normalizes, and confirm a duplicate active phone is rejected.

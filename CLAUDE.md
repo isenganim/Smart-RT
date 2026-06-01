@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Smart RT is a PWA for administering a single Indonesian neighborhood unit (RT): resident/household data, nightly watch (ronda) scheduling and check-in, daily cash collection (kas) via QR + daily PIN, fines, announcements, resident reports, letters, inventory, and simple voting.
 
-**The application is not scaffolded yet.** This repository currently holds only planning artifacts. The Laravel app gets bootstrapped by executing Phase 01 (see below). When working here, check whether `composer.json`/`artisan` exist before assuming any framework command will run.
+The Laravel application is scaffolded in this repository. Development runs through DDEV, so use `ddev artisan`, `ddev composer`, and `ddev npm` instead of host PHP/Composer/NPM.
 
 ## Document workflow
 
@@ -20,7 +20,7 @@ Work is driven by the `superpowers` skill workflow: brainstorm → spec → phas
 
 ## Commands (after Phase 01 scaffolds the app)
 
-The stack is Laravel 12, PHP 8.3, MySQL 8, Livewire 3 + Volt, Alpine.js, Tailwind, Pest, Vite. The user develops through **DDEV** and does not install PHP/MySQL/Composer directly on the host.
+The stack is Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4 + Volt, Alpine.js, Tailwind, Pest, Vite. The user develops through **DDEV** and does not install PHP/MySQL/Composer directly on the host.
 
 ```bash
 ddev start                                                # start Docker services
@@ -50,7 +50,7 @@ Single Laravel application split into two surfaces:
 
 Cross-cutting invariants the design mandates:
 
-- **Phone number is the warga identity.** It is normalized to a canonical form (`App\Support\PhoneNumber`) and must be unique among *active* residents only — enforced in the app layer (`UniqueActivePhone` rule), not a DB unique index, since the active-only condition isn't portably expressible there.
+- **Phone number is the warga identity.** It is normalized to a canonical form (`App\Support\PhoneNumber`) and must be unique among _active_ residents only — enforced in the app layer (`UniqueActivePhone` rule), not a DB unique index, since the active-only condition isn't portably expressible there.
 - **Cash transactions are never hard-deleted.** Mistakes are recorded as cancellations or corrections with a reason. Every important mutation writes to `audit_logs` via `App\Support\Audit::record()`.
 - **Kas core is the priority.** The ronda + kas modules (schedule/check-in, QR+PIN cash scan at Rp500, Rp5.000 fines, recap) are the highest-value operational loop. Rp500 per house per day, one paid record per house per date; daily PIN session gates the scan and has an active time window.
 - **QR tokens carry no PII** — only an opaque per-household token, rendered as inline SVG (no `imagick`/`gd` dependency).
