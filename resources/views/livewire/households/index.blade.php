@@ -2,7 +2,7 @@
 
 use App\Models\Household;
 use App\Support\Audit;
-use function Livewire\Volt\{state, rules, computed};
+use function Livewire\Volt\{state, rules, computed, layout, title};
 
 state([
     'editingId' => null,
@@ -10,6 +10,9 @@ state([
     'address' => '',
     'head_name' => '',
 ]);
+
+layout('components.layouts.app');
+title('Data Rumah/KK');
 
 rules([
     'house_number' => ['required', 'string', 'max:255'],
@@ -54,8 +57,7 @@ $toggleActive = function (int $id) {
 
 ?>
 
-<x-layouts.app title="Data Rumah/KK">
-    <div class="space-y-6">
+<div class="space-y-6">
         <div class="rounded-[1.5rem] bg-white p-6 shadow-xl shadow-slate-900/5 ring-1 ring-slate-200 sm:rounded-[1.75rem]">
             <p class="text-sm font-semibold text-emerald-700">Master data</p>
             <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-950">Data Rumah/KK</h1>
@@ -158,5 +160,4 @@ $toggleActive = function (int $id) {
                 @endforeach
             </div>
         </section>
-    </div>
-</x-layouts.app>
+</div>

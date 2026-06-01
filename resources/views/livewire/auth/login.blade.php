@@ -2,9 +2,12 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use function Livewire\Volt\{state, rules};
+use function Livewire\Volt\{state, rules, layout, title};
 
 state(['email' => '', 'password' => '', 'remember' => false]);
+
+layout('components.layouts.auth');
+title('Login Pengurus');
 
 rules([
     'email' => ['required', 'email'],
@@ -27,8 +30,7 @@ $login = function () {
 
 ?>
 
-<x-layouts.auth title="Login Pengurus">
-    <form wire:submit="login" class="space-y-5">
+<form wire:submit="login" class="space-y-5">
         <div>
             <label class="block text-sm font-semibold text-slate-700">Email</label>
             <input wire:model="email" type="email" class="mt-2 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 shadow-inner shadow-slate-200/60 transition focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100" placeholder="admin@smartrt.test" autofocus>
@@ -53,5 +55,4 @@ $login = function () {
         <p class="text-center text-xs leading-5 text-slate-500">
             Portal ini hanya untuk pengurus. Hubungi admin RT jika lupa akses.
         </p>
-    </form>
-</x-layouts.auth>
+</form>

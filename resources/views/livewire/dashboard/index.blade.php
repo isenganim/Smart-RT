@@ -2,15 +2,17 @@
 
 use App\Models\Household;
 use App\Models\Resident;
-use function Livewire\Volt\{computed};
+use function Livewire\Volt\{computed, layout, title};
+
+layout('components.layouts.app');
+title('Dashboard Pengurus');
 
 $householdCount = computed(fn () => Household::query()->where('is_active', true)->count());
 $residentCount = computed(fn () => Resident::query()->where('is_active', true)->count());
 
 ?>
 
-<x-layouts.app title="Dashboard Pengurus">
-    <div class="space-y-6 sm:space-y-8">
+<div class="space-y-6 sm:space-y-8">
         <div class="grid gap-4 sm:hidden">
             <a href="{{ route('households.index') }}" class="rounded-[1.25rem] bg-white p-5 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200">
                 <p class="text-sm font-semibold text-slate-500">Rumah/KK Aktif</p>
@@ -71,5 +73,4 @@ $residentCount = computed(fn () => Resident::query()->where('is_active', true)->
                 <p class="mt-2 text-sm text-slate-500">Warga dengan nomor HP unik dan status aktif.</p>
             </div>
         </div>
-    </div>
-</x-layouts.app>
+</div>

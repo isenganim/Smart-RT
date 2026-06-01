@@ -5,6 +5,7 @@
         ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => request()->routeIs('dashboard')],
         ['label' => 'Rumah/KK', 'route' => 'households.index', 'active' => request()->routeIs('households.*')],
         ['label' => 'Warga', 'route' => 'residents.index', 'active' => request()->routeIs('residents.*')],
+        ['label' => 'Ronda', 'route' => 'ronda.index', 'active' => request()->routeIs('ronda.*')],
     ];
 @endphp
 
@@ -39,14 +40,17 @@
                         @endforeach
                     </nav>
                 </div>
-                <livewire:auth.logout-button />
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('portal.home') }}" class="text-sm font-medium text-slate-400 hover:text-white transition-colors" target="_blank" rel="noopener">Portal Warga &rarr;</a>
+                    <livewire:auth.logout-button />
+                </div>
             </div>
         </header>
 
         <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-3 py-2 shadow-2xl shadow-slate-950/15 backdrop-blur sm:hidden" aria-label="Navigasi utama">
-            <div class="mx-auto grid max-w-md grid-cols-3 gap-2 text-xs font-semibold">
+            <div class="mx-auto grid max-w-md grid-cols-4 gap-2 text-[11px] font-semibold">
                 @foreach ($navItems as $item)
-                    <a href="{{ route($item['route']) }}" class="rounded-2xl px-3 py-2.5 text-center transition {{ $item['active'] ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' }}">
+                    <a href="{{ route($item['route']) }}" class="rounded-2xl px-1.5 py-2.5 text-center transition {{ $item['active'] ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' }}">
                         {{ $item['label'] }}
                     </a>
                 @endforeach
