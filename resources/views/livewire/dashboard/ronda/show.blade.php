@@ -102,7 +102,7 @@ $remove = function (int $assignmentId) {
                         @forelse ($this->assignments as $assignment)
                             <tr>
                                 <td class="px-4 py-3 font-semibold text-slate-900">{{ $assignment->resident?->name }}</td>
-                                <td class="px-4 py-3 tabular-nums">{{ blank($assignment->resident?->phone) ? '-' : (str_starts_with($assignment->resident->phone, '0') || str_starts_with($assignment->resident->phone, '+') ? $assignment->resident->phone : '0'.$assignment->resident->phone) }}</td>
+                                <td class="px-4 py-3 tabular-nums">{{ $assignment->resident?->display_phone ?? '-' }}</td>
                                 <td class="px-4 py-3">{{ $assignment->resident?->household?->house_number ?? '-' }}</td>
                                 <td class="px-4 py-3">
                                     @if ($assignment->hasCheckedIn())
@@ -134,7 +134,7 @@ $remove = function (int $assignmentId) {
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <h3 class="font-bold text-slate-950">{{ $assignment->resident?->name }}</h3>
-                                <p class="mt-1 text-sm text-slate-500">HP: {{ blank($assignment->resident?->phone) ? '-' : (str_starts_with($assignment->resident->phone, '0') || str_starts_with($assignment->resident->phone, '+') ? $assignment->resident->phone : '0'.$assignment->resident->phone) }}</p>
+                                <p class="mt-1 text-sm text-slate-500">HP: {{ $assignment->resident?->display_phone ?? '-' }}</p>
                                 <p class="text-xs text-slate-400 mt-1">Rumah: {{ $assignment->resident?->household?->house_number ?? '-' }}</p>
                             </div>
                             <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $assignment->hasCheckedIn() ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">

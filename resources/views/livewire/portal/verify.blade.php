@@ -29,17 +29,19 @@ $check = function (ResidentLookup $lookup) {
         return;
     }
 
-    RateLimiter::hit($key, 60);
-
     $result = $lookup->resolve($this->phone);
 
     if ($result->found()) {
         $this->verified = true;
         $this->feedback = null;
-    } else {
-        $this->verified = false;
-        $this->feedback = $result->message;
+
+        return;
     }
+
+    // Only count failed lookups so legitimate residents are not rate limited.
+    RateLimiter::hit($key, 60);
+    $this->verified = false;
+    $this->feedback = $result->message;
 };
 
 ?>

@@ -23,17 +23,19 @@ $submit = function (RondaCheckin $checkin) {
         return;
     }
 
-    RateLimiter::hit($key, 60);
-
     $result = $checkin->checkIn($this->phone, today());
 
     if ($result->success()) {
         $this->done = true;
         $this->feedback = null;
-    } else {
-        $this->done = false;
-        $this->feedback = $result->message;
+
+        return;
     }
+
+    // Only count failed check-ins so a successful resident is not rate limited.
+    RateLimiter::hit($key, 60);
+    $this->done = false;
+    $this->feedback = $result->message;
 };
 
 ?>
