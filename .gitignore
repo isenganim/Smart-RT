@@ -21,6 +21,8 @@
 /vendor
 .mcp.json
 .worktrees/
+.playwright-mcp/
+**/.playwright-mcp/
 Homestead.json
 Homestead.yaml
 Thumbs.db
