@@ -10,15 +10,17 @@
 
 ## Phases
 
-- [ ] **Phase 03 — Portal Warga Dasar** — `../plans/2026-05-30-phase-03-portal-warga-dasar.md`
+- [x] **Phase 03 — Portal Warga Dasar** — `../plans/2026-05-30-phase-03-portal-warga-dasar.md`
   - `ResidentLookup` service + `PhoneLookupResult` typed result
   - Public `x-layouts.public` layout + portal landing page (no auth)
   - Cek Nomor HP page with rate limiting
   - Move `/` to portal; keep `/dashboard` protected
-- [ ] **Phase 04 — Jadwal Ronda & Check-in** — `../plans/2026-05-30-phase-04-jadwal-ronda-checkin.md`
+- [x] **Phase 04 — Jadwal Ronda & Check-in** — `../plans/2026-05-30-phase-04-jadwal-ronda-checkin.md`
   - Ronda schedule per date with assigned warga
   - Phone-based check-in (only scheduled, active warga; once per date)
   - Pengurus schedule management
+  - Public `/jadwal-ronda` renders as a desktop table with mobile cards
+  - Check-in timestamps display with the WIB label
 
 ## Acceptance Criteria
 
@@ -37,7 +39,7 @@ Mapped to design spec "Testing MVP" → **DT-2** (warga tanpa login lihat pengum
 **AC-2.3 — Registered phone confirmed (DT-4)**
 - Given an active resident with a known phone
 - When a visitor enters that number in any format (spaces/dashes/+62)
-- Then the system confirms it is registered and active and shows the resident name
+- Then the system confirms it is registered and active without exposing the resident name
 
 **AC-2.4 — Verification is rate limited**
 - Given repeated verification attempts from one IP
@@ -54,11 +56,36 @@ Mapped to design spec "Testing MVP" → **DT-2** (warga tanpa login lihat pengum
 - When they attempt check-in
 - Then the system refuses with a clear reason
 
+**AC-2.7 — Public Ronda schedule table**
+- Given a warga visitor on a desktop viewport
+- When they open `/jadwal-ronda`
+- Then upcoming Ronda schedules are shown in a table with date, notes, assigned residents, and attendance count columns
+- And on mobile the same data remains readable as stacked cards
+
+**AC-2.8 — Livewire 4 page updates stay fragment-based**
+- Given a Livewire/Volt routed page
+- When the page submits or updates via Livewire
+- Then the response is component HTML, not a full HTML document, so the browser does not blank or morph incorrectly
+
+**AC-2.9 — Application time uses WIB**
+- Given the application records or displays Ronda check-in time
+- When Laravel resolves `now()` or formats `checked_in_at`
+- Then it uses `Asia/Jakarta` / GMT+7 and user-facing check-in times include `WIB`
+
 ## Definition of done
 
-- [ ] `php artisan test` passes for Phase 03 + 04 suites
-- [ ] Portal home loads with no login; `/dashboard` still redirects guests
-- [ ] Cek Nomor HP confirms a registered active phone and rejects unknown numbers
-- [ ] Rate limiting blocks excessive verification attempts
-- [ ] A scheduled warga can check in by phone; unscheduled warga are refused
-- [ ] Double check-in on the same date is prevented
+- [x] `php artisan test` passes for Phase 03 + 04 suites
+- [x] Portal home loads with no login; `/dashboard` still redirects guests
+- [x] Cek Nomor HP confirms a registered active phone and rejects unknown numbers
+- [x] Rate limiting blocks excessive verification attempts
+- [x] A scheduled warga can check in by phone; unscheduled warga are refused
+- [x] Double check-in on the same date is prevented
+- [x] `/jadwal-ronda` renders a desktop table and mobile cards
+- [x] Livewire/Volt routed pages use `layout()` / `title()` instead of wrapping component output in full layout components
+- [x] App timezone is `Asia/Jakarta` and check-in times show `WIB`
+
+## Implementation Notes
+
+- Current verification command: `ddev exec php artisan test` passes.
+- Browser QA covered `/jadwal-ronda` on desktop and mobile using `google-chrome-beta`; desktop table was visible, mobile cards were visible, and console output was clean.
+- MCP documentation was checked for Livewire 4 page layout behavior, Livewire loop rendering guidance, and Laravel validation/update patterns. The routed Volt pages now use Volt `layout()` and `title()` helpers so update responses remain fragment-based.

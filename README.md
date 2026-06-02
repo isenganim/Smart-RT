@@ -1,59 +1,103 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Smart RT
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Smart RT adalah aplikasi PWA responsive untuk operasional satu RT. Fokus saat ini adalah dashboard pengurus, data rumah dan warga, portal warga tanpa akun, serta jadwal ronda dengan check-in berbasis nomor HP terdaftar.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Laravel 12
+- Livewire 4 + Volt
+- Tailwind CSS 4 + Vite
+- Pest PHP
+- DDEV + MariaDB untuk local development
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fitur Saat Ini
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Login pengurus dengan role `admin_rt` dan `bendahara`
+- Dashboard pengurus yang terlindungi login
+- Manajemen rumah, warga, status aktif, dan QR rumah
+- Audit log untuk aksi pengurus dan check-in ronda
+- Portal warga publik di `/`
+- Cek nomor HP publik dengan rate limit dan respons tanpa membocorkan nama warga
+- Jadwal ronda publik di `/jadwal-ronda` dalam bentuk table desktop dan card mobile
+- Check-in ronda publik di `/checkin-ronda`
+- Manajemen jadwal ronda pengurus di `/dashboard/ronda`
+- Timezone aplikasi `Asia/Jakarta` / WIB
 
-## Learning Laravel
+## Setup Lokal
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Project ini disiapkan untuk DDEV.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+ddev start
+ddev exec composer install
+ddev exec npm install
+ddev exec cp .env.example .env
+ddev exec php artisan key:generate
+ddev exec php artisan migrate --seed
+ddev exec npm run build
+```
 
-## Laravel Sponsors
+URL lokal default:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```text
+https://smart-rt.ddev.site
+```
 
-### Premium Partners
+Demo login hasil seeder:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```text
+admin@smartrt.test / password
+bendahara@smartrt.test / password
+```
 
-## Contributing
+## Development
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Jalankan Vite:
 
-## Code of Conduct
+```bash
+ddev exec npm run dev
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Jalankan test:
 
-## Security Vulnerabilities
+```bash
+ddev exec php artisan test
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Format kode PHP:
 
-## License
+```bash
+ddev exec ./vendor/bin/pint --dirty
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Route Penting
+
+- `/` - portal warga
+- `/cek-nomor` - cek status nomor HP terdaftar
+- `/jadwal-ronda` - jadwal ronda publik
+- `/checkin-ronda` - check-in ronda publik
+- `/login` - login pengurus
+- `/dashboard` - dashboard pengurus
+- `/dashboard/rumah` - manajemen rumah
+- `/dashboard/warga` - manajemen warga
+- `/dashboard/ronda` - manajemen jadwal ronda
+
+## Catatan Implementasi
+
+- Warga tidak memakai akun atau password. Aksi publik memakai nomor HP aktif yang sudah terdaftar.
+- Verifikasi nomor publik hanya menampilkan status terdaftar, bukan nama warga.
+- Check-in ronda hanya berhasil untuk warga aktif yang terjadwal pada tanggal tersebut.
+- Check-in disimpan secara atomic dengan guard `checked_in_at IS NULL`, sehingga double submit paralel tidak mencatat kehadiran dua kali.
+- `checked_in_at` tidak mass assignable dan hanya ditulis lewat flow check-in.
+- Semua waktu aplikasi mengikuti `APP_TIMEZONE=Asia/Jakarta`.
+
+## Status
+
+Sprint 1 dan Sprint 2 sudah terimplementasi. Verifikasi terakhir:
+
+```text
+ddev exec php artisan test
+all tests pass
+```
+
+Dokumen sprint ada di `docs/superpowers/sprints/`.

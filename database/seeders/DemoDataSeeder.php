@@ -27,5 +27,23 @@ class DemoDataSeeder extends Seeder
             ->count(5)
             ->create()
             ->each(fn (Household $household) => Resident::factory()->count(2)->for($household)->create());
+
+        $residents = Resident::query()->where('is_active', true)->take(4)->get();
+        if ($residents->count() >= 2) {
+            $scheduleToday = \App\Models\RondaSchedule::query()->firstOrCreate(
+                ['date' => today()->toDateString()],
+                ['notes' => 'Ronda Malam Wajib']
+            );
+            $scheduleToday->assignments()->firstOrCreate(['resident_id' => $residents[0]->id]);
+            $scheduleToday->assignments()->firstOrCreate(['resident_id' => $residents[1]->id]);
+
+            if ($residents->count() >= 3) {
+                $scheduleTomorrow = \App\Models\RondaSchedule::query()->firstOrCreate(
+                    ['date' => today()->addDay()->toDateString()],
+                    ['notes' => 'Ronda Akhir Pekan']
+                );
+                $scheduleTomorrow->assignments()->firstOrCreate(['resident_id' => $residents[2]->id]);
+            }
+        }
     }
 }

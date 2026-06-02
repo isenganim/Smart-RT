@@ -16,4 +16,14 @@ class PhoneNumber
 
         return ltrim($digits, '0');
     }
+
+    /**
+     * Format a stored phone number for display in local (0-prefixed) form.
+     */
+    public static function forDisplay(?string $value): string
+    {
+        $normalized = self::normalize($value);
+
+        return $normalized === '' ? '-' : '0'.$normalized;
+    }
 }
