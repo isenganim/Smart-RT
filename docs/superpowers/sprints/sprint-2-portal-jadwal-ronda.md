@@ -39,7 +39,7 @@ Mapped to design spec "Testing MVP" → **DT-2** (warga tanpa login lihat pengum
 **AC-2.3 — Registered phone confirmed (DT-4)**
 - Given an active resident with a known phone
 - When a visitor enters that number in any format (spaces/dashes/+62)
-- Then the system confirms it is registered and active and shows the resident name
+- Then the system confirms it is registered and active without exposing the resident name
 
 **AC-2.4 — Verification is rate limited**
 - Given repeated verification attempts from one IP
@@ -86,6 +86,6 @@ Mapped to design spec "Testing MVP" → **DT-2** (warga tanpa login lihat pengum
 
 ## Implementation Notes
 
-- Current verification command: `ddev exec php artisan test` passes with 59 tests and 115 assertions.
+- Current verification command: `ddev exec php artisan test` passes with 62 tests and 127 assertions.
 - Browser QA covered `/jadwal-ronda` on desktop and mobile using `google-chrome-beta`; desktop table was visible, mobile cards were visible, and console output was clean.
-- MCP documentation was checked for Livewire 4 page layout behavior and Livewire loop rendering guidance. The routed Volt pages now use Volt `layout()` and `title()` helpers so update responses remain fragment-based.
+- MCP documentation was checked for Livewire 4 page layout behavior, Livewire loop rendering guidance, and Laravel validation/update patterns. The routed Volt pages now use Volt `layout()` and `title()` helpers so update responses remain fragment-based.

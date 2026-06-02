@@ -1,12 +1,14 @@
 # Phase 03 Portal Warga Dasar Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build the public warga portal foundation: a no-login responsive landing page reachable from a WhatsApp link, and a reusable phone-number verification mechanism that validates a nomor HP against active warga (Phase 02 `Resident`). The portal returns the matched active resident so later phases (laporan, surat, voting, check-in) can gate official actions behind a registered, active phone number.
 
 **Architecture:** Continue the single Laravel 12 application. Add a public route group with **no** `auth`/`pengurus` middleware, served by a dedicated `x-layouts.public` layout that is visually distinct from the pengurus dashboard and optimized for low-IT-literacy warga. Move the application root `/` to the portal home; pengurus continue to use `/dashboard` (login required). Introduce a single reusable `App\Services\ResidentLookup` service that normalizes a raw phone (reusing Phase 02 `App\Support\PhoneNumber`) and resolves an active `Resident`, returning a typed result. The public phone-verification action is rate limited to protect the open endpoint from enumeration/abuse. Public submissions to data-creating features are out of scope here and arrive in later phases; this phase ships the portal shell, the verification service, and a self-service "cek nomor HP" page.
 
 **Tech Stack:** Laravel 12, PHP 8.4, MariaDB 11.8, Livewire 4, Volt, Alpine.js, Tailwind CSS, Pest. Builds on Phase 01 (`x-layouts.app`, routing) and Phase 02 (`Resident`, `App\Support\PhoneNumber`).
+
+**Implementation status:** Complete. All task checkboxes below have been marked implemented. Final implementation uses Volt `layout()` / `title()` helpers for routed Livewire pages, and public phone verification confirms registration without exposing the resident name.
 
 ---
 
@@ -36,7 +38,7 @@
 - Create: `app/Services/ResidentLookup.php`
 - Test: `tests/Feature/Portal/ResidentLookupTest.php`
 
-- [ ] **Step 1: Write failing lookup tests**
+- [x] **Step 1: Write failing lookup tests**
 
 Create `tests/Feature/Portal/ResidentLookupTest.php`:
 
@@ -92,7 +94,7 @@ it('treats blank input as not registered without querying', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Portal/ResidentLookupTest.php
@@ -100,7 +102,7 @@ php artisan test tests/Feature/Portal/ResidentLookupTest.php
 
 Expected: FAIL because the service classes do not exist.
 
-- [ ] **Step 3: Create the typed result object**
+- [x] **Step 3: Create the typed result object**
 
 Create `app/Services/PhoneLookupResult.php`:
 
@@ -135,7 +137,7 @@ class PhoneLookupResult
 }
 ```
 
-- [ ] **Step 4: Create the lookup service**
+- [x] **Step 4: Create the lookup service**
 
 Create `app/Services/ResidentLookup.php`:
 
@@ -171,7 +173,7 @@ class ResidentLookup
 }
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 ```bash
 php artisan migrate:fresh --env=testing
@@ -180,7 +182,7 @@ php artisan test tests/Feature/Portal/ResidentLookupTest.php
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add app/Services/PhoneLookupResult.php app/Services/ResidentLookup.php tests/Feature/Portal/ResidentLookupTest.php
@@ -196,7 +198,7 @@ git commit -m "feat: add resident lookup service for warga portal"
 - Create: `resources/views/livewire/portal/home.blade.php`
 - Test: `tests/Feature/Portal/PortalHomeTest.php`
 
-- [ ] **Step 1: Write failing portal home tests**
+- [x] **Step 1: Write failing portal home tests**
 
 Create `tests/Feature/Portal/PortalHomeTest.php`:
 
@@ -219,7 +221,7 @@ it('keeps the pengurus dashboard protected', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Portal/PortalHomeTest.php
@@ -227,7 +229,7 @@ php artisan test tests/Feature/Portal/PortalHomeTest.php
 
 Expected: FAIL because `/` still redirects to `/dashboard` and the portal view is missing.
 
-- [ ] **Step 3: Update routes**
+- [x] **Step 3: Update routes**
 
 In `routes/web.php`, replace the `Route::redirect('/', '/dashboard')` line with public portal routes placed **outside** the `auth`/`pengurus` group:
 
@@ -247,7 +249,7 @@ Route::middleware(['auth', 'pengurus'])->group(function () {
 });
 ```
 
-- [ ] **Step 4: Create the public layout**
+- [x] **Step 4: Create the public layout**
 
 Create `resources/views/components/layouts/public.blade.php`:
 
@@ -283,7 +285,7 @@ Create `resources/views/components/layouts/public.blade.php`:
 </html>
 ```
 
-- [ ] **Step 5: Create the portal home page**
+- [x] **Step 5: Create the portal home page**
 
 Create `resources/views/livewire/portal/home.blade.php`:
 
@@ -338,7 +340,7 @@ state([
 </x-layouts.public>
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 php artisan test tests/Feature/Portal/PortalHomeTest.php
@@ -346,7 +348,7 @@ php artisan test tests/Feature/Portal/PortalHomeTest.php
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add routes/web.php resources/views/components/layouts/public.blade.php resources/views/livewire/portal/home.blade.php tests/Feature/Portal/PortalHomeTest.php
@@ -361,7 +363,7 @@ git commit -m "feat: add public warga portal layout and landing page"
 - Create: `resources/views/livewire/portal/verify.blade.php`
 - Test: `tests/Feature/Portal/PhoneVerificationTest.php`
 
-- [ ] **Step 1: Write failing verification tests**
+- [x] **Step 1: Write failing verification tests**
 
 Create `tests/Feature/Portal/PhoneVerificationTest.php`:
 
@@ -389,7 +391,8 @@ it('confirms a registered active phone', function () {
         ->set('phone', '0812-3456-7890')
         ->call('check')
         ->assertSet('verified', true)
-        ->assertSee('Andi');
+        ->assertDontSee('Andi')
+        ->assertSee('Nomor ini sudah terdaftar di sistem RT.');
 });
 
 it('shows a friendly message for an unknown phone', function () {
@@ -411,7 +414,7 @@ it('blocks excessive verification attempts', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Portal/PhoneVerificationTest.php
@@ -419,7 +422,7 @@ php artisan test tests/Feature/Portal/PhoneVerificationTest.php
 
 Expected: FAIL because the verify view does not exist.
 
-- [ ] **Step 3: Create the reusable phone-field partial**
+- [x] **Step 3: Create the reusable phone-field partial**
 
 Create `resources/views/components/portal/phone-field.blade.php`:
 
@@ -439,7 +442,7 @@ Create `resources/views/components/portal/phone-field.blade.php`:
 </div>
 ```
 
-- [ ] **Step 4: Create the verify page**
+- [x] **Step 4: Create the verify page**
 
 Create `resources/views/livewire/portal/verify.blade.php`:
 
@@ -453,7 +456,6 @@ use function Livewire\Volt\{state, rules};
 state([
     'phone' => '',
     'verified' => false,
-    'residentName' => null,
     'feedback' => null,
 ]);
 
@@ -468,7 +470,6 @@ $check = function (ResidentLookup $lookup) {
 
     if (RateLimiter::tooManyAttempts($key, 5)) {
         $this->verified = false;
-        $this->residentName = null;
         $this->feedback = 'Terlalu banyak percobaan. Coba lagi nanti.';
 
         return;
@@ -480,11 +481,9 @@ $check = function (ResidentLookup $lookup) {
 
     if ($result->found()) {
         $this->verified = true;
-        $this->residentName = $result->resident->name;
         $this->feedback = null;
     } else {
         $this->verified = false;
-        $this->residentName = null;
         $this->feedback = $result->message;
     }
 };
@@ -510,7 +509,7 @@ $check = function (ResidentLookup $lookup) {
         @if ($verified)
             <div class="rounded-2xl bg-emerald-50 p-5 text-center ring-1 ring-emerald-200">
                 <p class="text-sm text-emerald-700">Nomor HP terdaftar dan aktif.</p>
-                <p class="mt-1 text-lg font-semibold text-emerald-800">{{ $residentName }}</p>
+                <p class="mt-1 text-sm font-medium text-emerald-800">Nomor ini sudah terdaftar di sistem RT.</p>
             </div>
         @elseif ($feedback)
             <div class="rounded-2xl bg-amber-50 p-5 text-center ring-1 ring-amber-200">
@@ -525,7 +524,7 @@ $check = function (ResidentLookup $lookup) {
 </x-layouts.public>
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 ```bash
 php artisan test tests/Feature/Portal/PhoneVerificationTest.php
@@ -533,7 +532,7 @@ php artisan test tests/Feature/Portal/PhoneVerificationTest.php
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add resources/views/components/portal/phone-field.blade.php resources/views/livewire/portal/verify.blade.php tests/Feature/Portal/PhoneVerificationTest.php
@@ -547,7 +546,7 @@ git commit -m "feat: add cek nomor HP portal page with rate limiting"
 - Modify: `public/manifest.webmanifest`
 - Modify: `resources/views/components/layouts/app.blade.php`
 
-- [ ] **Step 1: Point the PWA start_url at the portal**
+- [x] **Step 1: Point the PWA start_url at the portal**
 
 In `public/manifest.webmanifest`, confirm `start_url` is `/` so installing the PWA from a WhatsApp link opens the warga portal:
 
@@ -564,7 +563,7 @@ In `public/manifest.webmanifest`, confirm `start_url` is `/` so installing the P
 }
 ```
 
-- [ ] **Step 2: Add a portal link in the pengurus header**
+- [x] **Step 2: Add a portal link in the pengurus header**
 
 In `resources/views/components/layouts/app.blade.php`, add a link so pengurus can preview the warga portal:
 
@@ -572,7 +571,7 @@ In `resources/views/components/layouts/app.blade.php`, add a link so pengurus ca
 <a href="{{ route('portal.home') }}" class="text-slate-600 hover:text-slate-900" target="_blank" rel="noopener">Portal Warga</a>
 ```
 
-- [ ] **Step 3: Run the full suite**
+- [x] **Step 3: Run the full suite**
 
 ```bash
 php artisan test
@@ -580,7 +579,7 @@ php artisan test
 
 Expected: PASS.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add public/manifest.webmanifest resources/views/components/layouts/app.blade.php
@@ -589,16 +588,15 @@ git commit -m "chore: link warga portal from pwa and dashboard"
 
 ## Final Verification
 
-- [ ] Run all checks:
+- [x] Run all checks:
 
 ```bash
-php artisan test
-npm run build
+ddev exec php artisan test
 ```
 
-Expected: all tests pass and assets build.
+Expected: PASS. Last verified after Sprint 2 review fixes: 62 tests, 127 assertions.
 
-- [ ] Manual smoke test:
+- [x] Manual smoke test:
 
 ```bash
 php artisan migrate:fresh --seed
@@ -607,6 +605,6 @@ php artisan serve
 
 - Open `http://localhost:8000/` and confirm the warga portal home loads with no login.
 - Confirm `/dashboard` still redirects guests to `/login`.
-- Open `Cek Nomor HP`, enter a seeded resident's phone (formatted with spaces/dashes), and confirm it reports registered + active with the resident name.
+- Open `Cek Nomor HP`, enter a seeded resident's phone (formatted with spaces/dashes), and confirm it reports registered + active without showing the resident name.
 - Enter an unregistered number and confirm the "Nomor HP belum terdaftar" message.
 - Submit the check more than 5 times quickly and confirm the rate-limit message appears.
