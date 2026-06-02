@@ -5,7 +5,7 @@ use App\Models\Resident;
 use App\Services\ResidentLookup;
 
 beforeEach(function () {
-    $this->lookup = new ResidentLookup();
+    $this->lookup = new ResidentLookup;
     $this->household = Household::factory()->create();
 });
 
@@ -34,6 +34,23 @@ it('rejects a phone that belongs only to an inactive resident', function () {
     Resident::factory()->for($this->household)->create([
         'phone' => '81234567890',
         'is_active' => false,
+    ]);
+
+    $result = $this->lookup->resolve('81234567890');
+
+    expect($result->found())->toBeFalse();
+    expect($result->message)->toBe('Nomor HP belum terdaftar. Silakan hubungi pengurus RT.');
+});
+
+it('rejects ambiguous active phone matches', function () {
+    Resident::factory()->for($this->household)->create([
+        'phone' => '81234567890',
+        'is_active' => true,
+    ]);
+
+    Resident::factory()->for($this->household)->create([
+        'phone' => '81234567890',
+        'is_active' => true,
     ]);
 
     $result = $this->lookup->resolve('81234567890');

@@ -594,7 +594,7 @@ git commit -m "chore: link warga portal from pwa and dashboard"
 ddev exec php artisan test
 ```
 
-Expected: PASS. Last verified after Sprint 2 review fixes: 62 tests, 127 assertions.
+Expected: PASS. Last verified after Sprint 2 review fixes: 65 tests, 134 assertions.
 
 - [x] Manual smoke test:
 

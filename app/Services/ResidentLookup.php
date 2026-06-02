@@ -17,13 +17,14 @@ class ResidentLookup
             return PhoneLookupResult::miss(self::NOT_REGISTERED);
         }
 
-        $resident = Resident::query()
+        $residents = Resident::query()
             ->where('is_active', true)
             ->where('phone', $normalized)
-            ->first();
+            ->limit(2)
+            ->get();
 
-        return $resident
-            ? PhoneLookupResult::hit($resident)
+        return $residents->count() === 1
+            ? PhoneLookupResult::hit($residents->first())
             : PhoneLookupResult::miss(self::NOT_REGISTERED);
     }
 }

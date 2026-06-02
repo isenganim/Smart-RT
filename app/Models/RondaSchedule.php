@@ -14,7 +14,6 @@ class RondaSchedule extends Model
     protected $fillable = [
         'date',
         'notes',
-        'created_by',
     ];
 
     protected function casts(): array

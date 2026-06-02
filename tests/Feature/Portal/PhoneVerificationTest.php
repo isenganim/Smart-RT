@@ -25,6 +25,14 @@ it('confirms a registered active phone', function () {
         ->assertSee('Nomor ini sudah terdaftar di sistem RT.');
 });
 
+it('renders an accessible phone field', function () {
+    $this->get('/cek-nomor')
+        ->assertOk()
+        ->assertSee('for="phone"', false)
+        ->assertSee('id="phone"', false)
+        ->assertSee('autocomplete="tel"', false);
+});
+
 it('shows a friendly message for an unknown phone', function () {
     Volt::test('portal.verify')
         ->set('phone', '0899-0000-0000')

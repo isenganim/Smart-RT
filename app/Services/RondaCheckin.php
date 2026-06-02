@@ -6,6 +6,7 @@ use App\Models\RondaAssignment;
 use App\Models\RondaSchedule;
 use App\Support\Audit;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\DB;
 
 class RondaCheckin
 {
@@ -43,24 +44,31 @@ class RondaCheckin
         }
 
         $checkedInAt = now();
+        $checkedInAssignment = DB::transaction(function () use ($assignment, $checkedInAt, $lookup, $schedule) {
+            $updated = RondaAssignment::query()
+                ->whereKey($assignment->id)
+                ->whereNull('checked_in_at')
+                ->update(['checked_in_at' => $checkedInAt]);
 
-        $updated = RondaAssignment::query()
-            ->whereKey($assignment->id)
-            ->whereNull('checked_in_at')
-            ->update(['checked_in_at' => $checkedInAt]);
+            if ($updated !== 1) {
+                return null;
+            }
 
-        if ($updated !== 1) {
+            $assignment->refresh();
+
+            Audit::record(auth()->user(), 'ronda.assignment.checked_in', 'ronda_assignment', $assignment->id, [
+                'ronda_schedule_id' => $schedule->id,
+                'resident_id' => $lookup->resident->id,
+                'checked_in_at' => $checkedInAt->toIso8601String(),
+            ]);
+
+            return $assignment;
+        });
+
+        if (! $checkedInAssignment) {
             return CheckinResult::fail('Anda sudah check-in untuk tanggal ini.');
         }
 
-        $assignment->refresh();
-
-        Audit::record(auth()->user(), 'ronda.assignment.checked_in', 'ronda_assignment', $assignment->id, [
-            'ronda_schedule_id' => $schedule->id,
-            'resident_id' => $lookup->resident->id,
-            'checked_in_at' => $checkedInAt->toIso8601String(),
-        ]);
-
-        return CheckinResult::done($assignment);
+        return CheckinResult::done($checkedInAssignment);
     }
 }

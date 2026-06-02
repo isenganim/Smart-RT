@@ -2,6 +2,8 @@
 
 use App\Models\RondaSchedule;
 use App\Support\Audit;
+use Illuminate\Database\QueryException;
+use Illuminate\Validation\ValidationException;
 use function Livewire\Volt\{state, rules, computed, layout, title};
 
 state(['date' => '', 'notes' => '']);
@@ -22,16 +24,20 @@ $schedules = computed(fn () => RondaSchedule::query()
 $save = function () {
     $data = $this->validate();
     $data['date'] = \Illuminate\Support\Carbon::parse($data['date'])->toDateString();
+    $createdBy = auth()->id();
 
-    if (RondaSchedule::query()->whereDate('date', $data['date'])->exists()) {
-        throw \Illuminate\Validation\ValidationException::withMessages([
-            'date' => 'Jadwal ronda untuk tanggal ini sudah ada.',
-        ]);
+    try {
+        $schedule = RondaSchedule::make($data);
+        $schedule->created_by = $createdBy;
+        $schedule->save();
+    } catch (QueryException $exception) {
+        if (($exception->errorInfo[0] ?? null) !== '23000') {
+            throw $exception;
+        }
+
+        throw ValidationException::withMessages(['date' => 'Jadwal ronda untuk tanggal ini sudah ada.']);
     }
 
-    $data['created_by'] = auth()->id();
-
-    $schedule = RondaSchedule::create($data);
     Audit::record(auth()->user(), 'ronda.schedule.created', 'ronda_schedule', $schedule->id, ['date' => $schedule->date->toDateString()]);
 
     $this->reset('date', 'notes');

@@ -4,6 +4,7 @@ use App\Models\Household;
 use App\Models\Resident;
 use App\Models\RondaAssignment;
 use App\Models\RondaSchedule;
+use App\Models\User;
 
 it('casts the schedule date and has many assignments', function () {
     $schedule = RondaSchedule::factory()->create(['date' => '2026-06-01']);
@@ -12,6 +13,17 @@ it('casts the schedule date and has many assignments', function () {
 
     expect($schedule->date->toDateString())->toBe('2026-06-01');
     expect($schedule->assignments)->toHaveCount(1);
+});
+
+it('does not mass assign the schedule creator', function () {
+    $user = User::factory()->create();
+
+    $schedule = RondaSchedule::query()->create([
+        'date' => '2026-06-01',
+        'created_by' => $user->id,
+    ]);
+
+    expect($schedule->created_by)->toBeNull();
 });
 
 it('marks an assignment present when checked in', function () {
