@@ -14,7 +14,7 @@ rules(['phone' => ['required', 'string', 'max:30']]);
 $submit = function (RondaCheckin $checkin) {
     $this->validate();
 
-    $key = 'portal-checkin:'.request()->ip();
+    $key = 'portal-checkin:'.request()->getClientIp();
 
     if (RateLimiter::tooManyAttempts($key, 5)) {
         $this->done = false;

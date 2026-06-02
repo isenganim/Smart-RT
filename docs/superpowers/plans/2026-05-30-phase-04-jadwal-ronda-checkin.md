@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
-**Goal:** Build the ronda scheduling module and warga self check-in. Pengurus create a ronda schedule per date and assign active warga to it from the dashboard. Warga view the public schedule with no login, and check in for their assigned date using only their registered phone number. Check-in is allowed once per assignment and rejected when the phone is unregistered, inactive, or not scheduled that day.
+**Goal:** Build the ronda scheduling module and warga self-check-in. Pengurus create a ronda schedule per date and assign active warga to it from the dashboard. Warga view the public schedule with no login, and check in for their assigned date using only their registered phone number. Check-in is allowed once per assignment and rejected when the phone is unregistered, inactive, or not scheduled that day.
 
 **Architecture:** Continue the single Laravel 12 application. Model ronda as two tables: `ronda_schedules` (one row per date) and `ronda_assignments` (one row per warga assigned to a schedule, carrying `checked_in_at`). Check-in is the public warga action, so it reuses the Phase 03 `App\Services\ResidentLookup` to resolve an active resident and then a new `App\Services\RondaCheckin` service that enforces the scheduling and once-only rules and returns a typed result. Admin scheduling lives under the authenticated `pengurus` dashboard and audits every mutation through `App\Support\Audit`. Public check-in is rate limited like the Phase 03 verification page. The list of "warga terjadwal yang belum check-in" (calon denda) is exposed as a query helper here but the denda transaction itself is deferred to Phase 06.
 
@@ -1020,7 +1020,7 @@ rules(['phone' => ['required', 'string', 'max:30']]);
 $submit = function (RondaCheckin $checkin) {
     $this->validate();
 
-    $key = 'portal-checkin:'.request()->ip();
+    $key = 'portal-checkin:'.request()->getClientIp();
 
     if (RateLimiter::tooManyAttempts($key, 5)) {
         $this->done = false;
@@ -1109,7 +1109,7 @@ git commit -m "feat: add public ronda schedule and check-in pages"
 ddev exec php artisan test
 ```
 
-Expected: PASS. Last verified after Sprint 2 review fixes: 65 tests, 134 assertions.
+Expected: PASS. Last verified after Sprint 2 review fixes with `ddev exec php artisan test`.
 
 - [x] Manual smoke test:
 
@@ -1119,7 +1119,7 @@ php artisan serve
 ```
 
 - Login as pengurus, open `Ronda`, create a schedule for today, and assign a seeded active resident.
-- Open `/jadwal-ronda` (no login) and confirm the schedule and assigned warga appear as a desktop table and mobile cards.
+- Open `/jadwal-ronda` (no login) and confirm the schedule and assigned warga appear clearly on desktop and mobile.
 - Open `/checkin-ronda`, enter the assigned resident's phone, and confirm "Check-in berhasil".
 - Re-submit the same phone and confirm the "sudah check-in" message.
 - Enter an active but unassigned resident's phone and confirm the "tidak terjadwal" message.

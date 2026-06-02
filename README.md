@@ -97,7 +97,7 @@ Sprint 1 dan Sprint 2 sudah terimplementasi. Verifikasi terakhir:
 
 ```text
 ddev exec php artisan test
-65 passed, 134 assertions
+all tests pass
 ```
 
 Dokumen sprint ada di `docs/superpowers/sprints/`.

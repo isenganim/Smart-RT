@@ -86,6 +86,6 @@ Mapped to design spec "Testing MVP" → **DT-2** (warga tanpa login lihat pengum
 
 ## Implementation Notes
 
-- Current verification command: `ddev exec php artisan test` passes with 65 tests and 134 assertions.
+- Current verification command: `ddev exec php artisan test` passes.
 - Browser QA covered `/jadwal-ronda` on desktop and mobile using `google-chrome-beta`; desktop table was visible, mobile cards were visible, and console output was clean.
 - MCP documentation was checked for Livewire 4 page layout behavior, Livewire loop rendering guidance, and Laravel validation/update patterns. The routed Volt pages now use Volt `layout()` and `title()` helpers so update responses remain fragment-based.

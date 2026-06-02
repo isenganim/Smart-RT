@@ -20,7 +20,7 @@ rules([
 $check = function (ResidentLookup $lookup) {
     $this->validate();
 
-    $key = 'portal-verify:'.request()->ip();
+    $key = 'portal-verify:'.request()->getClientIp();
 
     if (RateLimiter::tooManyAttempts($key, 5)) {
         $this->verified = false;

@@ -466,7 +466,7 @@ rules([
 $check = function (ResidentLookup $lookup) {
     $this->validate();
 
-    $key = 'portal-verify:'.request()->ip();
+    $key = 'portal-verify:'.request()->getClientIp();
 
     if (RateLimiter::tooManyAttempts($key, 5)) {
         $this->verified = false;
@@ -594,7 +594,7 @@ git commit -m "chore: link warga portal from pwa and dashboard"
 ddev exec php artisan test
 ```
 
-Expected: PASS. Last verified after Sprint 2 review fixes: 65 tests, 134 assertions.
+Expected: PASS. Last verified after Sprint 2 review fixes with `ddev exec php artisan test`.
 
 - [x] Manual smoke test:
 
