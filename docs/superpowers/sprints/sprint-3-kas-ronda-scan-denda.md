@@ -10,12 +10,12 @@
 
 ## Phases
 
-- [ ] **Phase 05 — QR Rumah, Sesi PIN & Scan Iuran** — `../plans/2026-05-30-phase-05-qr-pin-scan-iuran.md`
+- [x] **Phase 05 — QR Rumah, Sesi PIN & Scan Iuran** — `../plans/2026-05-30-phase-05-qr-pin-scan-iuran.md`
   - Daily ronda PIN session (active window, e.g. 18:00–06:00)
   - Scan QR rumah → show address/head/status → Terima Cash
   - Record Rp500 iuran; one paid record per rumah per date
   - Reject scans without an active PIN; reject expired PINs
-- [ ] **Phase 06 — Denda Ronda & Rekap Kas** — `../plans/2026-05-30-phase-06-denda-rekap-kas.md`
+- [x] **Phase 06 — Denda Ronda & Rekap Kas** — `../plans/2026-05-30-phase-06-denda-rekap-kas.md`
   - Candidate-fine list from scheduled warga who didn't check in
   - Admin/bendahara review → set Rp5.000 denda
   - Cash recap: daily/weekly/monthly, unpaid houses, missing check-ins
@@ -67,10 +67,10 @@ Mapped to design spec "Testing MVP" → **DT-5** (PIN valid buka scan), **DT-6**
 
 ## Definition of done
 
-- [ ] `php artisan test` passes for Phase 05 + 06 suites
-- [ ] A valid daily PIN opens scan mode; expired/absent PIN is rejected
-- [ ] Scanning a valid QR records Rp500; the same rumah can't pay twice on one date
-- [ ] Scheduled warga who missed check-in appear as denda candidates
-- [ ] Admin/bendahara can set the Rp5.000 fine after review
-- [ ] Bendahara sees daily/weekly/monthly recap and unpaid-house list
-- [ ] Corrections are recorded (not deleted) with a reason and audit trail
+- [x] `php artisan test` passes for Phase 05 + 06 suites
+- [x] A valid daily PIN opens scan mode; expired/absent PIN is rejected
+- [x] Scanning a valid QR records Rp500; the same rumah can't pay twice on one date
+- [x] Scheduled warga who missed check-in appear as denda candidates
+- [x] Admin/bendahara can set the Rp5.000 fine after review
+- [x] Bendahara sees daily/weekly/monthly recap and unpaid-house list
+- [x] Corrections are recorded (not deleted) with a reason and audit trail

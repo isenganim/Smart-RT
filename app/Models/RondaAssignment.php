@@ -13,6 +13,7 @@ class RondaAssignment extends Model
     protected $fillable = [
         'ronda_schedule_id',
         'resident_id',
+        'checked_in_at',
     ];
 
     protected function casts(): array

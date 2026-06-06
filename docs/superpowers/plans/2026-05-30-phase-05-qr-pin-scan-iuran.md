@@ -48,7 +48,7 @@
 - Create: `database/factories/CashTransactionFactory.php`
 - Test: `tests/Feature/Kas/CashTransactionModelTest.php`
 
-- [ ] **Step 1: Write failing model tests**
+- [x] **Step 1: Write failing model tests**
 
 Create `tests/Feature/Kas/CashTransactionModelTest.php`:
 
@@ -86,7 +86,7 @@ it('scopes iuran harian transactions', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/CashTransactionModelTest.php
@@ -94,7 +94,7 @@ php artisan test tests/Feature/Kas/CashTransactionModelTest.php
 
 Expected: FAIL because the enum, migration, and model do not exist.
 
-- [ ] **Step 3: Create the transaction type enum**
+- [x] **Step 3: Create the transaction type enum**
 
 Create `app/Enums/TransactionType.php`:
 
@@ -120,7 +120,7 @@ enum TransactionType: string
 }
 ```
 
-- [ ] **Step 4: Create the migration**
+- [x] **Step 4: Create the migration**
 
 ```bash
 php artisan make:migration create_cash_transactions_table
@@ -158,7 +158,7 @@ public function down(): void
 
 > Note: `ronda_scan_session_id` is left without a FK constraint here because the sessions table is created in Task 2. The model still exposes the relationship. Uniqueness of one `iuran_harian` per household per date is enforced in the application layer (Task 4) so it does not block multiple `koreksi` rows.
 
-- [ ] **Step 5: Create the model**
+- [x] **Step 5: Create the model**
 
 Create `app/Models/CashTransaction.php`:
 
@@ -221,7 +221,7 @@ class CashTransaction extends Model
 }
 ```
 
-- [ ] **Step 6: Create the factory**
+- [x] **Step 6: Create the factory**
 
 Create `database/factories/CashTransactionFactory.php`:
 
@@ -253,7 +253,7 @@ class CashTransactionFactory extends Factory
 }
 ```
 
-- [ ] **Step 7: Run tests**
+- [x] **Step 7: Run tests**
 
 ```bash
 php artisan migrate:fresh --env=testing
@@ -262,7 +262,7 @@ php artisan test tests/Feature/Kas/CashTransactionModelTest.php
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add app/Enums/TransactionType.php app/Models/CashTransaction.php database/migrations database/factories/CashTransactionFactory.php tests/Feature/Kas/CashTransactionModelTest.php
@@ -278,7 +278,7 @@ git commit -m "feat: add cash transaction model and transaction types"
 - Create: `database/factories/RondaScanSessionFactory.php`
 - Test: `tests/Feature/Kas/RondaScanSessionModelTest.php`
 
-- [ ] **Step 1: Write failing model tests**
+- [x] **Step 1: Write failing model tests**
 
 Create `tests/Feature/Kas/RondaScanSessionModelTest.php`:
 
@@ -318,7 +318,7 @@ it('reports expired when now is past the window', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/RondaScanSessionModelTest.php
@@ -326,7 +326,7 @@ php artisan test tests/Feature/Kas/RondaScanSessionModelTest.php
 
 Expected: FAIL because the migration and model do not exist.
 
-- [ ] **Step 3: Create the migration**
+- [x] **Step 3: Create the migration**
 
 ```bash
 php artisan make:migration create_ronda_scan_sessions_table
@@ -356,7 +356,7 @@ public function down(): void
 }
 ```
 
-- [ ] **Step 4: Create the model**
+- [x] **Step 4: Create the model**
 
 Create `app/Models/RondaScanSession.php`:
 
@@ -419,7 +419,7 @@ class RondaScanSession extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory**
+- [x] **Step 5: Create the factory**
 
 Create `database/factories/RondaScanSessionFactory.php`:
 
@@ -463,7 +463,7 @@ class RondaScanSessionFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 php artisan migrate:fresh --env=testing
@@ -472,7 +472,7 @@ php artisan test tests/Feature/Kas/RondaScanSessionModelTest.php
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add app/Models/RondaScanSession.php database/migrations database/factories/RondaScanSessionFactory.php tests/Feature/Kas/RondaScanSessionModelTest.php
@@ -490,7 +490,7 @@ git commit -m "feat: add ronda scan session with daily pin"
 - Test: `tests/Feature/Kas/PinGateTest.php`
 - Test: `tests/Feature/Kas/IuranScanServiceTest.php`
 
-- [ ] **Step 1: Write failing PIN gate tests**
+- [x] **Step 1: Write failing PIN gate tests**
 
 Create `tests/Feature/Kas/PinGateTest.php`:
 
@@ -539,7 +539,7 @@ it('rejects a blank pin without querying', function () {
 });
 ```
 
-- [ ] **Step 2: Write failing iuran scan tests**
+- [x] **Step 2: Write failing iuran scan tests**
 
 Create `tests/Feature/Kas/IuranScanServiceTest.php`:
 
@@ -593,7 +593,7 @@ it('rejects a token for an inactive household', function () {
 });
 ```
 
-- [ ] **Step 3: Run failing tests**
+- [x] **Step 3: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/PinGateTest.php tests/Feature/Kas/IuranScanServiceTest.php
@@ -601,7 +601,7 @@ php artisan test tests/Feature/Kas/PinGateTest.php tests/Feature/Kas/IuranScanSe
 
 Expected: FAIL because the service classes do not exist.
 
-- [ ] **Step 4: Create the PIN gate result and service**
+- [x] **Step 4: Create the PIN gate result and service**
 
 Create `app/Services/PinGateResult.php`:
 
@@ -670,7 +670,7 @@ class PinGate
 }
 ```
 
-- [ ] **Step 5: Create the iuran result and scan service**
+- [x] **Step 5: Create the iuran result and scan service**
 
 Create `app/Services/IuranResult.php`:
 
@@ -783,7 +783,7 @@ class IuranScan
 }
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 php artisan test tests/Feature/Kas/PinGateTest.php tests/Feature/Kas/IuranScanServiceTest.php
@@ -791,7 +791,7 @@ php artisan test tests/Feature/Kas/PinGateTest.php tests/Feature/Kas/IuranScanSe
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add app/Services/PinGateResult.php app/Services/PinGate.php app/Services/IuranResult.php app/Services/IuranScan.php tests/Feature/Kas/PinGateTest.php tests/Feature/Kas/IuranScanServiceTest.php
@@ -807,7 +807,7 @@ git commit -m "feat: add pin gate and iuran scan services"
 - Modify: `resources/views/components/layouts/app.blade.php`
 - Test: `tests/Feature/Kas/ScanSessionManagementTest.php`
 
-- [ ] **Step 1: Write failing management tests**
+- [x] **Step 1: Write failing management tests**
 
 Create `tests/Feature/Kas/ScanSessionManagementTest.php`:
 
@@ -870,7 +870,7 @@ it('regenerates a pin and audits the change', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/ScanSessionManagementTest.php
@@ -878,7 +878,7 @@ php artisan test tests/Feature/Kas/ScanSessionManagementTest.php
 
 Expected: FAIL because the route and view are missing.
 
-- [ ] **Step 3: Add the dashboard route**
+- [x] **Step 3: Add the dashboard route**
 
 In `routes/web.php`, inside the `auth` + `pengurus` group:
 
@@ -886,7 +886,7 @@ In `routes/web.php`, inside the `auth` + `pengurus` group:
 Volt::route('/dashboard/sesi-scan', 'dashboard.scan.index')->name('scan-sessions.index');
 ```
 
-- [ ] **Step 4: Create the session management page**
+- [x] **Step 4: Create the session management page**
 
 Create `resources/views/livewire/dashboard/scan/index.blade.php`:
 
@@ -995,7 +995,7 @@ $regenerate = function (int $id) {
 </x-layouts.app>
 ```
 
-- [ ] **Step 5: Add the nav link**
+- [x] **Step 5: Add the nav link**
 
 In `resources/views/components/layouts/app.blade.php`, add to the nav:
 
@@ -1003,7 +1003,7 @@ In `resources/views/components/layouts/app.blade.php`, add to the nav:
 <a href="{{ route('scan-sessions.index') }}" class="text-slate-600 hover:text-slate-900">Sesi Scan</a>
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 php artisan test tests/Feature/Kas/ScanSessionManagementTest.php
@@ -1011,7 +1011,7 @@ php artisan test tests/Feature/Kas/ScanSessionManagementTest.php
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add routes/web.php resources/views/livewire/dashboard/scan resources/views/components/layouts/app.blade.php tests/Feature/Kas/ScanSessionManagementTest.php
@@ -1027,7 +1027,7 @@ git commit -m "feat: add scan session management dashboard"
 - Modify: `resources/views/livewire/portal/home.blade.php`
 - Test: `tests/Feature/Kas/PublicScanIuranTest.php`
 
-- [ ] **Step 1: Write failing public scan tests**
+- [x] **Step 1: Write failing public scan tests**
 
 Create `tests/Feature/Kas/PublicScanIuranTest.php`:
 
@@ -1097,7 +1097,7 @@ it('rate limits repeated unlock attempts', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/PublicScanIuranTest.php
@@ -1105,7 +1105,7 @@ php artisan test tests/Feature/Kas/PublicScanIuranTest.php
 
 Expected: FAIL because the public route and view are missing.
 
-- [ ] **Step 3: Add the public route**
+- [x] **Step 3: Add the public route**
 
 In `routes/web.php`, with the other public portal routes (outside the auth group):
 
@@ -1113,7 +1113,7 @@ In `routes/web.php`, with the other public portal routes (outside the auth group
 Volt::route('/scan-iuran', 'portal.scan')->name('portal.scan');
 ```
 
-- [ ] **Step 4: Create the scan page**
+- [x] **Step 4: Create the scan page**
 
 Create `resources/views/livewire/portal/scan.blade.php`:
 
@@ -1264,7 +1264,7 @@ $scan = function (PinGate $gate, IuranScan $iuran) {
 
 > Note: The QR code field is a plain text input so it stays testable. A browser QR scanner (e.g. `html5-qrcode`) can be layered on later as progressive enhancement by writing the decoded value into `token` via Alpine and calling `$wire.scan()`; the server flow does not change.
 
-- [ ] **Step 5: Enable the portal home entry**
+- [x] **Step 5: Enable the portal home entry**
 
 In `resources/views/livewire/portal/home.blade.php`, add a Scan Iuran entry for regu ronda:
 
@@ -1272,7 +1272,7 @@ In `resources/views/livewire/portal/home.blade.php`, add a Scan Iuran entry for 
 ['label' => 'Scan Iuran (Petugas)', 'route' => 'portal.scan', 'desc' => 'Mode scan iuran ronda dengan PIN harian.', 'ready' => true],
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 php artisan test tests/Feature/Kas/PublicScanIuranTest.php
@@ -1280,7 +1280,7 @@ php artisan test tests/Feature/Kas/PublicScanIuranTest.php
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add routes/web.php resources/views/livewire/portal tests/Feature/Kas/PublicScanIuranTest.php
@@ -1289,7 +1289,7 @@ git commit -m "feat: add public scan iuran page with pin gate"
 
 ## Final Verification
 
-- [ ] Run all checks:
+- [x] Run all checks:
 
 ```bash
 php artisan test
@@ -1298,7 +1298,7 @@ npm run build
 
 Expected: all tests pass and assets build.
 
-- [ ] Manual smoke test:
+- [x] Manual smoke test:
 
 ```bash
 php artisan migrate:fresh --seed

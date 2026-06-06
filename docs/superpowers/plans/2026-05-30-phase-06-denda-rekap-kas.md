@@ -42,7 +42,7 @@
 - Modify: `app/Models/CashTransaction.php`
 - Test: `tests/Feature/Kas/TransactionCorrectionModelTest.php`
 
-- [ ] **Step 1: Write failing model tests**
+- [x] **Step 1: Write failing model tests**
 
 Create `tests/Feature/Kas/TransactionCorrectionModelTest.php`:
 
@@ -79,7 +79,7 @@ it('excludes cancelled rows from the active scope', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/TransactionCorrectionModelTest.php
@@ -87,7 +87,7 @@ php artisan test tests/Feature/Kas/TransactionCorrectionModelTest.php
 
 Expected: FAIL because the columns, relations, and scopes do not exist.
 
-- [ ] **Step 3: Create the migration**
+- [x] **Step 3: Create the migration**
 
 ```bash
 php artisan make:migration add_correction_columns_to_cash_transactions_table --table=cash_transactions
@@ -117,7 +117,7 @@ public function down(): void
 }
 ```
 
-- [ ] **Step 4: Update the model**
+- [x] **Step 4: Update the model**
 
 In `app/Models/CashTransaction.php`, add `reverses_id`, `cancelled_at`, and `cancelled_by` to `$fillable`, cast `cancelled_at` to `datetime`, and add:
 
@@ -150,7 +150,7 @@ public function scopeDenda(Builder $query): Builder
 }
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 ```bash
 php artisan migrate:fresh --env=testing
@@ -159,7 +159,7 @@ php artisan test tests/Feature/Kas/TransactionCorrectionModelTest.php
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add app/Models/CashTransaction.php database/migrations tests/Feature/Kas/TransactionCorrectionModelTest.php
@@ -173,7 +173,7 @@ git commit -m "feat: extend cash transactions for corrections"
 - Create: `app/Services/DendaService.php`
 - Test: `tests/Feature/Kas/DendaServiceTest.php`
 
-- [ ] **Step 1: Write failing service tests**
+- [x] **Step 1: Write failing service tests**
 
 Create `tests/Feature/Kas/DendaServiceTest.php`:
 
@@ -235,7 +235,7 @@ it('refuses to fine an assignment that has checked in', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/DendaServiceTest.php
@@ -243,7 +243,7 @@ php artisan test tests/Feature/Kas/DendaServiceTest.php
 
 Expected: FAIL because the service does not exist.
 
-- [ ] **Step 3: Create the service**
+- [x] **Step 3: Create the service**
 
 Create `app/Services/DendaService.php`:
 
@@ -299,7 +299,7 @@ class DendaService
 }
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 ```bash
 php artisan test tests/Feature/Kas/DendaServiceTest.php
@@ -307,7 +307,7 @@ php artisan test tests/Feature/Kas/DendaServiceTest.php
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/Services/DendaService.php tests/Feature/Kas/DendaServiceTest.php
@@ -323,7 +323,7 @@ git commit -m "feat: add denda service with review candidates"
 - Test: `tests/Feature/Kas/KasReportTest.php`
 - Test: `tests/Feature/Kas/TransactionCorrectionTest.php`
 
-- [ ] **Step 1: Write failing kas report tests**
+- [x] **Step 1: Write failing kas report tests**
 
 Create `tests/Feature/Kas/KasReportTest.php`:
 
@@ -378,7 +378,7 @@ it('lists households that have not paid iuran on a date', function () {
 });
 ```
 
-- [ ] **Step 2: Write failing correction tests**
+- [x] **Step 2: Write failing correction tests**
 
 Create `tests/Feature/Kas/TransactionCorrectionTest.php`:
 
@@ -422,7 +422,7 @@ it('requires a reason', function () {
 });
 ```
 
-- [ ] **Step 3: Run failing tests**
+- [x] **Step 3: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/KasReportTest.php tests/Feature/Kas/TransactionCorrectionTest.php
@@ -430,7 +430,7 @@ php artisan test tests/Feature/Kas/KasReportTest.php tests/Feature/Kas/Transacti
 
 Expected: FAIL because the services do not exist.
 
-- [ ] **Step 4: Create the kas report service**
+- [x] **Step 4: Create the kas report service**
 
 Create `app/Services/KasReport.php`:
 
@@ -489,7 +489,7 @@ class KasReport
 }
 ```
 
-- [ ] **Step 5: Add the household relation used by the report**
+- [x] **Step 5: Add the household relation used by the report**
 
 In `app/Models/Household.php`, add:
 
@@ -502,7 +502,7 @@ public function cashTransactions(): HasMany
 
 (import `Illuminate\Database\Eloquent\Relations\HasMany` if not already present).
 
-- [ ] **Step 6: Create the correction service**
+- [x] **Step 6: Create the correction service**
 
 Create `app/Services/TransactionCorrection.php`:
 
@@ -554,7 +554,7 @@ class TransactionCorrection
 }
 ```
 
-- [ ] **Step 7: Run tests**
+- [x] **Step 7: Run tests**
 
 ```bash
 php artisan test tests/Feature/Kas/KasReportTest.php tests/Feature/Kas/TransactionCorrectionTest.php
@@ -562,7 +562,7 @@ php artisan test tests/Feature/Kas/KasReportTest.php tests/Feature/Kas/Transacti
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add app/Services/KasReport.php app/Services/TransactionCorrection.php app/Models/Household.php tests/Feature/Kas/KasReportTest.php tests/Feature/Kas/TransactionCorrectionTest.php
@@ -578,7 +578,7 @@ git commit -m "feat: add kas report and transaction correction services"
 - Modify: `resources/views/components/layouts/app.blade.php`
 - Test: `tests/Feature/Kas/DendaManagementTest.php`
 
-- [ ] **Step 1: Write failing management tests**
+- [x] **Step 1: Write failing management tests**
 
 Create `tests/Feature/Kas/DendaManagementTest.php`:
 
@@ -629,7 +629,7 @@ it('sets a 5000 denda after review and audits it', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/DendaManagementTest.php
@@ -637,7 +637,7 @@ php artisan test tests/Feature/Kas/DendaManagementTest.php
 
 Expected: FAIL because the route and view are missing.
 
-- [ ] **Step 3: Add the route**
+- [x] **Step 3: Add the route**
 
 In `routes/web.php`, inside the `auth` + `pengurus` group:
 
@@ -645,7 +645,7 @@ In `routes/web.php`, inside the `auth` + `pengurus` group:
 Volt::route('/dashboard/denda', 'dashboard.denda.index')->name('denda.index');
 ```
 
-- [ ] **Step 4: Create the denda review page**
+- [x] **Step 4: Create the denda review page**
 
 Create `resources/views/livewire/dashboard/denda/index.blade.php`:
 
@@ -721,7 +721,7 @@ $fine = function (int $assignmentId) {
 </x-layouts.app>
 ```
 
-- [ ] **Step 5: Add the nav link**
+- [x] **Step 5: Add the nav link**
 
 In `resources/views/components/layouts/app.blade.php`, add to the nav:
 
@@ -729,7 +729,7 @@ In `resources/views/components/layouts/app.blade.php`, add to the nav:
 <a href="{{ route('denda.index') }}" class="text-slate-600 hover:text-slate-900">Denda</a>
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 ```bash
 php artisan test tests/Feature/Kas/DendaManagementTest.php
@@ -737,7 +737,7 @@ php artisan test tests/Feature/Kas/DendaManagementTest.php
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add routes/web.php resources/views/livewire/dashboard/denda resources/views/components/layouts/app.blade.php tests/Feature/Kas/DendaManagementTest.php
@@ -755,7 +755,7 @@ git commit -m "feat: add denda review dashboard"
 - Modify: `resources/views/livewire/dashboard/index.blade.php`
 - Test: `tests/Feature/Kas/KasRekapPageTest.php`
 
-- [ ] **Step 1: Write failing page tests**
+- [x] **Step 1: Write failing page tests**
 
 Create `tests/Feature/Kas/KasRekapPageTest.php`:
 
@@ -818,7 +818,7 @@ it('requires a reason before cancelling', function () {
 });
 ```
 
-- [ ] **Step 2: Run failing tests**
+- [x] **Step 2: Run failing tests**
 
 ```bash
 php artisan test tests/Feature/Kas/KasRekapPageTest.php
@@ -826,7 +826,7 @@ php artisan test tests/Feature/Kas/KasRekapPageTest.php
 
 Expected: FAIL because routes and views are missing.
 
-- [ ] **Step 3: Add the routes**
+- [x] **Step 3: Add the routes**
 
 In `routes/web.php`, inside the `auth` + `pengurus` group:
 
@@ -835,7 +835,7 @@ Volt::route('/dashboard/kas', 'dashboard.kas.index')->name('kas.index');
 Volt::route('/dashboard/kas/transaksi', 'dashboard.kas.transactions')->name('kas.transactions');
 ```
 
-- [ ] **Step 4: Create the rekap page**
+- [x] **Step 4: Create the rekap page**
 
 Create `resources/views/livewire/dashboard/kas/index.blade.php`:
 
@@ -906,7 +906,7 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
 </x-layouts.app>
 ```
 
-- [ ] **Step 5: Create the transactions page**
+- [x] **Step 5: Create the transactions page**
 
 Create `resources/views/livewire/dashboard/kas/transactions.blade.php`:
 
@@ -1014,7 +1014,7 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
 </x-layouts.app>
 ```
 
-- [ ] **Step 6: Add nav link and dashboard summary**
+- [x] **Step 6: Add nav link and dashboard summary**
 
 In `resources/views/components/layouts/app.blade.php`, add to the nav:
 
@@ -1037,7 +1037,7 @@ $kasToday = computed(fn () => app(KasReport::class)->daily(today())['total']);
 </div>
 ```
 
-- [ ] **Step 7: Run tests**
+- [x] **Step 7: Run tests**
 
 ```bash
 php artisan test tests/Feature/Kas/KasRekapPageTest.php
@@ -1045,7 +1045,7 @@ php artisan test tests/Feature/Kas/KasRekapPageTest.php
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add routes/web.php resources/views/livewire/dashboard tests/Feature/Kas/KasRekapPageTest.php
@@ -1054,7 +1054,7 @@ git commit -m "feat: add kas rekap and transaction correction pages"
 
 ## Final Verification
 
-- [ ] Run all checks:
+- [x] Run all checks:
 
 ```bash
 php artisan test
@@ -1063,7 +1063,7 @@ npm run build
 
 Expected: all tests pass and assets build.
 
-- [ ] Manual smoke test:
+- [x] Manual smoke test:
 
 ```bash
 php artisan migrate:fresh --seed
