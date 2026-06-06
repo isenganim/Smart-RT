@@ -2,7 +2,6 @@
 
 use App\Models\CashTransaction;
 use App\Services\TransactionCorrection;
-use App\Support\Audit;
 use function Livewire\Volt\{computed, layout, rules, state, title};
 
 layout('components.layouts.app');
@@ -27,12 +26,14 @@ $confirmCancel = function () {
     $this->validate();
 
     $tx = CashTransaction::findOrFail($this->cancelId);
-    $koreksi = app(TransactionCorrection::class)->cancel($tx, $this->reason, auth()->user());
 
-    Audit::record(auth()->user(), 'kas.transaction.cancelled', 'cash_transaction', $tx->id, [
-        'koreksi_id' => $koreksi->id,
-        'reason' => $this->reason,
-    ]);
+    try {
+        app(TransactionCorrection::class)->cancel($tx, $this->reason, auth()->user());
+    } catch (\InvalidArgumentException $exception) {
+        $this->addError('reason', $exception->getMessage());
+
+        return;
+    }
 
     $this->reset('cancelId', 'reason');
 };

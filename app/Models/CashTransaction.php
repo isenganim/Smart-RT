@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use LogicException;
+use InvalidArgumentException;
 
 class CashTransaction extends Model
 {
@@ -37,6 +39,22 @@ class CashTransaction extends Model
             'amount' => 'integer',
             'cancelled_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (): void {
+            throw new LogicException('Transaksi kas tidak boleh dihapus permanen. Gunakan pembatalan/koreksi.');
+        });
+
+        static::saving(function (CashTransaction $transaction): void {
+            $needsReason = $transaction->cancelled_at !== null
+                || $transaction->type === TransactionType::KOREKSI;
+
+            if ($needsReason && blank($transaction->reason)) {
+                throw new InvalidArgumentException('Alasan wajib diisi untuk pembatalan atau koreksi transaksi.');
+            }
+        });
     }
 
     public function household(): BelongsTo

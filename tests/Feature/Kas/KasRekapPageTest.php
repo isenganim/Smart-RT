@@ -25,6 +25,13 @@ it('shows daily, weekly, and monthly totals', function () {
         ->assertSee('1.000');
 });
 
+it('handles malformed recap date input safely', function () {
+    $this->actingAs($this->admin)
+        ->get('/dashboard/kas?date=not-a-date')
+        ->assertOk()
+        ->assertSee('Rekap Kas');
+});
+
 it('cancels a transaction with a reason from the transactions page', function () {
     $tx = CashTransaction::factory()->create(['amount' => 500]);
 

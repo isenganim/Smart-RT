@@ -88,7 +88,7 @@ $scan = function (IuranScan $iuran) {
             <form wire:submit="unlock" class="mt-4 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700">PIN Harian</label>
-                    <input wire:model="pin" type="text" inputmode="numeric" maxlength="6" class="mt-1 w-full rounded-lg border-slate-300 text-center text-lg tracking-widest">
+                    <input wire:model="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="one-time-code" class="mt-1 w-full rounded-lg border-slate-300 bg-white text-center text-lg text-slate-900 tracking-widest caret-emerald-600 placeholder:text-slate-400">
                     @error('pin') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <button class="w-full rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700">Buka Mode Scan</button>

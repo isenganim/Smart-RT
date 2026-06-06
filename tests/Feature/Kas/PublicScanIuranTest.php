@@ -13,7 +13,11 @@ beforeEach(function () {
 });
 
 it('serves the scan page without login', function () {
-    $this->get('/scan-iuran')->assertOk()->assertSee('Scan Iuran');
+    $this->get('/scan-iuran')
+        ->assertOk()
+        ->assertSee('Scan Iuran')
+        ->assertSee('type="password"', false)
+        ->assertSee('inputmode="numeric"', false);
 });
 
 it('unlocks the scan mode with a valid pin', function () {

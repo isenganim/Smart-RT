@@ -14,7 +14,13 @@ mount(function () {
 });
 
 $report = fn () => app(KasReport::class);
-$ref = fn () => Carbon::parse($this->date);
+$ref = function () {
+    $date = (string) $this->date;
+
+    return Carbon::hasFormat($date, 'Y-m-d')
+        ? Carbon::createFromFormat('Y-m-d', $date)->startOfDay()
+        : today();
+};
 
 $daily = computed(fn () => $this->report()->daily($this->ref()));
 $weekly = computed(fn () => $this->report()->rangeTotal($this->ref()->copy()->startOfWeek(), $this->ref()->copy()->endOfWeek()));

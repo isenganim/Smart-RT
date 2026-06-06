@@ -24,7 +24,12 @@ it('sums active transactions for a single day', function () {
 
 it('ignores cancelled transactions in totals', function () {
     CashTransaction::factory()->create(['date' => today(), 'amount' => 500]);
-    CashTransaction::factory()->create(['date' => today(), 'amount' => 500, 'cancelled_at' => now()]);
+    CashTransaction::factory()->create([
+        'date' => today(),
+        'amount' => 500,
+        'cancelled_at' => now(),
+        'reason' => 'Salah input',
+    ]);
 
     expect($this->report->daily(today())['total'])->toBe(500);
 });

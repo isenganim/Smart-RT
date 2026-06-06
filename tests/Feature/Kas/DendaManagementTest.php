@@ -29,6 +29,13 @@ it('shows absent residents as denda candidates', function () {
         ->assertSee('Joko');
 });
 
+it('handles malformed denda date input safely', function () {
+    $this->actingAs($this->admin)
+        ->get('/dashboard/denda?date=not-a-date')
+        ->assertOk()
+        ->assertSee('Review Denda Ronda');
+});
+
 it('sets a 5000 denda after review and audits it', function () {
     $resident = Resident::factory()->for(Household::factory())->create();
     $assignment = RondaAssignment::factory()->for($this->schedule)->for($resident)->create();

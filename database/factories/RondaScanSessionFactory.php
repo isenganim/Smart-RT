@@ -13,7 +13,7 @@ class RondaScanSessionFactory extends Factory
     {
         return [
             'date' => today()->toDateString(),
-            'pin' => '123456',
+            'pin' => RondaScanSession::generatePin(),
             'starts_at' => today()->setTime(18, 0),
             'ends_at' => today()->addDay()->setTime(6, 0),
             'created_by' => null,

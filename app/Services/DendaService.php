@@ -6,6 +6,7 @@ use App\Enums\TransactionType;
 use App\Models\CashTransaction;
 use App\Models\RondaAssignment;
 use App\Models\User;
+use App\Support\Audit;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
@@ -32,6 +33,7 @@ class DendaService
         $date = $assignment->rondaSchedule->date->toDateString();
 
         $existing = CashTransaction::query()
+            ->active()
             ->denda()
             ->where('resident_id', $assignment->resident_id)
             ->whereDate('date', $date)
@@ -41,7 +43,7 @@ class DendaService
             return $existing;
         }
 
-        return CashTransaction::create([
+        $transaction = CashTransaction::create([
             'date' => $date,
             'household_id' => $assignment->resident?->household_id,
             'resident_id' => $assignment->resident_id,
@@ -51,5 +53,15 @@ class DendaService
             'source' => 'denda_review',
             'recorded_by' => $actor?->id,
         ]);
+
+        Audit::record($actor, 'kas.denda.created', 'cash_transaction', $transaction->id, [
+            'resident_id' => $assignment->resident_id,
+            'household_id' => $assignment->resident?->household_id,
+            'ronda_assignment_id' => $assignment->id,
+            'date' => $date,
+            'amount' => self::AMOUNT,
+        ]);
+
+        return $transaction;
     }
 }

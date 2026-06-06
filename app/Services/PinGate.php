@@ -14,13 +14,18 @@ class PinGate
             return PinGateResult::deny('PIN wajib diisi.');
         }
 
-        $session = RondaScanSession::query()->where('pin', $pin)->first();
+        $sessions = RondaScanSession::query()
+            ->where('pin', $pin)
+            ->latest('id')
+            ->get();
 
-        if (! $session) {
+        if ($sessions->isEmpty()) {
             return PinGateResult::deny('PIN tidak ditemukan.');
         }
 
-        if (! $session->isActive()) {
+        $session = $sessions->first(fn (RondaScanSession $session) => $session->isActive());
+
+        if (! $session) {
             return PinGateResult::deny('PIN sudah kedaluwarsa.');
         }
 

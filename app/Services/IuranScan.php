@@ -7,6 +7,7 @@ use App\Models\CashTransaction;
 use App\Models\Household;
 use App\Models\RondaScanSession;
 use App\Models\User;
+use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 
 class IuranScan
@@ -32,6 +33,7 @@ class IuranScan
 
         return DB::transaction(function () use ($session, $household, $actor) {
             $existing = CashTransaction::query()
+                ->active()
                 ->iuranHarian()
                 ->where('household_id', $household->id)
                 ->whereDate('date', $session->date->toDateString())
@@ -52,6 +54,12 @@ class IuranScan
                 'status' => 'lunas',
                 'source' => 'scan',
                 'recorded_by' => $actor?->id,
+            ]);
+
+            Audit::record($actor, 'kas.iuran.created', 'cash_transaction', $transaction->id, [
+                'household_id' => $household->id,
+                'ronda_scan_session_id' => $session->id,
+                'amount' => self::AMOUNT,
             ]);
 
             return IuranResult::recorded($household, $transaction);

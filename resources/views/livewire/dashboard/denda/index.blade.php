@@ -2,7 +2,6 @@
 
 use App\Models\RondaAssignment;
 use App\Services\DendaService;
-use App\Support\Audit;
 use Illuminate\Support\Carbon;
 use function Livewire\Volt\{computed, layout, mount, state, title};
 
@@ -18,7 +17,15 @@ mount(function (?string $date = null) {
     $this->date = $date ?? request()->query('date', today()->subDay()->toDateString());
 });
 
-$candidates = computed(fn () => app(DendaService::class)->candidates(Carbon::parse($this->date)));
+$ref = function () {
+    $date = (string) $this->date;
+
+    return Carbon::hasFormat($date, 'Y-m-d')
+        ? Carbon::createFromFormat('Y-m-d', $date)->startOfDay()
+        : today()->subDay();
+};
+
+$candidates = computed(fn () => app(DendaService::class)->candidates($this->ref()));
 $pendingFine = computed(fn () => $this->pendingFineId
     ? RondaAssignment::with('resident.household')->find($this->pendingFineId)
     : null);
@@ -33,12 +40,14 @@ $cancelFine = function () {
 
 $fine = function (?int $assignmentId = null) {
     $assignment = RondaAssignment::with('resident', 'rondaSchedule')->findOrFail($assignmentId ?? $this->pendingFineId);
-    $tx = app(DendaService::class)->fine($assignment, auth()->user());
 
-    Audit::record(auth()->user(), 'kas.denda.created', 'cash_transaction', $tx->id, [
-        'resident_id' => $assignment->resident_id,
-        'date' => $this->date,
-    ]);
+    try {
+        app(DendaService::class)->fine($assignment, auth()->user());
+    } catch (\InvalidArgumentException $exception) {
+        $this->addError('fine', $exception->getMessage());
+
+        return;
+    }
 
     $this->pendingFineId = null;
 };
@@ -96,6 +105,7 @@ $fine = function (?int $assignmentId = null) {
                     <span class="font-medium text-slate-900">{{ $this->pendingFine->resident?->household?->house_number }}</span>.
                 </p>
                 <p class="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-700">Pastikan warga ini benar-benar tidak check-in sebelum mencatat denda.</p>
+                @error('fine') <p class="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ $message }}</p> @enderror
 
                 <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                     <button wire:click="cancelFine" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">Batal</button>
