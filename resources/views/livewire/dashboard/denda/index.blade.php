@@ -9,22 +9,38 @@ use function Livewire\Volt\{computed, layout, mount, state, title};
 layout('components.layouts.app');
 title('Review Denda Ronda');
 
-state(['date' => null]);
+state([
+    'date' => null,
+    'pendingFineId' => null,
+]);
 
 mount(function (?string $date = null) {
     $this->date = $date ?? request()->query('date', today()->subDay()->toDateString());
 });
 
 $candidates = computed(fn () => app(DendaService::class)->candidates(Carbon::parse($this->date)));
+$pendingFine = computed(fn () => $this->pendingFineId
+    ? RondaAssignment::with('resident.household')->find($this->pendingFineId)
+    : null);
 
-$fine = function (int $assignmentId) {
-    $assignment = RondaAssignment::with('resident', 'rondaSchedule')->findOrFail($assignmentId);
+$confirmFine = function (int $assignmentId) {
+    $this->pendingFineId = $assignmentId;
+};
+
+$cancelFine = function () {
+    $this->pendingFineId = null;
+};
+
+$fine = function (?int $assignmentId = null) {
+    $assignment = RondaAssignment::with('resident', 'rondaSchedule')->findOrFail($assignmentId ?? $this->pendingFineId);
     $tx = app(DendaService::class)->fine($assignment, auth()->user());
 
     Audit::record(auth()->user(), 'kas.denda.created', 'cash_transaction', $tx->id, [
         'resident_id' => $assignment->resident_id,
         'date' => $this->date,
     ]);
+
+    $this->pendingFineId = null;
 };
 
 ?>
@@ -57,7 +73,7 @@ $fine = function (int $assignmentId) {
                         <td class="px-4 py-2">{{ $assignment->resident?->name }}</td>
                         <td class="px-4 py-2">{{ $assignment->resident?->household?->house_number }}</td>
                         <td class="px-4 py-2 text-right">
-                            <button wire:click="fine({{ $assignment->id }})" wire:confirm="Tetapkan denda Rp5.000 untuk warga ini?" class="rounded-lg bg-red-600 px-3 py-1 text-white hover:bg-red-700">
+                            <button wire:click="confirmFine({{ $assignment->id }})" class="rounded-lg bg-red-600 px-3 py-1 text-white hover:bg-red-700">
                                 Denda Rp5.000
                             </button>
                         </td>
@@ -68,4 +84,24 @@ $fine = function (int $assignmentId) {
             </tbody>
         </table>
     </div>
+
+    @if ($this->pendingFine)
+        <div class="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="fine-modal-title">
+            <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+                <h2 id="fine-modal-title" class="text-lg font-semibold text-slate-900">Tetapkan Denda Ronda?</h2>
+                <p class="mt-2 text-sm text-slate-600">
+                    Konfirmasi denda Rp5.000 untuk
+                    <span class="font-medium text-slate-900">{{ $this->pendingFine->resident?->name }}</span>
+                    dari rumah
+                    <span class="font-medium text-slate-900">{{ $this->pendingFine->resident?->household?->house_number }}</span>.
+                </p>
+                <p class="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-700">Pastikan warga ini benar-benar tidak check-in sebelum mencatat denda.</p>
+
+                <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <button wire:click="cancelFine" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">Batal</button>
+                    <button wire:click="fine" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">Ya, Tetapkan Denda</button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
