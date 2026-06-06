@@ -43,4 +43,9 @@ class Household extends Model
     {
         return $this->residents()->where('is_active', true);
     }
+
+    public function cashTransactions(): HasMany
+    {
+        return $this->hasMany(CashTransaction::class);
+    }
 }

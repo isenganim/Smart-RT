@@ -9,6 +9,7 @@ state([
     'services' => [
         ['label' => 'Jadwal Ronda', 'route' => 'portal.ronda', 'desc' => 'Lihat jadwal ronda warga.', 'ready' => true],
         ['label' => 'Check-in Ronda', 'route' => 'portal.checkin', 'desc' => 'Catat kehadiran ronda Anda hari ini.', 'ready' => true],
+        ['label' => 'Scan Iuran (Petugas)', 'route' => 'portal.scan', 'desc' => 'Mode scan iuran ronda dengan PIN harian.', 'ready' => true],
         ['label' => 'Cek Nomor HP', 'route' => 'portal.verify', 'desc' => 'Pastikan nomor HP Anda sudah terdaftar.', 'ready' => true],
         ['label' => 'Pengumuman', 'route' => null, 'desc' => 'Informasi terbaru dari RT.', 'ready' => false],
         ['label' => 'Lapor Warga', 'route' => null, 'desc' => 'Kirim laporan ke pengurus.', 'ready' => false],

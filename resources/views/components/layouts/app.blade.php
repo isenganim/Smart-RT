@@ -6,6 +6,9 @@
         ['label' => 'Rumah/KK', 'route' => 'households.index', 'active' => request()->routeIs('households.*')],
         ['label' => 'Warga', 'route' => 'residents.index', 'active' => request()->routeIs('residents.*')],
         ['label' => 'Ronda', 'route' => 'ronda.index', 'active' => request()->routeIs('ronda.*')],
+        ['label' => 'Sesi Scan', 'route' => 'scan-sessions.index', 'active' => request()->routeIs('scan-sessions.*')],
+        ['label' => 'Denda', 'route' => 'denda.index', 'active' => request()->routeIs('denda.*')],
+        ['label' => 'Kas', 'route' => 'kas.index', 'active' => request()->routeIs('kas.*')],
     ];
 @endphp
 

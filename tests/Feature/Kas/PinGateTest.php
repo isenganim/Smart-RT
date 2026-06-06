@@ -1,0 +1,42 @@
+<?php
+
+use App\Models\RondaScanSession;
+use App\Services\PinGate;
+
+beforeEach(function () {
+    $this->gate = new PinGate();
+});
+
+it('unlocks with a valid active pin', function () {
+    $session = RondaScanSession::factory()->active()->create(['pin' => '654321']);
+
+    $result = $this->gate->unlock('654321');
+
+    expect($result->ok())->toBeTrue();
+    expect($result->session->is($session))->toBeTrue();
+});
+
+it('rejects an unknown pin', function () {
+    RondaScanSession::factory()->active()->create(['pin' => '654321']);
+
+    $result = $this->gate->unlock('000000');
+
+    expect($result->ok())->toBeFalse();
+    expect($result->message)->toBe('PIN tidak ditemukan.');
+});
+
+it('rejects an expired pin', function () {
+    RondaScanSession::factory()->expired()->create(['pin' => '654321']);
+
+    $result = $this->gate->unlock('654321');
+
+    expect($result->ok())->toBeFalse();
+    expect($result->message)->toBe('PIN sudah kedaluwarsa.');
+});
+
+it('rejects a blank pin without querying', function () {
+    $result = $this->gate->unlock('');
+
+    expect($result->ok())->toBeFalse();
+    expect($result->message)->toBe('PIN wajib diisi.');
+});

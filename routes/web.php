@@ -10,6 +10,7 @@ Volt::route('/', 'portal.home')->name('portal.home');
 Volt::route('/cek-nomor', 'portal.verify')->name('portal.verify');
 Volt::route('/jadwal-ronda', 'portal.ronda')->name('portal.ronda');
 Volt::route('/checkin-ronda', 'portal.checkin')->name('portal.checkin');
+Volt::route('/scan-iuran', 'portal.scan')->name('portal.scan');
 
 Volt::route('/login', 'auth.login')->name('login');
 
@@ -21,4 +22,8 @@ Route::middleware(['auth', 'pengurus'])->group(function () {
     Volt::route('/dashboard/warga', 'residents.index')->name('residents.index');
     Volt::route('/dashboard/ronda', 'dashboard.ronda.index')->name('ronda.index');
     Volt::route('/dashboard/ronda/{schedule}', 'dashboard.ronda.show')->name('ronda.show');
+    Volt::route('/dashboard/sesi-scan', 'dashboard.scan.index')->name('scan-sessions.index');
+    Volt::route('/dashboard/denda', 'dashboard.denda.index')->name('denda.index');
+    Volt::route('/dashboard/kas', 'dashboard.kas.index')->name('kas.index');
+    Volt::route('/dashboard/kas/transaksi', 'dashboard.kas.transactions')->name('kas.transactions');
 });
