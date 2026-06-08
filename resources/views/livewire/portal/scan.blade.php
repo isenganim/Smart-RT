@@ -3,6 +3,8 @@
 use App\Models\RondaScanSession;
 use App\Services\IuranScan;
 use App\Services\PinGate;
+use App\Services\ResidentLookup;
+use App\Support\Audit;
 use Illuminate\Support\Facades\RateLimiter;
 use function Livewire\Volt\{layout, rules, state, title};
 
@@ -10,6 +12,7 @@ layout('components.layouts.public');
 title('Scan Iuran');
 
 state([
+    'phone' => '',
     'pin' => '',
     'unlocked' => false,
     'sessionId' => null,
@@ -18,9 +21,12 @@ state([
     'lastResult' => null,
 ]);
 
-rules(['pin' => ['required', 'string', 'max:6']]);
+rules([
+    'phone' => ['required', 'string', 'max:30'],
+    'pin' => ['required', 'string', 'max:6'],
+]);
 
-$unlock = function (PinGate $gate) {
+$unlock = function (PinGate $gate, ResidentLookup $lookup) {
     $this->validate();
 
     $key = 'scan-unlock:'.request()->ip();
@@ -28,6 +34,15 @@ $unlock = function (PinGate $gate) {
     if (RateLimiter::tooManyAttempts($key, 5)) {
         $this->unlocked = false;
         $this->unlockError = 'Terlalu banyak percobaan. Coba lagi nanti.';
+
+        return;
+    }
+
+    $lookupResult = $lookup->resolve($this->phone);
+    if (! $lookupResult->found()) {
+        RateLimiter::hit($key, 60);
+        $this->unlocked = false;
+        $this->unlockError = $lookupResult->message;
 
         return;
     }
@@ -47,8 +62,17 @@ $unlock = function (PinGate $gate) {
     }
 };
 
-$scan = function (IuranScan $iuran) {
+$scan = function (IuranScan $iuran, ResidentLookup $lookup) {
     if (! $this->unlocked || ! $this->sessionId) {
+        return;
+    }
+
+    $lookupResult = $lookup->resolve($this->phone);
+    if (! $lookupResult->found()) {
+        $this->unlocked = false;
+        $this->sessionId = null;
+        $this->unlockError = $lookupResult->message;
+
         return;
     }
 
@@ -63,6 +87,19 @@ $scan = function (IuranScan $iuran) {
     }
 
     $result = $iuran->record($session, $this->token);
+
+    if ($result->paid() && $result->transaction) {
+        Audit::record(
+            auth()->user(),
+            'kas.iuran.scanned',
+            'cash_transaction',
+            $result->transaction->id,
+            [
+                'ronda_scan_session_id' => $session->id,
+                'household_id' => $result->household?->id,
+            ]
+        );
+    }
 
     $this->lastResult = [
         'paid' => $result->paid(),
@@ -86,6 +123,7 @@ $scan = function (IuranScan $iuran) {
             <p class="mt-1 text-sm text-slate-600">Masukkan PIN harian dari pengurus untuk membuka mode scan.</p>
 
             <form wire:submit="unlock" class="mt-4 space-y-4">
+                <x-portal.phone-field model="phone" label="Nomor HP Petugas" />
                 <div>
                     <label class="block text-sm font-medium text-slate-700">PIN Harian</label>
                     <input wire:model="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="one-time-code" class="mt-1 w-full rounded-lg border-slate-300 bg-white text-center text-lg text-slate-900 tracking-widest caret-emerald-600 placeholder:text-slate-400">

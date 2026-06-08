@@ -40,6 +40,14 @@ class DendaService
             ->first();
 
         if ($existing) {
+            Audit::record($actor, 'kas.denda.skipped_existing', 'cash_transaction', $existing->id, [
+                'resident_id' => $assignment->resident_id,
+                'household_id' => $assignment->resident?->household_id,
+                'ronda_assignment_id' => $assignment->id,
+                'date' => $date,
+                'amount' => self::AMOUNT,
+            ]);
+
             return $existing;
         }
 
@@ -54,7 +62,9 @@ class DendaService
             'recorded_by' => $actor?->id,
         ]);
 
-        Audit::record($actor, 'kas.denda.created', 'cash_transaction', $transaction->id, [
+        $action = $transaction->wasRecentlyCreated ? 'kas.denda.created' : 'kas.denda.skipped_existing';
+
+        Audit::record($actor, $action, 'cash_transaction', $transaction->id, [
             'resident_id' => $assignment->resident_id,
             'household_id' => $assignment->resident?->household_id,
             'ronda_assignment_id' => $assignment->id,

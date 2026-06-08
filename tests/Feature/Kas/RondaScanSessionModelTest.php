@@ -15,19 +15,27 @@ it('does not overwrite an explicit pin', function () {
 });
 
 it('reports active when now is inside the window', function () {
+    \Illuminate\Support\Carbon::setTestNow('2026-06-09 07:00:00');
+
     $session = RondaScanSession::factory()->create([
         'starts_at' => now()->subHour(),
         'ends_at' => now()->addHour(),
     ]);
 
     expect($session->isActive())->toBeTrue();
+
+    \Illuminate\Support\Carbon::setTestNow();
 });
 
 it('reports expired when now is past the window', function () {
+    \Illuminate\Support\Carbon::setTestNow('2026-06-09 07:00:00');
+
     $session = RondaScanSession::factory()->create([
         'starts_at' => now()->subHours(3),
         'ends_at' => now()->subHour(),
     ]);
 
     expect($session->isActive())->toBeFalse();
+
+    \Illuminate\Support\Carbon::setTestNow();
 });

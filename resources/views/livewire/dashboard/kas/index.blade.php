@@ -17,7 +17,7 @@ $report = fn () => app(KasReport::class);
 $ref = function () {
     $date = (string) $this->date;
 
-    return Carbon::hasFormat($date, 'Y-m-d')
+    return Carbon::canBeCreatedFromFormat($date, 'Y-m-d')
         ? Carbon::createFromFormat('Y-m-d', $date)->startOfDay()
         : today();
 };

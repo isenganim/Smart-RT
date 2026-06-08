@@ -20,7 +20,7 @@ mount(function (?string $date = null) {
 $ref = function () {
     $date = (string) $this->date;
 
-    return Carbon::hasFormat($date, 'Y-m-d')
+    return Carbon::canBeCreatedFromFormat($date, 'Y-m-d')
         ? Carbon::createFromFormat('Y-m-d', $date)->startOfDay()
         : today()->subDay();
 };
@@ -31,14 +31,17 @@ $pendingFine = computed(fn () => $this->pendingFineId
     : null);
 
 $confirmFine = function (int $assignmentId) {
+    $this->resetValidation('fine');
     $this->pendingFineId = $assignmentId;
 };
 
 $cancelFine = function () {
+    $this->resetValidation('fine');
     $this->pendingFineId = null;
 };
 
 $fine = function (?int $assignmentId = null) {
+    $this->resetValidation('fine');
     $assignment = RondaAssignment::with('resident', 'rondaSchedule')->findOrFail($assignmentId ?? $this->pendingFineId);
 
     try {
