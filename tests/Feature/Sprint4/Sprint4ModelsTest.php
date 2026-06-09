@@ -9,6 +9,15 @@ use App\Models\LetterRequest;
 use App\Models\Report;
 use App\Models\Vote;
 use App\Models\VoteOption;
+use Illuminate\Database\QueryException;
+
+it('prevents duplicate option labels within the same vote', function () {
+    $vote = Vote::factory()->create();
+    VoteOption::factory()->for($vote)->create(['label' => 'Setuju']);
+
+    expect(fn () => VoteOption::factory()->for($vote)->create(['label' => 'Setuju']))
+        ->toThrow(QueryException::class);
+});
 
 it('supports announcement publication queries', function () {
     $older = Announcement::factory()->published()->create(['published_at' => now()->subDays(2)]);

@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('vote_id')->constrained()->cascadeOnDelete();
             $table->string('label');
             $table->timestamps();
+            $table->unique(['vote_id', 'label']);
         });
     }
 

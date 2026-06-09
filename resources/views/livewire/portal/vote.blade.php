@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\VoteStatus;
 use App\Models\Vote;
 use App\Services\VotingService;
 use Illuminate\Support\Facades\RateLimiter;
@@ -8,7 +9,10 @@ use function Livewire\Volt\{computed, layout, mount, rules, state, title};
 layout('components.layouts.public');
 title('Voting');
 state(['vote' => null, 'phone' => '', 'optionId' => null, 'done' => false, 'feedback' => null]);
-mount(fn (Vote $vote) => $this->vote = $vote->load('options'));
+mount(function (Vote $vote) {
+    abort_unless(in_array($vote->status, [VoteStatus::AKTIF, VoteStatus::SELESAI], true), 404);
+    $this->vote = $vote->load('options');
+});
 rules(['phone' => ['required', 'string', 'max:30'], 'optionId' => ['required', 'integer']]);
 $tally = computed(fn () => app(VotingService::class)->tally($this->vote));
 $total = computed(fn () => array_sum($this->tally));
@@ -16,7 +20,7 @@ $showResults = computed(fn () => $this->done || ! $this->vote->isOpen());
 
 $submit = function (VotingService $voting) {
     $this->validate();
-    $key = 'portal-vote:'.request()->getClientIp();
+    $key = 'portal-vote:'.$this->vote->id.':'.request()->getClientIp();
     if (RateLimiter::tooManyAttempts($key, 5)) {
         $this->done = false; $this->feedback = 'Terlalu banyak percobaan. Coba lagi nanti.'; return;
     }

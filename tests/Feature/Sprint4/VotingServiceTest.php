@@ -6,6 +6,8 @@ use App\Models\Resident;
 use App\Models\Vote;
 use App\Models\VoteOption;
 use App\Services\VotingService;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function () {
     $this->service = app(VotingService::class);
@@ -34,4 +36,17 @@ it('rejects closed voting and tallies ballots', function () {
     expect($result->success())->toBeTrue()
         ->and($closed->message)->toBe('Voting sudah ditutup.')
         ->and($this->service->tally($this->vote)[$this->option->id])->toBe(1);
+});
+
+it('does not mask unrelated database errors as duplicate votes', function () {
+    DB::unprepared(<<<'SQL'
+        CREATE TRIGGER fail_vote_ballot_insert
+        BEFORE INSERT ON vote_ballots
+        BEGIN
+            SELECT RAISE(ABORT, 'simulated database failure');
+        END
+        SQL);
+
+    expect(fn () => $this->service->cast($this->vote, $this->option->id, '81234567890'))
+        ->toThrow(QueryException::class);
 });

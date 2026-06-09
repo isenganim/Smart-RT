@@ -119,9 +119,14 @@ ddev exec ./vendor/bin/pint --dirty
 
 Sprint 1, Sprint 2, Sprint 3, dan Sprint 4 sudah terimplementasi. Verifikasi terakhir:
 
-```text
-ddev exec php artisan test
-all tests pass
-```
+1. **Pest PHP Unit & Feature Tests**:
+   ```text
+   ddev exec php artisan test
+   136 passed (307 assertions)
+   ```
+
+2. **Playwright E2E Interactive Verification (Sprint 4)**:
+   * Portal Warga & Dashboard Pengurus workflows verified.
+   * Status: **PASS** (10/10 acceptance criteria met).
 
 Dokumen sprint ada di `docs/superpowers/sprints/`.

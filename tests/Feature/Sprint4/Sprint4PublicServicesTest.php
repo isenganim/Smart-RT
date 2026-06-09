@@ -75,3 +75,34 @@ it('allows one vote per registered phone', function () {
 
     expect(VoteBallot::query()->count())->toBe(1);
 });
+
+it('does not expose draft votes publicly', function () {
+    $vote = Vote::factory()->create();
+    VoteOption::factory()->for($vote)->create();
+
+    $this->get(route('portal.vote', $vote))->assertNotFound();
+});
+
+it('scopes vote throttling to each poll', function () {
+    $firstVote = Vote::factory()->open()->create();
+    $secondVote = Vote::factory()->open()->create();
+    $secondOption = VoteOption::factory()->for($secondVote)->create();
+
+    RateLimiter::clear('portal-vote:'.$secondVote->id.':127.0.0.1');
+    RateLimiter::hit('portal-vote:127.0.0.1', 60);
+    RateLimiter::hit('portal-vote:127.0.0.1', 60);
+    RateLimiter::hit('portal-vote:127.0.0.1', 60);
+    RateLimiter::hit('portal-vote:127.0.0.1', 60);
+    RateLimiter::hit('portal-vote:127.0.0.1', 60);
+    RateLimiter::hit('portal-vote:'.$firstVote->id.':127.0.0.1', 60);
+    RateLimiter::hit('portal-vote:'.$firstVote->id.':127.0.0.1', 60);
+    RateLimiter::hit('portal-vote:'.$firstVote->id.':127.0.0.1', 60);
+    RateLimiter::hit('portal-vote:'.$firstVote->id.':127.0.0.1', 60);
+    RateLimiter::hit('portal-vote:'.$firstVote->id.':127.0.0.1', 60);
+
+    Volt::test('portal.vote', ['vote' => $secondVote])
+        ->set('phone', '0812-3456-7890')
+        ->set('optionId', $secondOption->id)
+        ->call('submit')
+        ->assertSee('Suara Anda tercatat');
+});

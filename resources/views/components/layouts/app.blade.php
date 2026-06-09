@@ -39,7 +39,7 @@
                             <span class="block text-xs font-normal text-slate-400">Dashboard Pengurus</span>
                         </span>
                     </a>
-                    <nav class="hidden max-w-3xl flex-wrap items-center gap-1 rounded-2xl bg-white/5 p-1 text-sm font-medium text-slate-300 ring-1 ring-white/10 lg:flex">
+                    <nav class="hidden max-w-3xl flex-wrap items-center gap-1 rounded-2xl bg-white/5 p-1 text-sm font-medium text-slate-300 ring-1 ring-white/10 sm:flex">
                         @foreach ($navItems as $item)
                             <a href="{{ route($item['route']) }}" class="rounded-full px-4 py-2 transition {{ $item['active'] ? 'bg-white text-slate-950 shadow-sm' : 'hover:bg-white/10 hover:text-white' }}">
                                 {{ $item['label'] }}

@@ -10,6 +10,8 @@ use App\Models\LetterRequest;
 use App\Models\Report;
 use App\Models\User;
 use App\Models\Vote;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Volt\Volt;
 
 beforeEach(function () {
@@ -56,6 +58,34 @@ it('updates report and letter workflows with audit logs', function () {
         ->and(AuditLog::query()->where('action', 'letter.status_changed')->exists())->toBeTrue();
 });
 
+it('rolls back a letter status update when audit logging fails', function () {
+    $letter = LetterRequest::factory()->create();
+
+    Schema::table('audit_logs', function ($table) {
+        $table->dropColumn('metadata');
+    });
+
+    try {
+        Volt::test('dashboard.letters.index')
+            ->call('startUpdate', $letter->id)
+            ->set('status', LetterStatus::DISETUJUI->value)
+            ->set('notes', 'Silakan diambil.')
+            ->call('saveUpdate');
+    } catch (QueryException) {
+        // The database failure is expected; the status update must still roll back.
+    }
+
+    expect($letter->fresh()->status)->toBe(LetterStatus::DIAJUKAN);
+});
+
+it('uses enum-backed validation for letter statuses', function () {
+    $source = file_get_contents(resource_path('views/livewire/dashboard/letters/index.blade.php'));
+
+    expect($source)
+        ->toContain('Rule::enum(LetterStatus::class)')
+        ->not->toContain('in:diajukan,disetujui,ditolak,selesai');
+});
+
 it('creates activates and closes a vote', function () {
     Volt::test('dashboard.votes.index')
         ->set('question', 'Setuju kerja bakti bulanan?')
@@ -85,3 +115,11 @@ it('protects all sprint four dashboard routes', function (string $uri) {
     '/dashboard/surat',
     '/dashboard/voting',
 ]);
+
+it('keeps dashboard navigation available from the small breakpoint', function () {
+    $source = file_get_contents(resource_path('views/components/layouts/app.blade.php'));
+
+    expect($source)
+        ->toContain('ring-white/10 sm:flex')
+        ->not->toContain('ring-white/10 lg:flex');
+});

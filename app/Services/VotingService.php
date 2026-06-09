@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Vote;
 use App\Support\PhoneNumber;
-use Illuminate\Database\QueryException;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 class VotingService
 {
@@ -38,7 +38,7 @@ class VotingService
                 'resident_id' => $lookup->resident->id,
                 'phone' => $phone,
             ]);
-        } catch (QueryException) {
+        } catch (UniqueConstraintViolationException) {
             return BallotResult::fail('Nomor HP ini sudah memberikan suara.');
         }
 
