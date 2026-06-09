@@ -2,6 +2,7 @@
 
 use App\Models\Household;
 use App\Models\Resident;
+use App\Services\KasReport;
 use function Livewire\Volt\{computed, layout, title};
 
 layout('components.layouts.app');
@@ -9,6 +10,7 @@ title('Dashboard Pengurus');
 
 $householdCount = computed(fn () => Household::query()->where('is_active', true)->count());
 $residentCount = computed(fn () => Resident::query()->where('is_active', true)->count());
+$kasToday = computed(fn () => app(KasReport::class)->daily(today())['total']);
 
 ?>
 
@@ -71,6 +73,14 @@ $residentCount = computed(fn () => Resident::query()->where('is_active', true)->
                 </div>
                 <p class="mt-5 text-5xl font-bold tracking-tight text-slate-950">{{ $this->residentCount }}</p>
                 <p class="mt-2 text-sm text-slate-500">Warga dengan nomor HP unik dan status aktif.</p>
+            </div>
+            <div class="group rounded-[1.5rem] bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-900/10">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-slate-500">Kas Hari Ini</p>
+                    <span class="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">Rp</span>
+                </div>
+                <p class="mt-5 text-5xl font-bold tracking-tight text-slate-950">Rp{{ number_format($this->kasToday, 0, ',', '.') }}</p>
+                <p class="mt-2 text-sm text-slate-500">Total iuran, denda, dan koreksi aktif hari ini.</p>
             </div>
         </div>
 </div>
