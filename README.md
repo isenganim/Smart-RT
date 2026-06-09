@@ -15,12 +15,17 @@ Smart RT adalah aplikasi PWA responsive untuk operasional satu RT. Fokus saat in
 - Login pengurus dengan role `admin_rt` dan `bendahara`
 - Dashboard pengurus yang terlindungi login
 - Manajemen rumah, warga, status aktif, dan QR rumah
-- Audit log untuk aksi pengurus dan check-in ronda
+- Audit log untuk aksi pengurus, check-in ronda, dan transaksi kas
 - Portal warga publik di `/`
 - Cek nomor HP publik dengan rate limit dan respons tanpa membocorkan nama warga
 - Jadwal ronda publik di `/jadwal-ronda` dalam bentuk table desktop dan card mobile
 - Check-in ronda publik di `/checkin-ronda`
 - Manajemen jadwal ronda pengurus di `/dashboard/ronda`
+- Sesi scan iuran harian (PIN harian berdurasi waktu)
+- Scan iuran harian Rp500 per rumah via QR dengan perlindungan scan ganda
+- Review denda warga tidak check-in ronda (denda Rp5.000)
+- Rekap kas harian, mingguan, bulanan, daftar rumah belum bayar, dan ronda absen
+- Koreksi & pembatalan transaksi kas secara non-destructive
 - Timezone aplikasi `Asia/Jakarta` / WIB
 
 ## Setup Lokal
@@ -76,11 +81,16 @@ ddev exec ./vendor/bin/pint --dirty
 - `/cek-nomor` - cek status nomor HP terdaftar
 - `/jadwal-ronda` - jadwal ronda publik
 - `/checkin-ronda` - check-in ronda publik
+- `/scan-iuran` - scan iuran warga via QR code
 - `/login` - login pengurus
 - `/dashboard` - dashboard pengurus
 - `/dashboard/rumah` - manajemen rumah
 - `/dashboard/warga` - manajemen warga
 - `/dashboard/ronda` - manajemen jadwal ronda
+- `/dashboard/sesi-scan` - manajemen sesi scan iuran harian
+- `/dashboard/denda` - review dan penetapan denda ronda
+- `/dashboard/kas` - ringkasan & rekap kas RT
+- `/dashboard/kas/transaksi` - daftar & koreksi transaksi kas
 
 ## Catatan Implementasi
 
@@ -89,11 +99,13 @@ ddev exec ./vendor/bin/pint --dirty
 - Check-in ronda hanya berhasil untuk warga aktif yang terjadwal pada tanggal tersebut.
 - Check-in disimpan secara atomic dengan guard `checked_in_at IS NULL`, sehingga double submit paralel tidak mencatat kehadiran dua kali.
 - `checked_in_at` tidak mass assignable dan hanya ditulis lewat flow check-in.
+- Transaksi kas tidak boleh di-hard-delete; kesalahan dicatat sebagai pembatalan/koreksi yang menuliskan baris koreksi penyeimbang dengan menyertakan alasan.
+- Scan iuran harian dilindungi oleh sesi PIN harian yang aktif dalam jendela waktu tertentu.
 - Semua waktu aplikasi mengikuti `APP_TIMEZONE=Asia/Jakarta`.
 
 ## Status
 
-Sprint 1 dan Sprint 2 sudah terimplementasi. Verifikasi terakhir:
+Sprint 1, Sprint 2, dan Sprint 3 sudah terimplementasi. Verifikasi terakhir:
 
 ```text
 ddev exec php artisan test
