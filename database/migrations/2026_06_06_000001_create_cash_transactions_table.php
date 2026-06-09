@@ -13,7 +13,7 @@ return new class extends Migration
             $table->date('date');
             $table->foreignId('household_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('resident_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('ronda_scan_session_id')->nullable()->constrained('ronda_scan_sessions')->nullOnDelete();
+            $table->foreignId('ronda_scan_session_id')->nullable();
             $table->string('type');
             $table->integer('amount');
             $table->string('status')->default('lunas');
