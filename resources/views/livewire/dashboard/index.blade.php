@@ -21,7 +21,7 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
         </x-slot:actions>
     </x-admin.page-header>
 
-    <section aria-label="Ringkasan utama" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section aria-label="Ringkasan utama" class="grid grid-cols-2 gap-4 max-[359px]:grid-cols-1 xl:grid-cols-4">
         <x-admin.metric
             label="Rumah aktif"
             :value="$this->summary['metrics']['households']"
@@ -82,7 +82,7 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
             <div class="mt-6 flex h-44 items-end gap-1" aria-label="Grafik arus kas 30 hari">
                 @foreach ($this->summary['cash_trend'] as $day)
                     @php($height = $day['total'] > 0 ? max(3, round(($day['total'] / $maxCash) * 100)) : 0)
-                    <div class="group relative flex min-w-0 flex-1 items-end">
+                    <div class="group relative flex h-full min-w-0 flex-1 items-end">
                         <div
                             class="w-full rounded-t-xs bg-primary/25 transition group-hover:bg-primary"
                             style="height: {{ $height }}%"

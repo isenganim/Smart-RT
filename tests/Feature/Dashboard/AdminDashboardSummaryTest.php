@@ -89,3 +89,22 @@ it('builds truthful dashboard metrics actions trend and activity', function () {
         'actor' => 'Ketua RT',
     ]);
 });
+
+it('renders known audit actions with Indonesian labels', function () {
+    AuditLog::query()->create([
+        'action' => 'kas.iuran.scanned',
+        'metadata' => [],
+    ]);
+    AuditLog::query()->create([
+        'action' => 'ronda.assignment.checked_in',
+        'metadata' => [],
+    ]);
+
+    $labels = app(AdminDashboardSummary::class)
+        ->forDate(today())['recent_activity']
+        ->pluck('label');
+
+    expect($labels)
+        ->toContain('Petugas ronda check-in')
+        ->toContain('Iuran dipindai');
+});

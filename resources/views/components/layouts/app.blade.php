@@ -119,6 +119,7 @@
                 @endforeach
             @endforeach
             <button
+                x-ref="moreTrigger"
                 type="button"
                 @click="moreOpen = true; $nextTick(() => $refs.moreClose.focus())"
                 :aria-expanded="moreOpen"
@@ -129,13 +130,39 @@
             </button>
         </nav>
 
-        <div x-cloak x-show="moreOpen" @keydown.escape.window="moreOpen = false" class="fixed inset-0 z-50 lg:hidden">
-            <button type="button" @click="moreOpen = false" class="absolute inset-0 bg-ink/40" aria-label="Tutup menu"></button>
+        <div
+            x-cloak
+            x-show="moreOpen"
+            @keydown.escape.window="moreOpen = false; $nextTick(() => $refs.moreTrigger.focus())"
+            class="fixed inset-0 z-50 lg:hidden"
+        >
+            <button
+                type="button"
+                @click="moreOpen = false; $nextTick(() => $refs.moreTrigger.focus())"
+                class="absolute inset-0 bg-ink/40"
+                aria-label="Tutup menu"
+            ></button>
             <section
+                x-ref="moreDialog"
                 id="mobile-more-menu"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="mobile-more-title"
+                @keydown.tab="
+                    const focusable = [...$refs.moreDialog.querySelectorAll('a[href], button:not([disabled])')]
+                        .filter((element) => element.offsetParent !== null);
+                    if (focusable.length) {
+                        const first = focusable[0];
+                        const last = focusable[focusable.length - 1];
+                        if ($event.shiftKey && document.activeElement === first) {
+                            $event.preventDefault();
+                            last.focus();
+                        } else if (!$event.shiftKey && document.activeElement === last) {
+                            $event.preventDefault();
+                            first.focus();
+                        }
+                    }
+                "
                 class="safe-bottom absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-xl bg-white p-5 shadow-level2"
             >
                 <div class="flex items-center justify-between gap-4">
@@ -146,7 +173,7 @@
                     <button
                         x-ref="moreClose"
                         type="button"
-                        @click="moreOpen = false"
+                        @click="moreOpen = false; $nextTick(() => $refs.moreTrigger.focus())"
                         class="min-h-11 rounded-pill border border-hairline px-4 text-sm font-medium text-ink"
                     >
                         Tutup
@@ -154,18 +181,19 @@
                 </div>
                 <div class="mt-5 space-y-5">
                     @foreach ($groups as $group => $items)
-                        <div>
-                            <p class="text-[11px] font-medium uppercase tracking-[0.1em] text-ink-mute">{{ $group }}</p>
-                            <div class="mt-2 grid gap-2">
-                                @foreach ($items as $item)
-                                    @unless (in_array($item['route'], $mobileRoutes, true))
+                        @php($drawerItems = collect($items)->reject(fn ($item) => in_array($item['route'], $mobileRoutes, true)))
+                        @if ($drawerItems->isNotEmpty())
+                            <div>
+                                <p class="text-[11px] font-medium uppercase tracking-[0.1em] text-ink-mute">{{ $group }}</p>
+                                <div class="mt-2 grid gap-2">
+                                    @foreach ($drawerItems as $item)
                                         <a href="{{ route($item['route']) }}" class="flex min-h-11 items-center rounded-md border border-hairline px-3 text-sm font-medium text-ink-secondary">
                                             {{ $item['label'] }}
                                         </a>
-                                    @endunless
-                                @endforeach
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     @endforeach
                 </div>
                 <div class="mt-6 flex gap-2 border-t border-hairline pt-4">

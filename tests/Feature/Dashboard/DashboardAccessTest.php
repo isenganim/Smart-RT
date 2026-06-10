@@ -46,6 +46,8 @@ it('shows operational metrics and action queue instead of a marketing hero', fun
             ->assertSee('Arus kas 30 hari')
             ->assertSee('Aktivitas terbaru')
             ->assertSee('Rumah belum membayar iuran')
+            ->assertSee('h-full min-w-0', escape: false)
+            ->assertSee('grid grid-cols-2 gap-4', escape: false)
             ->assertDontSee('Sistem Smart RT Aktif');
     } finally {
         Carbon::setTestNow();
