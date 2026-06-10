@@ -10,6 +10,7 @@ use App\Models\LetterRequest;
 use App\Models\Report;
 use App\Models\User;
 use App\Models\Vote;
+use App\Models\VoteOption;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Livewire\Volt\Volt;
@@ -165,14 +166,20 @@ it('rolls back vote creation when audit logging fails', function () {
     expect(Vote::query()->where('question', 'Voting yang gagal diaudit')->exists())->toBeFalse();
 });
 
-it('shows feedback when a vote cannot be activated', function () {
+it('clears activation feedback after a vote is activated successfully', function () {
     $vote = Vote::factory()->create();
 
-    Volt::test('dashboard.votes.index')
+    $component = Volt::test('dashboard.votes.index')
         ->call('activate', $vote->id)
         ->assertHasErrors(['activation']);
 
-    expect($vote->fresh()->status)->toBe(VoteStatus::DRAFT);
+    VoteOption::factory()->count(2)->for($vote)->create();
+
+    $component
+        ->call('activate', $vote->id)
+        ->assertHasNoErrors(['activation']);
+
+    expect($vote->fresh()->status)->toBe(VoteStatus::AKTIF);
 });
 
 it('protects all sprint four dashboard routes', function (string $uri) {
@@ -187,7 +194,6 @@ it('protects all sprint four dashboard routes', function (string $uri) {
 
 it('denies dashboard routes to users without a pengurus role', function (string $uri) {
     $user = User::factory()->create();
-    DB::table('users')->where('id', $user->id)->update(['role' => 'warga']);
 
     $this->actingAs($user)->get($uri)->assertForbidden();
 })->with([

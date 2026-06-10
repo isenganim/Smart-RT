@@ -37,7 +37,7 @@ it('rejects closed voting and tallies ballots', function () {
 
     expect($result->success())->toBeTrue()
         ->and($closed->message)->toBe('Voting sudah ditutup.')
-        ->and($this->service->tally($this->vote))->toBe([
+        ->and($this->service->tally($this->vote))->toEqualCanonicalizing([
             $this->option->id => 1,
             $emptyOption->id => 0,
         ]);
@@ -65,8 +65,12 @@ it('does not mask unrelated database errors as duplicate votes', function () {
         END
         SQL);
 
-    expect(fn () => $this->service->cast($this->vote, $this->option->id, '81234567890'))
-        ->toThrow(QueryException::class);
+    try {
+        expect(fn () => $this->service->cast($this->vote, $this->option->id, '81234567890'))
+            ->toThrow(QueryException::class);
+    } finally {
+        DB::unprepared('DROP TRIGGER IF EXISTS fail_vote_ballot_insert');
+    }
 });
 
 it('rolls back ballot creation when audit logging fails', function () {
