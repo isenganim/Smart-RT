@@ -27,6 +27,17 @@ it('lists scheduled residents who did not check in for a date', function () {
     expect($candidates->first()->resident_id)->toBe($absent->id);
 });
 
+it('excludes already fined residents from candidates', function () {
+    $resident = Resident::factory()->for(Household::factory())->create();
+    $assignment = RondaAssignment::factory()->for($this->schedule)->for($resident)->create();
+
+    $this->service->fine($assignment);
+
+    $candidates = $this->service->candidates($this->schedule->date);
+
+    expect($candidates)->toBeEmpty();
+});
+
 it('records a 5000 denda for an absent assignment', function () {
     $resident = Resident::factory()->for(Household::factory())->create();
     $assignment = RondaAssignment::factory()->for($this->schedule)->for($resident)->create();
