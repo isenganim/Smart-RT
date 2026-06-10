@@ -42,10 +42,10 @@
             <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
                 <div class="flex items-center gap-6">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 font-sans font-normal text-[#0d253d] group">
-                        <span class="relative flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-full bg-[#533afd] text-xs font-semibold text-white shadow-level1 transition-transform duration-300 group-hover:scale-105">
+                        <span class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#533afd] text-xs font-semibold text-white shadow-level1 transition-transform duration-300 group-hover:scale-105">
                             <span>RT</span>
                         </span>
-                        <span class="hidden xsm:block">
+                        <span class="hidden sm:block">
                             <span class="block leading-tight text-[#0d253d] group-hover:text-[#533afd] transition-colors text-sm font-semibold">Smart RT</span>
                             <span class="block text-[10px] font-normal text-[#64748d]">Dashboard Pengurus</span>
                         </span>
