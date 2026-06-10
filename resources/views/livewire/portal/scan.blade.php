@@ -116,64 +116,79 @@ $scan = function (IuranScan $iuran, ResidentLookup $lookup) {
 
 ?>
 
-<div class="space-y-5">
+<div class="space-y-6">
     @unless ($unlocked)
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <h1 class="text-xl font-semibold text-slate-900">Scan Iuran Ronda</h1>
-            <p class="mt-1 text-sm text-slate-600">Masukkan PIN harian dari pengurus untuk membuka mode scan.</p>
+        <div class="relative overflow-hidden rounded-lg border border-[#e3e8ee] bg-white p-6 shadow-level1">
+            <h1 class="display-md text-[#0d253d]">Scan Iuran Ronda</h1>
+            <p class="mt-2 text-sm text-[#64748d] leading-relaxed">Masukkan PIN harian dari pengurus untuk membuka mode scan.</p>
 
-            <form wire:submit="unlock" class="mt-4 space-y-4">
+            <form wire:submit="unlock" class="mt-6 space-y-5">
                 <x-portal.phone-field model="phone" label="Nomor HP Petugas" />
                 <div>
-                    <label class="block text-sm font-medium text-slate-700">PIN Harian</label>
-                    <input wire:model="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="one-time-code" class="mt-1 w-full rounded-lg border-slate-300 bg-white text-center text-lg text-slate-900 tracking-widest caret-emerald-600 placeholder:text-slate-400">
-                    @error('pin') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    <label class="block text-sm font-semibold text-[#273951]">PIN Harian</label>
+                    <input wire:model="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="one-time-code" class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-3.5 text-center text-lg text-[#0d253d] tracking-widest focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300 text-base placeholder:text-[#64748d]">
+                    @error('pin') <p class="mt-2 text-sm text-[#ea2261] font-medium">{{ $message }}</p> @enderror
                 </div>
-                <button class="w-full rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700">Buka Mode Scan</button>
+                <button class="w-full rounded-full bg-[#533afd] py-3.5 font-sans font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] transition-all duration-150">
+                    Buka Mode Scan
+                </button>
             </form>
 
             @if ($unlockError)
-                <p class="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-700">{{ $unlockError }}</p>
+                <div class="mt-4 rounded-lg bg-[#fef2f2] border border-[#fca5a5] p-4 shadow-level1 animate-fade-in">
+                    <p class="text-sm font-medium text-[#991b1b] leading-relaxed">{{ $unlockError }}</p>
+                </div>
             @endif
         </div>
     @else
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <div class="relative overflow-hidden rounded-lg border border-[#e3e8ee] bg-white p-6 shadow-level1">
             <div class="flex items-center justify-between">
-                <h1 class="text-xl font-semibold text-slate-900">Scan Iuran</h1>
-                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">PIN aktif</span>
+                <h1 class="display-md text-[#0d253d]">Scan Iuran</h1>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-[#ecfdf5] border border-[#a7f3d0] px-3 py-1 text-[11px] font-semibold text-[#065f46]">
+                    <span class="h-1.5 w-1.5 rounded-full bg-[#059669] animate-pulse"></span>
+                    PIN Aktif
+                </span>
             </div>
-            <p class="mt-1 text-sm text-slate-600">Scan atau masukkan kode QR rumah untuk mencatat iuran Rp500.</p>
+            <p class="mt-2 text-sm text-[#64748d] leading-relaxed">Scan atau masukkan kode QR rumah untuk mencatat iuran Rp500.</p>
 
-            <form wire:submit="scan" class="mt-4 space-y-4">
+            <form wire:submit="scan" class="mt-6 space-y-5">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700">Kode QR Rumah</label>
-                    <input wire:model="token" type="text" autofocus class="mt-1 w-full rounded-lg border-slate-300" placeholder="Hasil scan akan terisi di sini">
+                    <label class="block text-sm font-semibold text-[#273951]">Kode QR Rumah</label>
+                    <input wire:model="token" type="text" autofocus class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-3.5 text-[#0d253d] placeholder-[#64748d] focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300 text-base" placeholder="Hasil scan akan terisi di sini">
                 </div>
-                <button class="w-full rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700">Terima Cash Rp500</button>
+                <button class="w-full rounded-full bg-[#533afd] py-3.5 font-sans font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] transition-all duration-150">
+                    Terima Cash Rp500
+                </button>
             </form>
         </div>
 
         @if ($lastResult)
             @if ($lastResult['paid'])
-                <div class="rounded-2xl bg-emerald-50 p-5 ring-1 ring-emerald-200">
-                    <p class="text-lg font-semibold text-emerald-800">Lunas Rp{{ number_format((int) $lastResult['amount'], 0, ',', '.') }}</p>
-                    <p class="text-sm text-emerald-700">{{ $lastResult['house'] }} - {{ $lastResult['head'] }}</p>
-                    @if ($lastResult['address']) <p class="text-xs text-emerald-600">{{ $lastResult['address'] }}</p> @endif
+                <div class="rounded-lg bg-[#ecfdf5] border border-[#a7f3d0] p-5 shadow-level1 relative overflow-hidden animate-fade-in flex flex-col gap-1 text-[#065f46]">
+                    <p class="text-xs font-semibold tracking-wide uppercase text-[#059669]">Pembayaran Berhasil</p>
+                    <p class="text-lg font-bold mt-1 tnum">Lunas Rp{{ number_format((int) $lastResult['amount'], 0, ',', '.') }}</p>
+                    <p class="text-sm mt-1 font-medium">{{ $lastResult['house'] }} - {{ $lastResult['head'] }}</p>
+                    @if ($lastResult['address']) <p class="text-xs opacity-80">{{ $lastResult['address'] }}</p> @endif
                 </div>
             @elseif ($lastResult['status'] === 'already_paid')
-                <div class="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200">
-                    <p class="font-semibold text-amber-800">{{ $lastResult['message'] }}</p>
-                    <p class="text-sm text-amber-700">{{ $lastResult['house'] }} - {{ $lastResult['head'] }}</p>
+                <div class="rounded-lg bg-[#fef3c7] border border-[#fde68a] p-5 shadow-level1 animate-fade-in flex flex-col gap-1 text-[#92400e]">
+                    <p class="text-xs font-semibold tracking-wide uppercase text-[#b45309]">Pembayaran Sudah Tercatat</p>
+                    <p class="text-sm font-medium leading-relaxed mt-1">{{ $lastResult['message'] }}</p>
+                    <p class="text-xs mt-1">{{ $lastResult['house'] }} - {{ $lastResult['head'] }}</p>
                 </div>
             @else
-                <div class="rounded-2xl bg-red-50 p-5 ring-1 ring-red-200">
-                    <p class="text-sm text-red-700">{{ $lastResult['message'] }}</p>
+                <div class="rounded-lg bg-[#fef2f2] border border-[#fca5a5] p-5 shadow-level1 animate-fade-in text-[#991b1b]">
+                    <p class="text-xs font-semibold tracking-wide uppercase text-[#dc2626]">Gagal Memproses</p>
+                    <p class="text-sm font-medium leading-relaxed mt-1">{{ $lastResult['message'] }}</p>
                 </div>
             @endif
         @endif
     @endunless
 
     <div class="text-center">
-        <a href="{{ route('portal.home') }}" class="text-sm text-emerald-700 hover:underline">Kembali ke portal</a>
+        <a href="{{ route('portal.home') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#64748d] hover:text-[#533afd] transition-colors group">
+            <span class="transition-transform duration-300 group-hover:-translate-x-1">&larr;</span>
+            Kembali ke portal
+        </a>
     </div>
 </div>

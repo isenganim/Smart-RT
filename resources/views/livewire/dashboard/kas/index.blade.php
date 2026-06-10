@@ -33,50 +33,55 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
 ?>
 
 <div class="space-y-6">
+    <!-- Header Section -->
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-white sm:text-slate-900">Rekap Kas</h1>
-        <a href="{{ route('kas.transactions') }}" class="text-sm text-emerald-300 hover:underline sm:text-emerald-700">Daftar Transaksi</a>
+        <h1 class="display-lg text-white">Rekap Kas</h1>
+        <a href="{{ route('kas.transactions') }}" class="text-sm font-semibold text-[#b9b9f9] hover:text-white transition-colors">Daftar Transaksi</a>
     </div>
 
-    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <label class="block text-sm font-medium text-slate-700">Tanggal Acuan</label>
-        <input wire:model.live="date" type="date" class="mt-1 rounded-lg border-slate-300">
+    <!-- Date Picker Card -->
+    <div class="rounded-lg bg-[#1c1e54]/40 p-5 border border-white/10 shadow-level1">
+        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Tanggal Acuan</label>
+        <input wire:model.live="date" type="date" class="mt-2 rounded-sm border border-white/10 bg-[#0d253d] px-4 py-2.5 text-white focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all text-base">
     </div>
 
+    <!-- Summary Cards -->
     <div class="grid gap-4 sm:grid-cols-3">
-        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <p class="text-sm text-slate-500">Total Harian</p>
-            <p class="mt-1 text-2xl font-semibold text-emerald-700">{{ $this->rupiah($this->daily['total']) }}</p>
-            <p class="mt-1 text-xs text-slate-400">Iuran {{ $this->rupiah($this->daily['iuran']) }} · Denda {{ $this->rupiah($this->daily['denda']) }} · Koreksi {{ $this->rupiah($this->daily['koreksi']) }}</p>
+        <div class="rounded-lg bg-[#1c1e54]/40 p-5 border border-white/10 shadow-level1">
+            <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Total Harian</p>
+            <p class="mt-1 text-3xl font-light text-white tnum">{{ $this->rupiah($this->daily['total']) }}</p>
+            <p class="mt-1.5 text-xs text-slate-300">Iuran <span class="tnum">{{ $this->rupiah($this->daily['iuran']) }}</span> · Denda <span class="tnum">{{ $this->rupiah($this->daily['denda']) }}</span> · Koreksi <span class="tnum">{{ $this->rupiah($this->daily['koreksi']) }}</span></p>
         </div>
-        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <p class="text-sm text-slate-500">Total Mingguan</p>
-            <p class="mt-1 text-2xl font-semibold text-emerald-700">{{ $this->rupiah($this->weekly) }}</p>
+        <div class="rounded-lg bg-[#1c1e54]/40 p-5 border border-white/10 shadow-level1">
+            <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Total Mingguan</p>
+            <p class="mt-1 text-3xl font-light text-white tnum">{{ $this->rupiah($this->weekly) }}</p>
         </div>
-        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <p class="text-sm text-slate-500">Total Bulanan</p>
-            <p class="mt-1 text-2xl font-semibold text-emerald-700">{{ $this->rupiah($this->monthly) }}</p>
+        <div class="rounded-lg bg-[#1c1e54]/40 p-5 border border-white/10 shadow-level1">
+            <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Total Bulanan</p>
+            <p class="mt-1 text-3xl font-light text-white tnum">{{ $this->rupiah($this->monthly) }}</p>
         </div>
     </div>
 
-    <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <h2 class="font-medium text-slate-900">Rumah Belum Bayar ({{ $this->ref()->format('d M Y') }})</h2>
-        <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+    <!-- Unpaid List -->
+    <div class="rounded-lg bg-[#1c1e54]/40 p-6 border border-white/10 shadow-level1">
+        <h2 class="text-base font-semibold text-white">Rumah Belum Bayar ({{ $this->ref()->format('d M Y') }})</h2>
+        <ul class="mt-4 grid gap-2 sm:grid-cols-2">
             @forelse ($this->unpaid as $household)
-                <li class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{{ $household->house_number }} - {{ $household->head_name }}</li>
+                <li class="rounded-sm bg-[#0d253d] border border-white/5 px-3 py-2 text-sm text-slate-200 tnum">{{ $household->house_number }} - {{ $household->head_name }}</li>
             @empty
-                <li class="text-sm text-slate-400">Semua rumah aktif sudah bayar.</li>
+                <li class="text-sm text-slate-400 italic">Semua rumah aktif sudah bayar.</li>
             @endforelse
         </ul>
     </div>
 
-    <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <h2 class="font-medium text-slate-900">Warga Belum Check-in</h2>
-        <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+    <!-- Missing Checkins List -->
+    <div class="rounded-lg bg-[#1c1e54]/40 p-6 border border-white/10 shadow-level1">
+        <h2 class="text-base font-semibold text-white">Warga Belum Check-in</h2>
+        <ul class="mt-4 grid gap-2 sm:grid-cols-2">
             @forelse ($this->missingCheckins as $assignment)
-                <li class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{{ $assignment->resident?->name }} - {{ $assignment->resident?->household?->house_number }}</li>
+                <li class="rounded-sm bg-[#0d253d] border border-white/5 px-3 py-2 text-sm text-slate-200 tnum">{{ $assignment->resident?->name }} - {{ $assignment->resident?->household?->house_number }}</li>
             @empty
-                <li class="text-sm text-slate-400">Tidak ada warga terjadwal yang belum check-in.</li>
+                <li class="text-sm text-slate-400 italic">Tidak ada warga terjadwal yang belum check-in.</li>
             @endforelse
         </ul>
     </div>

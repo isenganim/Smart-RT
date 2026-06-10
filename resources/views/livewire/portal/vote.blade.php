@@ -34,18 +34,65 @@ $submit = function (VotingService $voting) {
 ?>
 
 <div class="space-y-5">
-    <div class="rounded-2xl border border-white/5 bg-slate-900 p-6 shadow-xl">
-        <h1 class="text-xl font-bold text-white">{{ $vote->question }}</h1>
-        <p class="mt-1 text-xs {{ $vote->isOpen() ? 'text-emerald-400' : 'text-slate-500' }}">{{ $vote->isOpen() ? 'Sedang berlangsung' : 'Sudah ditutup' }}</p>
+    <div class="rounded-lg border border-[#e3e8ee] bg-white p-6 shadow-level1 text-[#0d253d]">
+        <h1 class="display-md text-[#0d253d] leading-snug">{{ $vote->question }}</h1>
+        <div class="mt-2">
+            @if ($vote->isOpen())
+                <span class="inline-flex items-center gap-1 rounded-full bg-[#b9b9f9]/20 border border-[#b9b9f9]/30 px-2.5 py-0.5 text-[10px] font-semibold text-[#533afd]">
+                    <span class="h-1 w-1 rounded-full bg-[#533afd] animate-pulse"></span>
+                    Sedang berlangsung
+                </span>
+            @else
+                <span class="inline-flex items-center gap-1 rounded-full bg-[#f6f9fc] border border-[#e3e8ee] px-2.5 py-0.5 text-[10px] font-semibold text-[#64748d]">
+                    Sudah ditutup
+                </span>
+            @endif
+        </div>
+
         @if($this->showResults)
-            <div class="mt-5 space-y-4">@foreach($vote->options as $option)@php($count = $this->tally[$option->id] ?? 0)@php($pct = $this->total ? round($count / $this->total * 100) : 0)<div><div class="flex justify-between text-sm text-slate-300"><span>{{ $option->label }}</span><span>{{ $count }} ({{ $pct }}%)</span></div><div class="mt-1 h-2 overflow-hidden rounded-full bg-slate-800"><div class="h-full bg-emerald-500" style="width: {{ $pct }}%"></div></div></div>@endforeach</div>
+            <div class="mt-5 space-y-4">
+                @foreach($vote->options as $option)
+                    @php($count = $this->tally[$option->id] ?? 0)
+                    @php($pct = $this->total ? round($count / $this->total * 100) : 0)
+                    <div>
+                        <div class="flex justify-between text-sm">
+                            <span class="font-medium text-[#273951]">{{ $option->label }}</span>
+                            <span class="font-semibold text-[#533afd] tnum">{{ $count }} ({{ $pct }}%)</span>
+                        </div>
+                        <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-[#e3e8ee]">
+                            <div class="h-full bg-[#533afd]" style="width: {{ $pct }}%"></div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         @else
             <form wire:submit="submit" class="mt-5 space-y-5">
                 <x-portal.phone-field model="phone" />
-                <div class="space-y-2">@foreach($vote->options as $option)<label class="flex items-center gap-3 rounded-xl border border-white/10 p-3 text-slate-200"><input wire:model="optionId" type="radio" value="{{ $option->id }}"><span>{{ $option->label }}</span></label>@endforeach @error('optionId')<p class="text-sm text-red-400">{{ $message }}</p>@enderror</div>
-                <button class="w-full rounded-xl bg-emerald-500 py-3 font-bold text-slate-950">Kirim Suara</button>
+                <div class="space-y-2">
+                    @foreach($vote->options as $option)
+                        <label class="flex items-center gap-3 rounded-sm border border-[#e3e8ee] p-3 text-[#273951] bg-[#f6f9fc]/50 cursor-pointer hover:border-[#533afd] transition-all">
+                            <input wire:model="optionId" type="radio" value="{{ $option->id }}" class="text-[#533afd] focus:ring-[#533afd]">
+                            <span class="font-medium text-sm">{{ $option->label }}</span>
+                        </label>
+                    @endforeach 
+                    @error('optionId')
+                        <p class="text-sm text-[#ea2261] font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+                <button class="w-full rounded-full bg-[#533afd] py-3.5 font-sans font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] transition-all duration-150">
+                    Kirim Suara
+                </button>
             </form>
         @endif
     </div>
-    @if($done)<div class="rounded-2xl border border-emerald-500/20 bg-emerald-950/40 p-5 text-center text-emerald-300"><strong>Suara Anda tercatat</strong></div>@elseif($feedback)<div class="rounded-2xl border border-amber-500/20 bg-amber-950/40 p-5 text-center text-amber-300">{{ $feedback }}</div>@endif
+
+    @if($done)
+        <div class="rounded-lg border border-[#a7f3d0] bg-[#ecfdf5] p-5 text-center text-[#065f46] shadow-level1 font-semibold">
+            Suara Anda tercatat. Terima kasih!
+        </div>
+    @elseif($feedback)
+        <div class="rounded-lg border border-[#fca5a5] bg-[#fef2f2] p-5 text-center text-[#991b1b] shadow-level1">
+            {{ $feedback }}
+        </div>
+    @endif
 </div>
