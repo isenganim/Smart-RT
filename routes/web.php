@@ -36,4 +36,5 @@ Route::middleware(['auth', 'pengurus'])->group(function () {
     Volt::route('/dashboard/surat', 'dashboard.letters.index')->name('letters.index');
     Volt::route('/dashboard/voting', 'dashboard.votes.index')->name('votes.index');
     Volt::route('/dashboard/voting/{vote}', 'dashboard.votes.show')->name('votes.show');
+    Volt::route('/dashboard/inventaris', 'dashboard.inventory.index')->name('inventory.index');
 });
