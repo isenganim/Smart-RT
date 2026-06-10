@@ -150,6 +150,25 @@ it('deactivates and reactivates an item with audit logs', function () {
             ->count())->toBe(2);
 });
 
+it('does not deactivate an item that is on loan', function () {
+    $item = InventoryItem::factory()->onLoan()->create([
+        'holder' => 'Pak Budi',
+    ]);
+    $this->actingAs($this->admin);
+
+    Volt::test('dashboard.inventory.index')
+        ->assertSee('Kembalikan')
+        ->assertDontSee('Nonaktifkan')
+        ->call('toggleActive', $item->id);
+
+    expect($item->fresh()->status)->toBe(ItemStatus::DIPINJAM)
+        ->and($item->fresh()->holder)->toBe('Pak Budi')
+        ->and(AuditLog::query()
+            ->where('action', 'inventory.status_changed')
+            ->where('subject_id', $item->id)
+            ->exists())->toBeFalse();
+});
+
 it('rolls back inventory creation when audit logging fails', function () {
     $this->actingAs($this->admin);
 

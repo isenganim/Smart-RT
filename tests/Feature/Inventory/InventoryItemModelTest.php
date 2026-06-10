@@ -3,6 +3,8 @@
 use App\Enums\ItemCondition;
 use App\Enums\ItemStatus;
 use App\Models\InventoryItem;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 it('casts condition and status to enums', function () {
     $item = InventoryItem::factory()->create([
@@ -35,4 +37,24 @@ it('reports whether an item is on loan', function () {
 
     expect($available->isOnLoan())->toBeFalse()
         ->and($onLoan->isOnLoan())->toBeTrue();
+});
+
+it('rejects condition values outside the enum domain at database level', function () {
+    expect(fn () => DB::table('inventory_items')->insert([
+        'name' => 'Barang invalid',
+        'condition' => 'sempurna',
+        'status' => ItemStatus::TERSEDIA->value,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]))->toThrow(QueryException::class);
+});
+
+it('rejects status values outside the enum domain at database level', function () {
+    expect(fn () => DB::table('inventory_items')->insert([
+        'name' => 'Barang invalid',
+        'condition' => ItemCondition::BAIK->value,
+        'status' => 'hilang',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]))->toThrow(QueryException::class);
 });

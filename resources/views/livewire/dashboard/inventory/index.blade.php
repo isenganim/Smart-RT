@@ -6,7 +6,12 @@ use App\Models\InventoryItem;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use function Livewire\Volt\{computed, layout, rules, state, title};
+
+use function Livewire\Volt\computed;
+use function Livewire\Volt\layout;
+use function Livewire\Volt\rules;
+use function Livewire\Volt\state;
+use function Livewire\Volt\title;
 
 layout('components.layouts.app');
 title('Inventaris');
@@ -134,6 +139,11 @@ $returnItem = function (int $id) {
 $toggleActive = function (int $id) {
     DB::transaction(function () use ($id) {
         $item = InventoryItem::query()->lockForUpdate()->findOrFail($id);
+
+        if ($item->status === ItemStatus::DIPINJAM) {
+            return;
+        }
+
         $from = $item->status;
         $to = $from === ItemStatus::TIDAK_AKTIF
             ? ItemStatus::TERSEDIA
@@ -242,9 +252,11 @@ $toggleActive = function (int $id) {
                         <button wire:click="startLend({{ $item->id }})" class="text-emerald-700 hover:text-emerald-900">Pinjamkan</button>
                     @endif
 
-                    <button wire:click="toggleActive({{ $item->id }})" class="text-slate-500 hover:text-slate-800">
-                        {{ $item->status === ItemStatus::TIDAK_AKTIF ? 'Aktifkan' : 'Nonaktifkan' }}
-                    </button>
+                    @if (! $item->isOnLoan())
+                        <button wire:click="toggleActive({{ $item->id }})" class="text-slate-500 hover:text-slate-800">
+                            {{ $item->status === ItemStatus::TIDAK_AKTIF ? 'Aktifkan' : 'Nonaktifkan' }}
+                        </button>
+                    @endif
                 </div>
             </article>
         @empty
