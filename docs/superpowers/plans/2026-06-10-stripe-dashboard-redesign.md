@@ -33,7 +33,7 @@
                 <span class="relative flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-full bg-[#533afd] text-xs font-semibold text-white shadow-level1 transition-transform duration-300 group-hover:scale-105">
                     <span>RT</span>
                 </span>
-                <span class="hidden xsm:block">
+                <span class="hidden sm:block">
                     <span class="block leading-tight text-[#0d253d] group-hover:text-[#533afd] transition-colors text-sm font-semibold">Smart RT</span>
                     <span class="block text-[10px] font-normal text-[#64748d]">Dashboard Pengurus</span>
                 </span>
