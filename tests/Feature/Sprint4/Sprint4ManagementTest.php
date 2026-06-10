@@ -207,6 +207,6 @@ it('keeps dashboard navigation available from the small breakpoint', function ()
     $source = file_get_contents(resource_path('views/components/layouts/app.blade.php'));
 
     expect($source)
-        ->toContain('ring-white/10 sm:flex')
-        ->not->toContain('ring-white/10 lg:flex');
+        ->toContain('ring-slate-200 sm:flex')
+        ->not->toContain('ring-slate-200 lg:flex');
 });
