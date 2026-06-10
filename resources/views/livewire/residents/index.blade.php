@@ -68,119 +68,122 @@ $toggleActive = function (int $id) {
 ?>
 
 <div class="space-y-6">
-        <div class="rounded-[1.5rem] bg-white p-6 shadow-xl shadow-slate-900/5 ring-1 ring-slate-200 sm:rounded-[1.75rem]">
-            <p class="text-sm font-semibold text-emerald-700">Master data</p>
-            <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-950">Data Warga</h1>
-            <p class="mt-2 text-slate-500">Kelola warga aktif, nomor HP unik, rumah/KK, dan catatan ronda.</p>
+    <!-- Header Section -->
+    <div class="rounded-lg bg-white p-6 border border-[#e3e8ee] shadow-level1 relative overflow-hidden">
+        <p class="text-xs font-semibold text-[#64748d] uppercase tracking-wider">Master data</p>
+        <h1 class="mt-2 display-lg text-[#0d253d]">Data Warga</h1>
+        <p class="mt-2 text-[#64748d]">Kelola warga aktif, nomor HP unik, rumah/KK, dan catatan ronda.</p>
+    </div>
+
+    <!-- Form Section -->
+    <section class="rounded-lg bg-white p-6 border border-[#e3e8ee] shadow-level1">
+        <div class="mb-5">
+            <h2 class="text-base font-semibold text-[#0d253d]">{{ $editingId ? 'Perbarui Warga' : 'Tambah Warga Baru' }}</h2>
+            <p class="mt-1 text-sm text-[#64748d]">Pilih rumah/KK, isi nama, dan nomor HP aktif warga.</p>
         </div>
 
-        <section class="rounded-[1.5rem] bg-white p-5 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200">
-            <div class="mb-5">
-                <h2 class="text-lg font-bold text-slate-950">{{ $editingId ? 'Perbarui Warga' : 'Tambah Warga Baru' }}</h2>
-                <p class="mt-1 text-sm text-slate-500">Pilih rumah/KK, isi nama, dan nomor HP aktif warga.</p>
+        <form wire:submit="save" class="grid gap-4 sm:grid-cols-5 items-end">
+            <div>
+                <label class="block text-xs font-semibold text-[#64748d] uppercase tracking-wider">Rumah/KK</label>
+                <select wire:model="household_id" class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-2.5 text-[#0d253d] focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300 text-base">
+                    <option value="">Pilih rumah</option>
+                    @foreach ($this->households as $household)
+                        <option value="{{ $household->id }}">{{ $household->house_number }} - {{ $household->head_name }}</option>
+                    @endforeach
+                </select>
+                @error('household_id') <p class="mt-1 text-xs text-[#ea2261] font-medium">{{ $message }}</p> @enderror
             </div>
-
-            <form wire:submit="save" class="grid gap-4 sm:grid-cols-5">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Rumah/KK</label>
-                    <select wire:model="household_id" class="mt-2 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100">
-                        <option value="">Pilih rumah</option>
-                        @foreach ($this->households as $household)
-                            <option value="{{ $household->id }}">{{ $household->house_number }} - {{ $household->head_name }}</option>
-                        @endforeach
-                    </select>
-                    @error('household_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Nama</label>
-                    <input wire:model="name" type="text" class="mt-2 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100">
-                    @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Nomor HP</label>
-                    <input wire:model="phone" type="text" class="mt-2 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100">
-                    @error('phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Catatan Ronda</label>
-                    <input wire:model="ronda_notes" type="text" class="mt-2 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100">
-                </div>
-                <div class="flex items-end gap-2">
-                    <button class="rounded-2xl bg-emerald-500 px-5 py-3 font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
-                        {{ $editingId ? 'Perbarui' : 'Tambah' }}
-                    </button>
-                    @if ($editingId)
-                        <button type="button" wire:click="resetForm" class="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900">Batal</button>
-                    @endif
-                </div>
-            </form>
-        </section>
-
-        <section class="rounded-[1.5rem] bg-white shadow-xl shadow-slate-900/5 ring-1 ring-slate-200">
-            <div class="border-b border-slate-100 px-5 py-4">
-                <h2 class="text-lg font-bold text-slate-950">Daftar Warga</h2>
-                <p class="mt-1 text-sm text-slate-500">Nomor HP adalah identitas warga aktif untuk akses layanan.</p>
+            <div>
+                <label class="block text-xs font-semibold text-[#64748d] uppercase tracking-wider">Nama</label>
+                <input wire:model="name" type="text" class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-2.5 text-[#0d253d] placeholder-slate-400 focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300 text-base">
+                @error('name') <p class="mt-1 text-xs text-[#ea2261] font-medium">{{ $message }}</p> @enderror
             </div>
+            <div>
+                <label class="block text-xs font-semibold text-[#64748d] uppercase tracking-wider">Nomor HP</label>
+                <input wire:model="phone" type="text" class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-2.5 text-[#0d253d] placeholder-slate-400 focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300 text-base">
+                @error('phone') <p class="mt-1 text-xs text-[#ea2261] font-medium">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-[#64748d] uppercase tracking-wider">Catatan Ronda</label>
+                <input wire:model="ronda_notes" type="text" class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-2.5 text-[#0d253d] placeholder-slate-400 focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300 text-base">
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="rounded-full bg-[#533afd] px-5 py-3 font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] transition duration-150 text-xs">
+                    {{ $editingId ? 'Perbarui' : 'Tambah' }}
+                </button>
+                @if ($editingId)
+                    <button type="button" wire:click="resetForm" class="rounded-full bg-slate-100 border border-[#e3e8ee] px-4 py-3 text-xs font-semibold text-[#0d253d] hover:bg-slate-200 transition duration-150">Batal</button>
+                @endif
+            </div>
+        </form>
+    </section>
 
-            <div class="hidden overflow-hidden sm:block">
-                <table class="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead class="bg-slate-50 text-left text-slate-500">
-                        <tr>
-                            <th class="px-4 py-3">Nama</th>
-                            <th class="px-4 py-3">Nomor HP</th>
-                            <th class="px-4 py-3">Rumah</th>
-                            <th class="px-4 py-3">Status</th>
-                            <th class="px-4 py-3 text-right">Aksi</th>
+    <!-- Table Section -->
+    <section class="rounded-lg bg-white border border-[#e3e8ee] overflow-hidden shadow-level1">
+        <div class="border-b border-[#e3e8ee] px-5 py-4">
+            <h2 class="text-base font-semibold text-[#0d253d]">Daftar Warga</h2>
+            <p class="mt-1 text-xs text-[#64748d]">Nomor HP adalah identitas warga aktif untuk akses layanan.</p>
+        </div>
+
+        <div class="hidden overflow-hidden sm:block">
+            <table class="min-w-full divide-y divide-[#e3e8ee] text-sm">
+                <thead class="bg-[#f6f9fc] text-left text-[#64748d]">
+                    <tr>
+                        <th class="px-5 py-3 font-semibold">Nama</th>
+                        <th class="px-5 py-3 font-semibold">Nomor HP</th>
+                        <th class="px-5 py-3 font-semibold">Rumah</th>
+                        <th class="px-5 py-3 font-semibold">Status</th>
+                        <th class="px-5 py-3 font-semibold text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#e3e8ee] text-[#0d253d]">
+                    @foreach ($this->residents as $resident)
+                        <tr class="hover:bg-[#f6f9fc]/50 transition-colors">
+                            <td class="px-5 py-3 font-semibold text-[#0d253d]">{{ $resident->name }}</td>
+                            <td class="px-5 py-3 text-[#273951] tnum">{{ blank($resident->phone) ? '-' : (str_starts_with($resident->phone, '0') || str_starts_with($resident->phone, '+') ? $resident->phone : '0'.$resident->phone) }}</td>
+                            <td class="px-5 py-3 text-[#273951] tnum">{{ $resident->household?->house_number }}</td>
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $resident->is_active ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600' : 'bg-slate-500/10 border border-slate-500/20 text-slate-600' }}">
+                                    {{ $resident->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-3 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button wire:click="edit({{ $resident->id }})" class="rounded-full bg-slate-100 border border-[#e3e8ee] px-3 py-1.5 text-xs font-semibold text-[#0d253d] hover:bg-slate-200 transition duration-150">Edit</button>
+                                    <button wire:click="toggleActive({{ $resident->id }})" class="rounded-full px-3 py-1.5 text-xs font-semibold transition duration-150 {{ $resident->is_active ? 'bg-red-500/10 border border-red-500/30 text-red-600 hover:bg-red-500/20' : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20' }}">
+                                        {{ $resident->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @foreach ($this->residents as $resident)
-                            <tr>
-                                <td class="px-4 py-3 font-semibold text-slate-900">{{ $resident->name }}</td>
-                                <td class="px-4 py-3 tabular-nums">{{ blank($resident->phone) ? '-' : (str_starts_with($resident->phone, '0') || str_starts_with($resident->phone, '+') ? $resident->phone : '0'.$resident->phone) }}</td>
-                                <td class="px-4 py-3">{{ $resident->household?->house_number }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $resident->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
-                                        {{ $resident->is_active ? 'Aktif' : 'Nonaktif' }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    <div class="flex justify-end gap-2">
-                                        <button wire:click="edit({{ $resident->id }})" class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200">Edit</button>
-                                        <button wire:click="toggleActive({{ $resident->id }})" class="rounded-full px-3 py-1.5 text-xs font-bold {{ $resident->is_active ? 'bg-red-50 text-red-700 hover:bg-red-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
-                                            {{ $resident->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-            <div class="divide-y divide-slate-100 sm:hidden">
-                @foreach ($this->residents as $resident)
-                    <article class="p-5">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <h3 class="font-bold text-slate-950">{{ $resident->name }}</h3>
-                                <p class="mt-1 text-sm text-slate-500">No. {{ $resident->household?->house_number ?? '-' }} · HP: <span class="tabular-nums">{{ blank($resident->phone) ? '-' : (str_starts_with($resident->phone, '0') || str_starts_with($resident->phone, '+') ? $resident->phone : '0'.$resident->phone) }}</span></p>
-                            </div>
-                            <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $resident->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
-                                {{ $resident->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </span>
+        <div class="divide-y divide-[#e3e8ee] sm:hidden">
+            @foreach ($this->residents as $resident)
+                <article class="p-5 hover:bg-[#f6f9fc]/50 transition-colors">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h3 class="font-semibold text-[#0d253d]">{{ $resident->name }}</h3>
+                            <p class="mt-1 text-sm text-[#64748d]">No. <span class="tnum">{{ $resident->household?->house_number ?? '-' }}</span> · HP: <span class="tnum">{{ blank($resident->phone) ? '-' : (str_starts_with($resident->phone, '0') || str_starts_with($resident->phone, '+') ? $resident->phone : '0'.$resident->phone) }}</span></p>
                         </div>
-                        @if ($resident->ronda_notes)
-                            <p class="mt-3 rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-600">{{ $resident->ronda_notes }}</p>
-                        @endif
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            <button wire:click="edit({{ $resident->id }})" class="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700">Edit</button>
-                            <button wire:click="toggleActive({{ $resident->id }})" class="rounded-full px-3 py-2 text-xs font-bold {{ $resident->is_active ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700' }}">
-                                {{ $resident->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                            </button>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-        </section>
+                        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $resident->is_active ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600' : 'bg-slate-500/10 border border-slate-500/20 text-slate-600' }}">
+                            {{ $resident->is_active ? 'Aktif' : 'Nonaktif' }}
+                        </span>
+                    </div>
+                    @if ($resident->ronda_notes)
+                        <p class="mt-3 rounded-sm bg-slate-50 border border-[#e3e8ee] p-3 text-xs text-[#64748d]">{{ $resident->ronda_notes }}</p>
+                    @endif
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <button wire:click="edit({{ $resident->id }})" class="rounded-full bg-slate-100 border border-[#e3e8ee] px-3 py-1.5 text-xs font-semibold text-[#0d253d] hover:bg-slate-200 transition duration-150">Edit</button>
+                        <button wire:click="toggleActive({{ $resident->id }})" class="rounded-full px-3 py-1.5 text-xs font-semibold transition duration-150 {{ $resident->is_active ? 'bg-red-500/10 border border-red-500/30 text-red-600 hover:bg-red-500/20' : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20' }}">
+                            {{ $resident->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                        </button>
+                    </div>
+                </article>
+            @endforeach
+        </div>
+    </section>
 </div>
