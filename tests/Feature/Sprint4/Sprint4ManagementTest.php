@@ -203,10 +203,12 @@ it('denies dashboard routes to users without a pengurus role', function (string 
     '/dashboard/voting',
 ]);
 
-it('keeps dashboard navigation available from the small breakpoint', function () {
+it('keeps dashboard navigation available across desktop and mobile layouts', function () {
     $source = file_get_contents(resource_path('views/components/layouts/app.blade.php'));
 
     expect($source)
-        ->toContain('ring-slate-200 sm:flex')
-        ->not->toContain('ring-slate-200 lg:flex');
+        ->toContain('lg:grid-cols-[16rem_minmax(0,1fr)]')
+        ->toContain('aria-label="Navigasi utama"')
+        ->toContain('lg:hidden')
+        ->toContain('Lainnya');
 });
