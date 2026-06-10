@@ -27,4 +27,9 @@ class VoteBallot extends Model
     {
         return $this->belongsTo(VoteOption::class, 'vote_option_id');
     }
+
+    public function resident(): BelongsTo
+    {
+        return $this->belongsTo(Resident::class);
+    }
 }

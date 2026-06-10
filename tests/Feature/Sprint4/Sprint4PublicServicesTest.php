@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Announcement;
+use App\Models\AuditLog;
 use App\Models\Household;
 use App\Models\LetterRequest;
 use App\Models\Report;
@@ -55,7 +56,11 @@ it('accepts reports and letters only from registered active phones', function ()
         ->assertSee('belum terdaftar');
 
     expect(Report::query()->count())->toBe(1)
-        ->and(LetterRequest::query()->count())->toBe(1);
+        ->and(Report::query()->firstOrFail()->phone)->toBe($this->resident->phone)
+        ->and(LetterRequest::query()->count())->toBe(1)
+        ->and(LetterRequest::query()->firstOrFail()->phone)->toBe($this->resident->phone)
+        ->and(AuditLog::query()->where('action', 'report.submitted')->exists())->toBeTrue()
+        ->and(AuditLog::query()->where('action', 'letter.submitted')->exists())->toBeTrue();
 });
 
 it('allows one vote per registered phone', function () {

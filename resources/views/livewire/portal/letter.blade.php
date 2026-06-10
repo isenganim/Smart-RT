@@ -4,6 +4,8 @@ use App\Enums\LetterStatus;
 use App\Enums\LetterType;
 use App\Models\LetterRequest;
 use App\Services\ResidentLookup;
+use App\Support\Audit;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use function Livewire\Volt\{computed, layout, rules, state, title};
 
@@ -24,7 +26,15 @@ $submit = function (ResidentLookup $lookup) {
     if (! $result->found()) {
         $this->done = false; $this->feedback = $result->message; return;
     }
-    LetterRequest::create(['phone' => $this->phone, 'resident_id' => $result->resident->id, 'type' => $this->type, 'purpose' => $this->purpose, 'status' => LetterStatus::DIAJUKAN]);
+    DB::transaction(function () use ($result) {
+        $letter = LetterRequest::create(['phone' => $result->resident->phone, 'resident_id' => $result->resident->id, 'type' => $this->type, 'purpose' => $this->purpose, 'status' => LetterStatus::DIAJUKAN]);
+        Audit::record(null, 'letter.submitted', 'letter_request', $letter->id, [
+            'resident_id' => $result->resident->id,
+            'type' => $this->type,
+            'status' => LetterStatus::DIAJUKAN->value,
+        ]);
+    });
+
     $this->reset('phone', 'type', 'purpose'); $this->done = true; $this->feedback = null;
 };
 ?>

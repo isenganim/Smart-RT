@@ -3,6 +3,8 @@
 use App\Enums\ReportStatus;
 use App\Models\Report;
 use App\Services\ResidentLookup;
+use App\Support\Audit;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use function Livewire\Volt\{layout, rules, state, title};
 
@@ -30,7 +32,15 @@ $submit = function (ResidentLookup $lookup) {
         return;
     }
 
-    Report::create(['phone' => $this->phone, 'resident_id' => $result->resident->id, 'category' => $this->category, 'description' => $this->description, 'status' => ReportStatus::BARU]);
+    DB::transaction(function () use ($result) {
+        $report = Report::create(['phone' => $result->resident->phone, 'resident_id' => $result->resident->id, 'category' => $this->category, 'description' => $this->description, 'status' => ReportStatus::BARU]);
+        Audit::record(null, 'report.submitted', 'report', $report->id, [
+            'resident_id' => $result->resident->id,
+            'category' => $this->category,
+            'status' => ReportStatus::BARU->value,
+        ]);
+    });
+
     $this->reset('phone', 'category', 'description');
     $this->done = true;
     $this->feedback = null;

@@ -7,7 +7,10 @@ use App\Enums\VoteStatus;
 use App\Models\Announcement;
 use App\Models\LetterRequest;
 use App\Models\Report;
+use App\Models\Resident;
+use App\Models\User;
 use App\Models\Vote;
+use App\Models\VoteBallot;
 use App\Models\VoteOption;
 use Illuminate\Database\QueryException;
 
@@ -50,14 +53,26 @@ it('casts and scopes reports and letter requests', function () {
 });
 
 it('models voting periods and options', function () {
+    $creator = User::factory()->create();
+    $resident = Resident::factory()->create();
     $vote = Vote::factory()->create([
+        'created_by' => $creator->id,
         'status' => VoteStatus::AKTIF,
         'starts_at' => now()->subDay(),
         'ends_at' => now()->addDay(),
     ]);
-    VoteOption::factory()->count(2)->for($vote)->create();
+    $option = VoteOption::factory()->for($vote)->create();
+    VoteOption::factory()->for($vote)->create();
+    $ballot = VoteBallot::query()->create([
+        'vote_id' => $vote->id,
+        'vote_option_id' => $option->id,
+        'resident_id' => $resident->id,
+        'phone' => $resident->phone,
+    ]);
 
     expect($vote->fresh()->status)->toBe(VoteStatus::AKTIF)
         ->and($vote->isOpen())->toBeTrue()
-        ->and($vote->options)->toHaveCount(2);
+        ->and($vote->options)->toHaveCount(2)
+        ->and($vote->creator->is($creator))->toBeTrue()
+        ->and($ballot->resident->is($resident))->toBeTrue();
 });

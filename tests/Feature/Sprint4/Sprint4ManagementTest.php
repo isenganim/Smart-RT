@@ -11,7 +11,7 @@ use App\Models\Report;
 use App\Models\User;
 use App\Models\Vote;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use Livewire\Volt\Volt;
 
 beforeEach(function () {
@@ -61,29 +61,65 @@ it('updates report and letter workflows with audit logs', function () {
 it('rolls back a letter status update when audit logging fails', function () {
     $letter = LetterRequest::factory()->create();
 
-    Schema::table('audit_logs', function ($table) {
-        $table->dropColumn('metadata');
-    });
+    DB::unprepared(<<<'SQL'
+        CREATE TRIGGER fail_letter_audit_insert
+        BEFORE INSERT ON audit_logs
+        WHEN NEW.action = 'letter.status_changed'
+        BEGIN
+            SELECT RAISE(ABORT, 'simulated audit failure');
+        END
+        SQL);
 
     try {
-        Volt::test('dashboard.letters.index')
+        expect(fn () => Volt::test('dashboard.letters.index')
             ->call('startUpdate', $letter->id)
             ->set('status', LetterStatus::DISETUJUI->value)
             ->set('notes', 'Silakan diambil.')
-            ->call('saveUpdate');
-    } catch (QueryException) {
-        // The database failure is expected; the status update must still roll back.
+            ->call('saveUpdate'))
+            ->toThrow(QueryException::class);
+    } finally {
+        DB::unprepared('DROP TRIGGER IF EXISTS fail_letter_audit_insert');
     }
 
     expect($letter->fresh()->status)->toBe(LetterStatus::DIAJUKAN);
 });
 
-it('uses enum-backed validation for letter statuses', function () {
+it('rolls back a report status update when audit logging fails', function () {
+    $report = Report::factory()->create();
+
+    DB::unprepared(<<<'SQL'
+        CREATE TRIGGER fail_report_audit_insert
+        BEFORE INSERT ON audit_logs
+        WHEN NEW.action = 'report.status_changed'
+        BEGIN
+            SELECT RAISE(ABORT, 'simulated audit failure');
+        END
+        SQL);
+
+    try {
+        expect(fn () => Volt::test('dashboard.reports.index')
+            ->call('startUpdate', $report->id)
+            ->set('status', ReportStatus::SELESAI->value)
+            ->set('notes', 'Sudah ditangani.')
+            ->call('saveUpdate'))
+            ->toThrow(QueryException::class);
+    } finally {
+        DB::unprepared('DROP TRIGGER IF EXISTS fail_report_audit_insert');
+    }
+
+    expect($report->fresh()->status)->toBe(ReportStatus::BARU);
+});
+
+it('uses enum-backed validation for workflow statuses', function () {
+    $reportSource = file_get_contents(resource_path('views/livewire/dashboard/reports/index.blade.php'));
     $source = file_get_contents(resource_path('views/livewire/dashboard/letters/index.blade.php'));
 
     expect($source)
         ->toContain('Rule::enum(LetterStatus::class)')
-        ->not->toContain('in:diajukan,disetujui,ditolak,selesai');
+        ->not->toContain('in:diajukan,disetujui,ditolak,selesai')
+        ->and($reportSource)
+        ->toContain('Rule::enum(ReportStatus::class)')
+        ->not->toContain('in:baru,diproses,selesai,ditolak');
 });
 
 it('creates activates and closes a vote', function () {
@@ -106,9 +142,54 @@ it('creates activates and closes a vote', function () {
         ->and(AuditLog::query()->where('action', 'vote.created')->exists())->toBeTrue();
 });
 
+it('rolls back vote creation when audit logging fails', function () {
+    DB::unprepared(<<<'SQL'
+        CREATE TRIGGER fail_vote_creation_audit_insert
+        BEFORE INSERT ON audit_logs
+        WHEN NEW.action = 'vote.created'
+        BEGIN
+            SELECT RAISE(ABORT, 'simulated audit failure');
+        END
+        SQL);
+
+    try {
+        expect(fn () => Volt::test('dashboard.votes.index')
+            ->set('question', 'Voting yang gagal diaudit')
+            ->set('optionsText', "Setuju\nTidak Setuju")
+            ->call('save'))
+            ->toThrow(QueryException::class);
+    } finally {
+        DB::unprepared('DROP TRIGGER IF EXISTS fail_vote_creation_audit_insert');
+    }
+
+    expect(Vote::query()->where('question', 'Voting yang gagal diaudit')->exists())->toBeFalse();
+});
+
+it('shows feedback when a vote cannot be activated', function () {
+    $vote = Vote::factory()->create();
+
+    Volt::test('dashboard.votes.index')
+        ->call('activate', $vote->id)
+        ->assertHasErrors(['activation']);
+
+    expect($vote->fresh()->status)->toBe(VoteStatus::DRAFT);
+});
+
 it('protects all sprint four dashboard routes', function (string $uri) {
     auth()->logout();
     $this->get($uri)->assertRedirect('/login');
+})->with([
+    '/dashboard/pengumuman',
+    '/dashboard/laporan',
+    '/dashboard/surat',
+    '/dashboard/voting',
+]);
+
+it('denies dashboard routes to users without a pengurus role', function (string $uri) {
+    $user = User::factory()->create();
+    DB::table('users')->where('id', $user->id)->update(['role' => 'warga']);
+
+    $this->actingAs($user)->get($uri)->assertForbidden();
 })->with([
     '/dashboard/pengumuman',
     '/dashboard/laporan',

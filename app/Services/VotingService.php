@@ -3,8 +3,9 @@
 namespace App\Services;
 
 use App\Models\Vote;
-use App\Support\PhoneNumber;
+use App\Support\Audit;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
 
 class VotingService
 {
@@ -26,18 +27,28 @@ class VotingService
             return BallotResult::fail($lookup->message);
         }
 
-        $phone = PhoneNumber::normalize($rawPhone);
+        $phone = $lookup->resident->phone;
 
         if ($vote->ballots()->where('phone', $phone)->exists()) {
             return BallotResult::fail('Nomor HP ini sudah memberikan suara.');
         }
 
         try {
-            $ballot = $vote->ballots()->create([
-                'vote_option_id' => $optionId,
-                'resident_id' => $lookup->resident->id,
-                'phone' => $phone,
-            ]);
+            $ballot = DB::transaction(function () use ($vote, $optionId, $lookup, $phone) {
+                $ballot = $vote->ballots()->create([
+                    'vote_option_id' => $optionId,
+                    'resident_id' => $lookup->resident->id,
+                    'phone' => $phone,
+                ]);
+
+                Audit::record(null, 'vote.cast', 'vote_ballot', $ballot->id, [
+                    'vote_id' => $vote->id,
+                    'vote_option_id' => $optionId,
+                    'resident_id' => $lookup->resident->id,
+                ]);
+
+                return $ballot;
+            });
         } catch (UniqueConstraintViolationException) {
             return BallotResult::fail('Nomor HP ini sudah memberikan suara.');
         }
@@ -47,11 +58,15 @@ class VotingService
 
     public function tally(Vote $vote): array
     {
-        return $vote->ballots()
+        $totals = $vote->ballots()
             ->selectRaw('vote_option_id, COUNT(*) as total')
             ->groupBy('vote_option_id')
             ->pluck('total', 'vote_option_id')
-            ->map(fn ($total) => (int) $total)
+            ->map(fn ($total) => (int) $total);
+
+        return $vote->options()
+            ->pluck('id')
+            ->mapWithKeys(fn ($id) => [$id => $totals->get($id, 0)])
             ->all();
     }
 }

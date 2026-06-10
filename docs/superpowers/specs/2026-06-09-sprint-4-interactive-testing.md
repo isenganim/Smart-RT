@@ -6,8 +6,8 @@ This document outlines the test scenarios, target URLs, input data, and expected
 
 * **Target URL:** `http://127.0.0.1:32772` / `http://smart-rt.ddev.site` (hosted via DDEV)
 * **Resident Test Data:**
-  * Registered Resident: Phone `0801-3425-2918` (Normalizes to `80134252918`, Name: `Martani Maryadi S.Sos`)
-  * Unregistered Resident: Phone `0899-0000-0000` (Normalizes to `89900000000`)
+  * Registered Resident: `Test Resident A`, phone `PHONE_REGISTERED_FIXTURE`
+  * Unregistered Resident: `Test Resident B`, phone `PHONE_UNREGISTERED_FIXTURE`
 * **Admin Test Data:**
   * Login: `admin@smartrt.test`
   * Password: `password`
@@ -26,24 +26,24 @@ This document outlines the test scenarios, target URLs, input data, and expected
 * **Goal:** Verify report submissions are gated by registered phone numbers.
 * **Steps:**
   1. Navigate to `/lapor`.
-  2. Submit report with unregistered number `089900000000` -> Verify error "Nomor HP belum terdaftar".
-  3. Submit report with registered number `080134252918`, category "Keamanan", description "Lampu jalan depan pos ronda mati." -> Verify success "Laporan terkirim".
+  2. Submit report with `PHONE_UNREGISTERED_FIXTURE` -> Verify error "Nomor HP belum terdaftar".
+  3. Submit report with `PHONE_REGISTERED_FIXTURE`, category "Keamanan", description "Lampu jalan depan pos ronda mati." -> Verify success "Laporan terkirim".
 
 ### Test Case 3: Surat Pengantar (DT-4)
 * **Goal:** Verify letter requests are gated by registered phone numbers.
 * **Steps:**
   1. Navigate to `/surat`.
-  2. Submit request with unregistered number `089900000000` -> Verify error "Nomor HP belum terdaftar".
-  3. Submit request with registered number `080134252918`, type "domisili", purpose "Pengurusan KTP baru." -> Verify success "Pengajuan terkirim".
+  2. Submit request with `PHONE_UNREGISTERED_FIXTURE` -> Verify error "Nomor HP belum terdaftar".
+  3. Submit request with `PHONE_REGISTERED_FIXTURE`, type "domisili", purpose "Pengurusan KTP baru." -> Verify success "Pengajuan terkirim".
 
 ### Test Case 4: Simple Voting (DT-14)
 * **Goal:** Verify voting accepts exactly one vote per registered phone number.
 * **Steps:**
   1. Log in as admin, navigate to `/dashboard/voting` and create an active voting session. Or seed/tinker one.
   2. Navigate to `/voting/{id}`.
-  3. Attempt vote with unregistered number `089900000000` -> Verify error.
-  4. Cast vote with registered number `080134252918` -> Verify success "Suara Anda tercatat".
-  5. Attempt vote again with the same number `080134252918` -> Verify error "sudah memberikan suara".
+  3. Attempt vote with `PHONE_UNREGISTERED_FIXTURE` -> Verify error.
+  4. Cast vote with `PHONE_REGISTERED_FIXTURE` -> Verify success "Suara Anda tercatat".
+  5. Attempt vote again with `PHONE_REGISTERED_FIXTURE` -> Verify error "sudah memberikan suara".
 
 ### Test Case 5: Admin Workflows (Report & Letter Management)
 * **Goal:** Verify admin can log in, view, and update Sprint 4 submissions with audit logs.
