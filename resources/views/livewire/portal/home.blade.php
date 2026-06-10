@@ -11,8 +11,10 @@ state([
         ['label' => 'Check-in Ronda', 'route' => 'portal.checkin', 'desc' => 'Catat kehadiran ronda Anda hari ini.', 'ready' => true],
         ['label' => 'Scan Iuran (Petugas)', 'route' => 'portal.scan', 'desc' => 'Mode scan iuran ronda dengan PIN harian.', 'ready' => true],
         ['label' => 'Cek Nomor HP', 'route' => 'portal.verify', 'desc' => 'Pastikan nomor HP Anda sudah terdaftar.', 'ready' => true],
-        ['label' => 'Pengumuman', 'route' => null, 'desc' => 'Informasi terbaru dari RT.', 'ready' => false],
-        ['label' => 'Lapor Warga', 'route' => null, 'desc' => 'Kirim laporan ke pengurus.', 'ready' => false],
+        ['label' => 'Pengumuman', 'route' => 'portal.announcements', 'desc' => 'Informasi terbaru dari RT.', 'ready' => true],
+        ['label' => 'Lapor Warga', 'route' => 'portal.report', 'desc' => 'Kirim laporan ke pengurus.', 'ready' => true],
+        ['label' => 'Surat Pengantar', 'route' => 'portal.letter', 'desc' => 'Ajukan surat pengantar RT.', 'ready' => true],
+        ['label' => 'Voting', 'route' => 'portal.votes', 'desc' => 'Ikut voting warga RT.', 'ready' => true],
     ],
 ]);
 

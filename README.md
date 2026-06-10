@@ -26,6 +26,10 @@ Smart RT adalah aplikasi PWA responsive untuk operasional satu RT. Fokus saat in
 - Review denda warga tidak check-in ronda (denda Rp5.000)
 - Rekap kas harian, mingguan, bulanan, daftar rumah belum bayar, dan ronda absen
 - Koreksi & pembatalan transaksi kas secara non-destructive
+- Pengumuman publik dengan pengelolaan draft/publikasi oleh pengurus
+- Laporan warga berbasis nomor HP terdaftar dengan alur tindak lanjut
+- Pengajuan surat pengantar berbasis nomor HP terdaftar
+- Voting warga dengan satu suara per nomor HP terdaftar
 - Timezone aplikasi `Asia/Jakarta` / WIB
 
 ## Setup Lokal
@@ -82,6 +86,10 @@ ddev exec ./vendor/bin/pint --dirty
 - `/jadwal-ronda` - jadwal ronda publik
 - `/checkin-ronda` - check-in ronda publik
 - `/scan-iuran` - scan iuran warga via QR code
+- `/pengumuman` - pengumuman RT yang sudah dipublikasikan
+- `/lapor` - pengiriman laporan warga
+- `/surat` - pengajuan surat pengantar
+- `/voting` - daftar dan partisipasi voting warga
 - `/login` - login pengurus
 - `/dashboard` - dashboard pengurus
 - `/dashboard/rumah` - manajemen rumah
@@ -91,6 +99,10 @@ ddev exec ./vendor/bin/pint --dirty
 - `/dashboard/denda` - review dan penetapan denda ronda
 - `/dashboard/kas` - ringkasan & rekap kas RT
 - `/dashboard/kas/transaksi` - daftar & koreksi transaksi kas
+- `/dashboard/pengumuman` - manajemen pengumuman
+- `/dashboard/laporan` - tindak lanjut laporan warga
+- `/dashboard/surat` - pengelolaan surat pengantar
+- `/dashboard/voting` - manajemen voting dan hasil
 
 ## Catatan Implementasi
 
@@ -105,11 +117,16 @@ ddev exec ./vendor/bin/pint --dirty
 
 ## Status
 
-Sprint 1, Sprint 2, dan Sprint 3 sudah terimplementasi. Verifikasi terakhir:
+Sprint 1, Sprint 2, Sprint 3, dan Sprint 4 sudah terimplementasi. Verifikasi terakhir:
 
-```text
-ddev exec php artisan test
-all tests pass
-```
+1. **Pest PHP Unit & Feature Tests**:
+   ```text
+   ddev exec php artisan test
+   136 passed (307 assertions)
+   ```
+
+2. **Playwright E2E Interactive Verification (Sprint 4)**:
+   * Portal Warga & Dashboard Pengurus workflows verified.
+   * Status: **PASS** (10/10 acceptance criteria met).
 
 Dokumen sprint ada di `docs/superpowers/sprints/`.

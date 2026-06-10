@@ -9,6 +9,10 @@
         ['label' => 'Sesi Scan', 'route' => 'scan-sessions.index', 'active' => request()->routeIs('scan-sessions.*')],
         ['label' => 'Denda', 'route' => 'denda.index', 'active' => request()->routeIs('denda.*')],
         ['label' => 'Kas', 'route' => 'kas.index', 'active' => request()->routeIs('kas.*')],
+        ['label' => 'Pengumuman', 'route' => 'announcements.index', 'active' => request()->routeIs('announcements.*')],
+        ['label' => 'Laporan', 'route' => 'reports.index', 'active' => request()->routeIs('reports.*')],
+        ['label' => 'Surat', 'route' => 'letters.index', 'active' => request()->routeIs('letters.*')],
+        ['label' => 'Voting', 'route' => 'votes.index', 'active' => request()->routeIs('votes.*')],
     ];
 @endphp
 
@@ -35,7 +39,7 @@
                             <span class="block text-xs font-normal text-slate-400">Dashboard Pengurus</span>
                         </span>
                     </a>
-                    <nav class="hidden items-center gap-2 rounded-full bg-white/5 p-1 text-sm font-medium text-slate-300 ring-1 ring-white/10 sm:flex">
+                    <nav class="hidden max-w-3xl flex-wrap items-center gap-1 rounded-2xl bg-white/5 p-1 text-sm font-medium text-slate-300 ring-1 ring-white/10 sm:flex">
                         @foreach ($navItems as $item)
                             <a href="{{ route($item['route']) }}" class="rounded-full px-4 py-2 transition {{ $item['active'] ? 'bg-white text-slate-950 shadow-sm' : 'hover:bg-white/10 hover:text-white' }}">
                                 {{ $item['label'] }}
@@ -51,9 +55,9 @@
         </header>
 
         <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-3 py-2 shadow-2xl shadow-slate-950/15 backdrop-blur sm:hidden" aria-label="Navigasi utama">
-            <div class="mx-auto grid max-w-md grid-cols-4 gap-2 text-[11px] font-semibold">
+            <div class="mx-auto flex max-w-md gap-2 overflow-x-auto text-[11px] font-semibold">
                 @foreach ($navItems as $item)
-                    <a href="{{ route($item['route']) }}" class="rounded-2xl px-1.5 py-2.5 text-center transition {{ $item['active'] ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' }}">
+                    <a href="{{ route($item['route']) }}" class="shrink-0 rounded-2xl px-3 py-2.5 text-center transition {{ $item['active'] ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' }}">
                         {{ $item['label'] }}
                     </a>
                 @endforeach

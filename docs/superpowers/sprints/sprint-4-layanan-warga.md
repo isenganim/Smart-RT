@@ -10,13 +10,13 @@
 
 ## Phases
 
-- [ ] **Phase 07 — Pengumuman & Laporan Warga** — `../plans/2026-05-30-phase-07-pengumuman-laporan-warga.md`
+- [x] **Phase 07 — Pengumuman & Laporan Warga** — `../plans/2026-05-30-phase-07-pengumuman-laporan-warga.md`
   - Pengurus pengumuman CRUD + public display
   - Warga laporan submission (phone-gated), pengurus follow-up status
-- [ ] **Phase 08 — Surat Pengantar** — `../plans/2026-05-30-phase-08-surat-pengantar.md`
+- [x] **Phase 08 — Surat Pengantar** — `../plans/2026-05-30-phase-08-surat-pengantar.md`
   - Warga surat request (phone-gated): jenis surat, keperluan
   - Pengurus review + status workflow
-- [ ] **Phase 10 — Voting Sederhana** — `../plans/2026-05-30-phase-10-voting-sederhana.md`
+- [x] **Phase 10 — Voting Sederhana** — `../plans/2026-05-30-phase-10-voting-sederhana.md`
   - Pengurus creates voting (question, options, active period)
   - One vote per registered phone per voting; result tally
 
@@ -56,8 +56,8 @@ Mapped to design spec "Testing MVP" → **DT-2** (warga lihat pengumuman), **DT-
 
 ## Definition of done
 
-- [ ] `php artisan test` passes for Phase 07, 08, 10 suites
-- [ ] Public can read pengumuman; warga can submit laporan with a registered phone
-- [ ] Pengurus can advance laporan and surat follow-up status
-- [ ] Warga can submit a surat request gated by phone verification
-- [ ] Voting accepts exactly one vote per registered phone; results tally correctly
+- [x] `php artisan test` passes for Phase 07, 08, 10 suites
+- [x] Public can read pengumuman; warga can submit laporan with a registered phone
+- [x] Pengurus can advance laporan and surat follow-up status
+- [x] Warga can submit a surat request gated by phone verification
+- [x] Voting accepts exactly one vote per registered phone; results tally correctly
