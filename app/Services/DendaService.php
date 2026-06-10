@@ -16,9 +16,16 @@ class DendaService
 
     public function candidates(CarbonInterface $date): Collection
     {
+        $finedResidentIds = CashTransaction::query()
+            ->active()
+            ->denda()
+            ->whereDate('date', $date->toDateString())
+            ->pluck('resident_id');
+
         return RondaAssignment::query()
             ->with('resident.household')
             ->whereNull('checked_in_at')
+            ->whereNotIn('resident_id', $finedResidentIds)
             ->whereHas('rondaSchedule', fn ($query) => $query->whereDate('date', $date->toDateString()))
             ->get();
     }
