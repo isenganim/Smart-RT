@@ -10,7 +10,7 @@
 
 ## Phases
 
-- [ ] **Phase 09 — Inventaris Dasar** — `../plans/2026-05-30-phase-09-inventaris-dasar.md`
+- [x] **Phase 09 — Inventaris Dasar** — `../plans/2026-05-30-phase-09-inventaris-dasar.md`
   - Inventory item CRUD (nama, kondisi, lokasi/peminjam, status)
   - Pengurus-only dashboard module with audit logging
 
@@ -35,6 +35,6 @@ The design's "Testing MVP" list has no inventaris-specific case; these derive fr
 
 ## Definition of done
 
-- [ ] `php artisan test` passes for the Phase 09 suite
-- [ ] Pengurus can add/edit inventory items and track condition + location/borrower
-- [ ] Mutations are recorded in the audit log
+- [x] `php artisan test` passes for the Phase 09 suite
+- [x] Pengurus can add/edit inventory items and track condition + location/borrower
+- [x] Mutations are recorded in the audit log

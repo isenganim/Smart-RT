@@ -30,6 +30,7 @@ Smart RT adalah aplikasi PWA responsive untuk operasional satu RT. Fokus saat in
 - Laporan warga berbasis nomor HP terdaftar dengan alur tindak lanjut
 - Pengajuan surat pengantar berbasis nomor HP terdaftar
 - Voting warga dengan satu suara per nomor HP terdaftar
+- Inventaris RT dengan pelacakan kondisi, lokasi, peminjam, dan status barang
 - Timezone aplikasi `Asia/Jakarta` / WIB
 
 ## Setup Lokal
@@ -103,6 +104,7 @@ ddev exec ./vendor/bin/pint --dirty
 - `/dashboard/laporan` - tindak lanjut laporan warga
 - `/dashboard/surat` - pengelolaan surat pengantar
 - `/dashboard/voting` - manajemen voting dan hasil
+- `/dashboard/inventaris` - manajemen inventaris RT
 
 ## Catatan Implementasi
 
@@ -117,15 +119,21 @@ ddev exec ./vendor/bin/pint --dirty
 
 ## Status
 
-Sprint 1, Sprint 2, Sprint 3, dan Sprint 4 sudah terimplementasi. Verifikasi terakhir:
+Sprint 1 sampai Sprint 5 sudah terimplementasi. Verifikasi terakhir:
 
 1. **Pest PHP Unit & Feature Tests**:
    ```text
    ddev exec php artisan test
-   136 passed (307 assertions)
+   166 passed (392 assertions)
    ```
 
-2. **Playwright E2E Interactive Verification (Sprint 4)**:
+2. **Vite Production Build**:
+   ```text
+   ddev npm run build
+   built successfully
+   ```
+
+3. **Playwright E2E Interactive Verification (Sprint 4)**:
    * Portal Warga & Dashboard Pengurus workflows verified.
    * Status: **PASS** (10/10 acceptance criteria met).
 

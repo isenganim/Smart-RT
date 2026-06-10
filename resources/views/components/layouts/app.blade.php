@@ -13,6 +13,7 @@
         ['label' => 'Laporan', 'route' => 'reports.index', 'active' => request()->routeIs('reports.*')],
         ['label' => 'Surat', 'route' => 'letters.index', 'active' => request()->routeIs('letters.*')],
         ['label' => 'Voting', 'route' => 'votes.index', 'active' => request()->routeIs('votes.*')],
+        ['label' => 'Inventaris', 'route' => 'inventory.index', 'active' => request()->routeIs('inventory.*')],
     ];
 @endphp
 
