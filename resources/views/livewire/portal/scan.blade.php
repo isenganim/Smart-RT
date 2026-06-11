@@ -62,7 +62,8 @@ $unlock = function (PinGate $gate, ResidentLookup $lookup) {
     }
 };
 
-$scan = function (IuranScan $iuran, ResidentLookup $lookup) {
+// Shared logic used by both manual scan() and camera-triggered scanDetectedToken().
+$processScan = function (string $token, IuranScan $iuran, ResidentLookup $lookup) {
     if (! $this->unlocked || ! $this->sessionId) {
         return;
     }
@@ -86,7 +87,7 @@ $scan = function (IuranScan $iuran, ResidentLookup $lookup) {
         return;
     }
 
-    $result = $iuran->record($session, $this->token);
+    $result = $iuran->record($session, $token);
 
     if ($result->paid() && $result->transaction) {
         Audit::record(
@@ -112,6 +113,17 @@ $scan = function (IuranScan $iuran, ResidentLookup $lookup) {
     ];
 
     $this->reset('token');
+};
+
+// Manual form submission.
+$scan = function (IuranScan $iuran, ResidentLookup $lookup) {
+    $this->processScan($this->token, $iuran, $lookup);
+};
+
+// Camera-detected token from the JS scanner.
+$scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $lookup) {
+    $this->token = $token;
+    $this->processScan($token, $iuran, $lookup);
 };
 
 ?>
@@ -149,12 +161,55 @@ $scan = function (IuranScan $iuran, ResidentLookup $lookup) {
                     PIN Aktif
                 </span>
             </div>
-            <p class="mt-2 text-sm text-[#64748d] leading-relaxed">Scan atau masukkan kode QR rumah untuk mencatat iuran Rp500.</p>
+            <p class="mt-2 text-sm text-[#64748d] leading-relaxed">Arahkan kamera ke QR rumah, atau masukkan kode QR secara manual.</p>
 
-            <form wire:submit="scan" class="mt-6 space-y-5">
+            {{-- Camera scanner panel --}}
+            <div
+                x-data
+                x-on:iuran-qr-detected.window="$wire.scanDetectedToken($event.detail.token)"
+                class="mt-6"
+            >
+                <div wire:ignore data-iuran-scanner class="space-y-3">
+                    <div id="iuran-qr-reader" class="overflow-hidden rounded-lg border border-[#e3e8ee] bg-[#f6f9fc]"></div>
+
+                    <div class="flex gap-2">
+                        <button
+                            id="iuran-start-camera"
+                            type="button"
+                            class="flex-1 rounded-full border border-[#533afd] bg-[#533afd]/10 px-4 py-2.5 text-sm font-semibold text-[#533afd] transition hover:bg-[#533afd]/20"
+                        >
+                            Mulai Kamera
+                        </button>
+                        <button
+                            id="iuran-stop-camera"
+                            type="button"
+                            class="hidden flex-1 rounded-full border border-[#e3e8ee] bg-white px-4 py-2.5 text-sm font-semibold text-[#64748d] transition hover:bg-[#f6f9fc]"
+                        >
+                            Matikan Kamera
+                        </button>
+                    </div>
+
+                    <p
+                        id="iuran-scanner-status"
+                        aria-live="polite"
+                        class="text-center text-xs text-[#64748d]"
+                    >
+                        Kamera belum aktif.
+                    </p>
+                </div>
+            </div>
+
+            {{-- Manual token form --}}
+            <form wire:submit="scan" class="mt-5 space-y-4 border-t border-[#e3e8ee] pt-5">
                 <div>
-                    <label class="block text-sm font-semibold text-[#273951]">Kode QR Rumah</label>
-                    <input wire:model="token" type="text" autofocus class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-3.5 text-[#0d253d] placeholder-[#64748d] focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300 text-base" placeholder="Hasil scan akan terisi di sini">
+                    <label for="iuran-token-input" class="block text-sm font-semibold text-[#273951]">Input Manual Kode QR Rumah</label>
+                    <input
+                        id="iuran-token-input"
+                        wire:model="token"
+                        type="text"
+                        class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-3.5 text-[#0d253d] placeholder-[#64748d] focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300 text-base"
+                        placeholder="Hasil scan akan terisi di sini"
+                    >
                 </div>
                 <button class="w-full rounded-full bg-[#533afd] py-3.5 font-sans font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] transition-all duration-150">
                     Terima Cash Rp500

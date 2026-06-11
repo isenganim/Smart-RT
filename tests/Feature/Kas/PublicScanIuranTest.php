@@ -22,12 +22,31 @@ it('serves the scan page without login', function () {
         ->assertSee('inputmode="numeric"', false);
 });
 
+it('does not show scanner controls on the locked page', function () {
+    $this->get('/scan-iuran')
+        ->assertOk()
+        ->assertDontSee('Mulai Kamera')
+        ->assertDontSee('data-iuran-scanner', false);
+});
+
 it('unlocks the scan mode with a valid pin', function () {
     Volt::test('portal.scan')
         ->set('phone', '081234567890')
         ->set('pin', '654321')
         ->call('unlock')
         ->assertSet('unlocked', true);
+});
+
+it('shows scanner controls and manual fallback after unlock', function () {
+    Volt::test('portal.scan')
+        ->set('phone', '081234567890')
+        ->set('pin', '654321')
+        ->call('unlock')
+        ->assertSee('Mulai Kamera')
+        ->assertSee('data-iuran-scanner', false)
+        ->assertSee('iuran-qr-reader', false)
+        ->assertSee('Input Manual Kode QR Rumah')
+        ->assertSee('iuran-token-input', false);
 });
 
 it('rejects an expired pin', function () {
@@ -41,7 +60,7 @@ it('rejects an expired pin', function () {
         ->assertSee('kedaluwarsa');
 });
 
-it('records iuran when a valid token is scanned', function () {
+it('records iuran when a valid token is scanned via manual input', function () {
     $component = Volt::test('portal.scan')
         ->set('phone', '081234567890')
         ->set('pin', '654321')
@@ -50,6 +69,32 @@ it('records iuran when a valid token is scanned', function () {
     $component->set('token', 'HOUSE-TOKEN-1')->call('scan')
         ->assertSee('Budi')
         ->assertSee('Lunas');
+
+    expect(CashTransaction::query()->iuranHarian()->count())->toBe(1);
+});
+
+it('records iuran when a token is submitted via the camera-detected action', function () {
+    $component = Volt::test('portal.scan')
+        ->set('phone', '081234567890')
+        ->set('pin', '654321')
+        ->call('unlock');
+
+    $component->call('scanDetectedToken', 'HOUSE-TOKEN-1')
+        ->assertSee('Budi')
+        ->assertSee('Lunas');
+
+    expect(CashTransaction::query()->iuranHarian()->count())->toBe(1);
+});
+
+it('reports already paid on a duplicate scan via camera action', function () {
+    $component = Volt::test('portal.scan')
+        ->set('phone', '081234567890')
+        ->set('pin', '654321')
+        ->call('unlock');
+
+    $component->call('scanDetectedToken', 'HOUSE-TOKEN-1');
+    $component->call('scanDetectedToken', 'HOUSE-TOKEN-1')
+        ->assertSee('sudah tercatat');
 
     expect(CashTransaction::query()->iuranHarian()->count())->toBe(1);
 });
