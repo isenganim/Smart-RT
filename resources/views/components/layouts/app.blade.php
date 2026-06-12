@@ -25,6 +25,51 @@
     ];
 
     $mobileRoutes = ['dashboard', 'households.index', 'residents.index', 'kas.index'];
+
+    if (!function_exists('getMenuIcon')) {
+        function getMenuIcon($route, $class = 'mr-2.5 h-5 w-5 shrink-0') {
+            $svg = '';
+            switch ($route) {
+                case 'dashboard':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />';
+                    break;
+                case 'households.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M8.25 21v-8.25A2.25 2.25 0 0110.5 10.5h3a2.25 2.25 0 012.25 2.25V21" />';
+                    break;
+                case 'residents.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0110.089 21c-2.213 0-4.3-.645-6.07-1.757v-.11a4.125 4.125 0 017.533-2.492M9 10.5a3 3 0 11-6 0 3 3 0 016 0zm9-1.5a3 3 0 11-6 0 3 3 0 016 0z" />';
+                    break;
+                case 'ronda.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 0v18.5" />';
+                    break;
+                case 'scan-sessions.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.875zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.875zM13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />';
+                    break;
+                case 'denda.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />';
+                    break;
+                case 'kas.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5c.621 0 1.125.504 1.125 1.125v12.125c0 .621-.504 1.125-1.125 1.125H3.75A1.125 1.125 0 012.625 16.5V5.625C2.625 5.004 3.129 4.5 3.75 4.5zM18 10.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6 10.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />';
+                    break;
+                case 'announcements.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />';
+                    break;
+                case 'reports.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />';
+                    break;
+                case 'letters.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />';
+                    break;
+                case 'votes.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+                    break;
+                case 'inventory.index':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />';
+                    break;
+            }
+            return $svg ? "<svg class=\"{$class}\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\">{$svg}</svg>" : '';
+        }
+    }
 @endphp
 
 <!DOCTYPE html>
@@ -67,6 +112,7 @@
                                     @if ($item['active']) aria-current="page" @endif
                                     class="flex min-h-11 items-center rounded-md px-3 text-sm font-medium transition {{ $item['active'] ? 'bg-primary text-white' : 'text-ink-secondary hover:bg-canvas-soft hover:text-ink' }}"
                                 >
+                                    {!! getMenuIcon($item['route']) !!}
                                     {{ $item['label'] }}
                                 </a>
                             @endforeach
@@ -104,15 +150,16 @@
             </main>
         </div>
 
-        <nav class="safe-bottom fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-hairline bg-white/95 px-2 pt-2 shadow-level2 backdrop-blur lg:hidden" aria-label="Navigasi utama">
+        <nav class="safe-bottom fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-hairline bg-white/95 px-2 pt-3 shadow-level2 backdrop-blur lg:hidden" aria-label="Navigasi utama">
             @foreach ($groups as $items)
                 @foreach ($items as $item)
                     @if (in_array($item['route'], $mobileRoutes, true))
                         <a
                             href="{{ route($item['route']) }}"
                             @if ($item['active']) aria-current="page" @endif
-                            class="flex min-h-11 items-center justify-center rounded-md px-1 text-center text-xs font-medium {{ $item['active'] ? 'text-primary' : 'text-ink-mute' }}"
+                            class="flex flex-col items-center justify-center rounded-md py-1.5 px-1 text-center text-[10px] font-medium {{ $item['active'] ? 'text-primary' : 'text-ink-mute' }}"
                         >
+                            {!! getMenuIcon($item['route'], 'h-5 w-5 mb-1 shrink-0') !!}
                             {{ $item['mobile'] }}
                         </a>
                     @endif
@@ -124,8 +171,11 @@
                 @click="moreOpen = true; $nextTick(() => $refs.moreClose.focus())"
                 :aria-expanded="moreOpen"
                 aria-controls="mobile-more-menu"
-                class="min-h-11 rounded-md px-1 text-xs font-medium text-ink-mute"
+                class="flex flex-col items-center justify-center rounded-md py-1.5 px-1 text-center text-[10px] font-medium text-ink-mute"
             >
+                <svg class="h-5 w-5 mb-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 5.25h16.5m-16.5-10.5h16.5" />
+                </svg>
                 Lainnya
             </button>
         </nav>
@@ -185,9 +235,10 @@
                         @if ($drawerItems->isNotEmpty())
                             <div>
                                 <p class="text-[11px] font-medium uppercase tracking-[0.1em] text-ink-mute">{{ $group }}</p>
-                                <div class="mt-2 grid gap-2">
+                                <div class="mt-2 grid grid-cols-2 gap-2.5">
                                     @foreach ($drawerItems as $item)
                                         <a href="{{ route($item['route']) }}" class="flex min-h-11 items-center rounded-md border border-hairline px-3 text-sm font-medium text-ink-secondary">
+                                            {!! getMenuIcon($item['route']) !!}
                                             {{ $item['label'] }}
                                         </a>
                                     @endforeach

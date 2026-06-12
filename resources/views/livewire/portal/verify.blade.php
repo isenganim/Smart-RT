@@ -69,14 +69,12 @@ $check = function (ResidentLookup $lookup) {
         </div>
     @elseif ($feedback)
         <div class="rounded-lg bg-[#fef2f2] border border-[#fca5a5] p-6 text-center shadow-level1 animate-fade-in">
-            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ef4444]/15 text-[#dc2626] mb-3 ring-1 ring-[#ef4444]/20">!</span>
             <p class="text-sm font-medium text-[#991b1b] leading-relaxed">{{ $feedback }}</p>
         </div>
     @endif
 
     <div class="text-center">
         <a href="{{ route('portal.home') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#64748d] hover:text-[#533afd] transition-colors group">
-            <span class="transition-transform duration-300 group-hover:-translate-x-1">&larr;</span>
             Kembali ke portal
         </a>
     </div>

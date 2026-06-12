@@ -45,7 +45,7 @@ it('shows scanner controls and manual fallback after unlock', function () {
         ->assertSee('Mulai Kamera')
         ->assertSee('data-iuran-scanner', false)
         ->assertSee('iuran-qr-reader', false)
-        ->assertSee('Input Manual Kode QR Rumah')
+        ->assertSee('Masukkan Kode QR Rumah Secara Manual')
         ->assertSee('iuran-token-input', false);
 });
 

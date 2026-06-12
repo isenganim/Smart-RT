@@ -131,8 +131,8 @@ $scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $
 <div class="space-y-6">
     @unless ($unlocked)
         <div class="relative overflow-hidden rounded-lg border border-[#e3e8ee] bg-white p-6 shadow-level1">
-            <h1 class="display-md text-[#0d253d]">Scan Iuran Ronda</h1>
-            <p class="mt-2 text-sm text-[#64748d] leading-relaxed">Masukkan PIN harian dari pengurus untuk membuka mode scan.</p>
+            <h1 class="display-md text-[#0d253d]">Pindai Iuran Ronda</h1>
+            <p class="mt-2 text-sm text-[#64748d] leading-relaxed">Masukkan PIN harian dari pengurus untuk membuka mode pindai.</p>
 
             <form wire:submit="unlock" class="mt-6 space-y-5">
                 <x-portal.phone-field model="phone" label="Nomor HP Petugas" />
@@ -142,7 +142,7 @@ $scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $
                     @error('pin') <p class="mt-2 text-sm text-[#ea2261] font-medium">{{ $message }}</p> @enderror
                 </div>
                 <button class="w-full rounded-full bg-[#533afd] py-3.5 font-sans font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] transition-all duration-150">
-                    Buka Mode Scan
+                    Buka Mode Pindai
                 </button>
             </form>
 
@@ -155,7 +155,7 @@ $scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $
     @else
         <div class="relative overflow-hidden rounded-lg border border-[#e3e8ee] bg-white p-6 shadow-level1">
             <div class="flex items-center justify-between">
-                <h1 class="display-md text-[#0d253d]">Scan Iuran</h1>
+                <h1 class="display-md text-[#0d253d]">Pindai Iuran</h1>
                 <span class="inline-flex items-center gap-1.5 rounded-full bg-[#ecfdf5] border border-[#a7f3d0] px-3 py-1 text-[11px] font-semibold text-[#065f46]">
                     <span class="h-1.5 w-1.5 rounded-full bg-[#059669] animate-pulse"></span>
                     PIN Aktif
@@ -202,17 +202,17 @@ $scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $
             {{-- Manual token form --}}
             <form wire:submit="scan" class="mt-5 space-y-4 border-t border-[#e3e8ee] pt-5">
                 <div>
-                    <label for="iuran-token-input" class="block text-sm font-semibold text-[#273951]">Input Manual Kode QR Rumah</label>
+                    <label for="iuran-token-input" class="block text-sm font-semibold text-[#273951]">Masukkan Kode QR Rumah Secara Manual</label>
                     <input
                         id="iuran-token-input"
                         wire:model="token"
                         type="text"
                         class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-3.5 text-[#0d253d] placeholder-[#64748d] focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300 text-base"
-                        placeholder="Hasil scan akan terisi di sini"
+                        placeholder="Hasil pindai akan muncul di sini"
                     >
                 </div>
                 <button class="w-full rounded-full bg-[#533afd] py-3.5 font-sans font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] transition-all duration-150">
-                    Terima Cash Rp500
+                    Terima Tunai Rp500
                 </button>
             </form>
         </div>
@@ -242,7 +242,6 @@ $scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $
 
     <div class="text-center">
         <a href="{{ route('portal.home') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#64748d] hover:text-[#533afd] transition-colors group">
-            <span class="transition-transform duration-300 group-hover:-translate-x-1">&larr;</span>
             Kembali ke portal
         </a>
     </div>

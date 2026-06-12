@@ -5,12 +5,12 @@ use App\Models\Vote;
 use function Livewire\Volt\{computed, layout, title};
 
 layout('components.layouts.public');
-title('Voting Warga');
+title('Pemungutan Suara Warga');
 $votes = computed(fn () => Vote::query()->whereIn('status', [VoteStatus::AKTIF->value, VoteStatus::SELESAI->value])->latest()->take(20)->get());
 ?>
 
 <div class="space-y-4">
-    <h1 class="display-md text-[#0d253d]">Voting Warga</h1>
+    <h1 class="display-md text-[#0d253d]">Pemungutan Suara Warga</h1>
     @forelse($this->votes as $vote)
         <a href="{{ route('portal.vote', $vote) }}" class="group block rounded-lg border border-[#e3e8ee] bg-white p-5 shadow-level1 hover:border-[#533afd]/60 hover:shadow-level2 transition-all duration-150">
             <p class="font-sans font-semibold text-[#0d253d] group-hover:text-[#533afd] transition-colors leading-snug">{{ $vote->question }}</p>

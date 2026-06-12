@@ -112,10 +112,9 @@ $schedules = computed(fn () => RondaSchedule::query()
 
     <div class="flex flex-col gap-3 items-center">
         <a href="{{ route('portal.checkin') }}" class="w-full rounded-full bg-[#533afd] py-3.5 font-sans font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] text-center transition-all duration-150">
-            Check-in Ronda Hari Ini
+            Catat Kehadiran Ronda Hari Ini
         </a>
         <a href="{{ route('portal.home') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#64748d] hover:text-[#533afd] transition-colors group mt-1">
-            <span class="transition-transform duration-300 group-hover:-translate-x-1">&larr;</span>
             Kembali ke portal
         </a>
     </div>

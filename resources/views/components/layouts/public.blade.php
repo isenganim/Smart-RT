@@ -60,7 +60,7 @@
             </main>
 
             <footer class="px-6 py-6 text-center text-xs text-[#64748d] border-t border-[#e3e8ee] bg-[#f6f9fc]/50">
-                <p>Smart RT Warga Portal &bull; Hubungi pengurus RT jika data Anda belum terdaftar.</p>
+                <p>Portal Warga Smart RT &bull; Hubungi pengurus RT jika data Anda belum terdaftar.</p>
             </footer>
         </div>
     </div>

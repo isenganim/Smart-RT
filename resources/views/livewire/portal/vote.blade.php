@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use function Livewire\Volt\{computed, layout, mount, rules, state, title};
 
 layout('components.layouts.public');
-title('Voting');
+title('Pemungutan Suara');
 state(['vote' => null, 'phone' => '', 'optionId' => null, 'done' => false, 'feedback' => null]);
 mount(function (Vote $vote) {
     abort_unless(in_array($vote->status, [VoteStatus::AKTIF, VoteStatus::SELESAI], true), 404);

@@ -35,6 +35,34 @@ it('creates and publishes announcements with audit logs', function () {
         ->and(AuditLog::query()->where('action', 'announcement.published')->exists())->toBeTrue();
 });
 
+it('sanitizes rich announcement content before saving', function () {
+    Volt::test('dashboard.announcements.index')
+        ->set('title', 'Kerja Bakti')
+        ->set('body', '<div><strong>Minggu pagi</strong></div><script>alert(1)</script><a href="javascript:alert(1)">Detail</a>')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $body = Announcement::query()->firstOrFail()->body;
+
+    expect($body)
+        ->toContain('<strong>Minggu pagi</strong>')
+        ->not->toContain('<script')
+        ->not->toContain('javascript:');
+});
+
+it('uses a rich text editor and explicit announcement publication controls', function () {
+    $source = file_get_contents(resource_path('views/livewire/dashboard/announcements/index.blade.php'));
+
+    expect($source)
+        ->toContain('<trix-editor')
+        ->toContain('data-announcement-editor')
+        ->toContain('<x-admin.page-header')
+        ->toContain('<x-admin.status-badge')
+        ->toContain('Tampilkan')
+        ->toContain('Sembunyikan')
+        ->not->toContain('<textarea wire:model="body"');
+});
+
 it('updates report and letter workflows with audit logs', function () {
     $report = Report::factory()->create();
     $letter = LetterRequest::factory()->create();
@@ -181,6 +209,27 @@ it('clears activation feedback after a vote is activated successfully', function
 
     expect($vote->fresh()->status)->toBe(VoteStatus::AKTIF);
 });
+
+it('edits an existing draft vote and its options', function () {
+    $vote = Vote::factory()->create(['question' => 'Original Question']);
+    VoteOption::factory()->for($vote)->create(['label' => 'Original Option']);
+
+    Volt::test('dashboard.votes.index')
+        ->call('edit', $vote->id)
+        ->assertSet('question', 'Original Question')
+        ->assertSet('optionsText', "Original Option")
+        ->set('question', 'Updated Question')
+        ->set('optionsText', "Updated Option 1\nUpdated Option 2")
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $vote = $vote->fresh();
+    expect($vote->question)->toBe('Updated Question')
+        ->and($vote->options()->count())->toBe(2)
+        ->and($vote->options()->pluck('label')->toArray())->toBe(['Updated Option 1', 'Updated Option 2'])
+        ->and(AuditLog::query()->where('action', 'vote.updated')->exists())->toBeTrue();
+});
+
 
 it('protects all sprint four dashboard routes', function (string $uri) {
     auth()->logout();

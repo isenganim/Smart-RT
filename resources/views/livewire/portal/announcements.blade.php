@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Announcement;
+use App\Support\AnnouncementHtml;
 use function Livewire\Volt\{computed, layout, title};
 
 layout('components.layouts.public');
@@ -15,10 +16,10 @@ $announcements = computed(fn () => Announcement::query()->published()->take(50)-
         <article class="rounded-lg border border-[#e3e8ee] bg-white p-5 shadow-level1">
             <h2 class="font-sans font-semibold text-[#533afd] text-base leading-snug">{{ $announcement->title }}</h2>
             <p class="mt-1 text-xs text-[#64748d]">{{ $announcement->published_at->translatedFormat('d M Y') }}</p>
-            <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-[#273951]">{{ $announcement->body }}</p>
+            <div class="announcement-content mt-3">{!! app(AnnouncementHtml::class)->sanitize($announcement->body) !!}</div>
         </article>
     @empty
         <p class="rounded-lg border border-[#e3e8ee] bg-white p-5 text-[#64748d] shadow-level1">Belum ada pengumuman.</p>
     @endforelse
-    <a href="{{ route('portal.home') }}" class="block text-center text-sm font-semibold text-[#64748d] hover:text-[#533afd] transition-colors">&larr; Kembali ke portal</a>
+    <a href="{{ route('portal.home') }}" class="block text-center text-sm font-semibold text-[#64748d] hover:text-[#533afd] transition-colors">Kembali ke portal</a>
 </div>

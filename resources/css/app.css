@@ -110,12 +110,83 @@ body {
     scrollbar-width: none;
 }
 
+.announcement-editor trix-toolbar {
+    margin-bottom: 0.5rem;
+}
+
+.announcement-editor .trix-button-row {
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.announcement-editor .trix-button-group {
+    margin: 0;
+    border-color: var(--color-hairline);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.announcement-editor .trix-button {
+    border-bottom: 0;
+    background-color: white;
+}
+
+.announcement-editor .trix-button.trix-active {
+    background-color: color-mix(in srgb, var(--color-primary) 10%, white);
+}
+
+.announcement-editor trix-editor {
+    min-height: 11rem;
+    border: 1px solid var(--color-hairline-input);
+    border-radius: var(--radius-sm);
+    background: white;
+    padding: 0.875rem 1rem;
+    color: var(--color-ink);
+    line-height: 1.65;
+}
+
+.announcement-editor trix-editor:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+    outline: none;
+}
+
+.announcement-content {
+    color: var(--color-ink-secondary);
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+
+.announcement-content > * + * {
+    margin-top: 0.75rem;
+}
+
+.announcement-content ul,
+.announcement-content ol {
+    padding-left: 1.25rem;
+}
+
+.announcement-content ul {
+    list-style: disc;
+}
+
+.announcement-content ol {
+    list-style: decimal;
+}
+
+.announcement-content a {
+    color: var(--color-primary);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 [x-cloak] {
     display: none !important;
 }
 
 .safe-bottom {
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
 }
 
 :focus-visible {

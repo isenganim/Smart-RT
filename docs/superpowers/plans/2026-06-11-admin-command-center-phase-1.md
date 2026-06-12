@@ -700,11 +700,49 @@ Replace only the button markup in
 </x-admin.button>
 ```
 
-- [ ] **Step 5: Add shell accessibility utilities**
+- [ ] **Step 5: Add shell design tokens and accessibility utilities**
 
-Append to `resources/css/app.css`:
+Ensure `resources/css/app.css` defines the Tailwind v4 theme tokens used by the
+shell before the accessibility utilities:
 
 ```css
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    --color-primary: #533afd;
+    --color-primary-deep: #4434d4;
+    --color-primary-press: #2e2b8c;
+    --color-primary-soft: #665efd;
+    --color-primary-bg-subdued-hover: #b9b9f9;
+    --color-brand-dark-900: #1c1e54;
+    --color-ruby: #ea2261;
+    --color-magenta: #f96bee;
+    --color-lemon: #9b6829;
+
+    --color-canvas: #ffffff;
+    --color-canvas-soft: #f6f9fc;
+    --color-canvas-cream: #f5e9d4;
+    --color-hairline: #e3e8ee;
+    --color-hairline-input: #a8c3de;
+
+    --color-ink: #0d253d;
+    --color-ink-secondary: #273951;
+    --color-ink-mute: #64748d;
+    --color-ink-mute-2: #61718a;
+    --color-on-primary: #ffffff;
+
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-pill: 9999px;
+
+    --shadow-level1: 0 1px 3px rgba(0, 55, 112, 0.08);
+    --shadow-level2: 0 8px 24px rgba(0, 55, 112, 0.08), 0 2px 6px rgba(0, 55, 112, 0.04);
+}
+
 [x-cloak] {
     display: none !important;
 }

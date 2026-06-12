@@ -16,6 +16,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "html5-qrcode": "^2.3.8"
+        "html5-qrcode": "^2.3.8",
+        "trix": "^2.1.19"
     }
 }
