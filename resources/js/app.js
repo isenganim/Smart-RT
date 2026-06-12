@@ -22,6 +22,7 @@ function initIuranScanner() {
 
   let scanner     = null;
   let isSubmitting = false;
+  let isStarting = false;
 
   function setStatus(msg) {
     if (statusEl) statusEl.textContent = msg;
@@ -38,6 +39,7 @@ function initIuranScanner() {
   }
 
   async function stopScanner() {
+    isStarting = false;
     if (!scanner) return;
     try {
       await scanner.stop();
@@ -50,11 +52,13 @@ function initIuranScanner() {
   }
 
   async function startScanner() {
+    if (scanner || isStarting) return;
     if (!navigator.mediaDevices?.getUserMedia) {
       setStatus('Kamera tidak tersedia di browser ini. Gunakan input manual.');
       return;
     }
 
+    isStarting = true;
     import('html5-qrcode').then(({ Html5Qrcode, Html5QrcodeSupportedFormats }) => {
       scanner = new Html5Qrcode('iuran-qr-reader');
 
@@ -92,9 +96,12 @@ function initIuranScanner() {
         }
       )
       .then(() => {
+        isStarting = false;
         setStatus('Arahkan kamera ke QR rumah.');
       })
       .catch((err) => {
+        isStarting = false;
+        scanner = null;
         showStartBtn();
         if (err && err.message && err.message.toLowerCase().includes('permission')) {
           setStatus('Izin kamera ditolak. Aktifkan izin kamera atau input kode manual.');
@@ -105,6 +112,7 @@ function initIuranScanner() {
         }
       });
     }).catch(() => {
+      isStarting = false;
       setStatus('Scanner gagal dimuat. Gunakan input manual.');
     });
   }

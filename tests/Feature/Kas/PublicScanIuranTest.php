@@ -49,6 +49,16 @@ it('shows scanner controls and manual fallback after unlock', function () {
         ->assertSee('iuran-token-input', false);
 });
 
+it('guards scanner startup against overlapping initialization', function () {
+    $source = file_get_contents(resource_path('js/app.js'));
+
+    expect($source)
+        ->toContain('let isStarting = false;')
+        ->toContain('if (scanner || isStarting) return;')
+        ->toContain('isStarting = true;')
+        ->toContain('isStarting = false;');
+});
+
 it('rejects an expired pin', function () {
     $this->session->update(['ends_at' => now()->subHour(), 'starts_at' => now()->subHours(3)]);
 

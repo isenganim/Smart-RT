@@ -159,6 +159,27 @@ it('updates existing family members from the same modal', function () {
     expect(AuditLog::query()->where('action', 'resident.updated')->exists())->toBeTrue();
 });
 
+it('keeps inactive family members inactive when saving the modal', function () {
+    $resident = Resident::factory()->for($this->household)->create([
+        'name' => 'Anggota Tidak Aktif',
+        'phone' => '81267676767',
+        'is_active' => false,
+    ]);
+
+    $this->actingAs($this->admin);
+
+    Volt::test('residents.index')
+        ->call('openFamilyModal', $this->household->id)
+        ->set('memberRows.0.ronda_notes', 'Catatan diperbarui')
+        ->call('saveFamilyMembers')
+        ->assertHasNoErrors();
+
+    $resident->refresh();
+
+    expect($resident->is_active)->toBeFalse();
+    expect($resident->ronda_notes)->toBe('Catatan diperbarui');
+});
+
 it('deactivates an existing family member when removed from the modal', function () {
     $resident = Resident::factory()->for($this->household)->create([
         'name' => 'Anggota Dihapus',

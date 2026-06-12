@@ -175,7 +175,7 @@ $saveFamilyMembers = function () {
                 'name' => $row['name'],
                 'phone' => $row['phone'],
                 'ronda_notes' => filled($row['ronda_notes'] ?? null) ? $row['ronda_notes'] : null,
-                'is_active' => true,
+                'is_active' => (bool) ($row['is_active'] ?? true),
             ];
 
             if ($residentId) {
