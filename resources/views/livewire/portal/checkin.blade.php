@@ -63,7 +63,6 @@ $submit = function (RondaCheckin $checkin) {
         </div>
     @elseif ($feedback)
         <div class="rounded-lg bg-[#fef2f2] border border-[#fca5a5] p-6 text-center shadow-level1 animate-fade-in">
-            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ef4444]/15 text-[#dc2626] mb-3 ring-1 ring-[#ef4444]/20">!</span>
             <p class="text-sm font-medium text-[#991b1b] leading-relaxed">{{ $feedback }}</p>
         </div>
     @endif

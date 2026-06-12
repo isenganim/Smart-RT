@@ -80,8 +80,8 @@ $submit = function (ResidentLookup $lookup) {
             <p class="mt-1 text-sm">Pengurus akan memproses pengajuan Anda.</p>
         </div>
     @elseif ($feedback)
-        <div class="rounded-lg border border-[#fca5a5] bg-[#fef2f2] p-5 text-center text-[#991b1b] shadow-level1">
-            {{ $feedback }}
+        <div class="rounded-lg border border-[#fca5a5] bg-[#fef2f2] p-6 text-center shadow-level1 animate-fade-in">
+            <p class="text-sm font-medium text-[#991b1b] leading-relaxed">{{ $feedback }}</p>
         </div>
     @endif
 </div>

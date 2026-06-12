@@ -146,12 +146,13 @@ $scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $
                 </button>
             </form>
 
-            @if ($unlockError)
-                <div class="mt-4 rounded-lg bg-[#fef2f2] border border-[#fca5a5] p-4 shadow-level1 animate-fade-in">
-                    <p class="text-sm font-medium text-[#991b1b] leading-relaxed">{{ $unlockError }}</p>
-                </div>
-            @endif
         </div>
+
+        @if ($unlockError)
+            <div class="rounded-lg bg-[#fef2f2] border border-[#fca5a5] p-6 text-center shadow-level1 animate-fade-in">
+                <p class="text-sm font-medium text-[#991b1b] leading-relaxed">{{ $unlockError }}</p>
+            </div>
+        @endif
     @else
         <div class="relative overflow-hidden rounded-lg border border-[#e3e8ee] bg-white p-6 shadow-level1">
             <div class="flex items-center justify-between">
@@ -232,9 +233,8 @@ $scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $
                     <p class="text-xs mt-1">{{ $lastResult['house'] }} - {{ $lastResult['head'] }}</p>
                 </div>
             @else
-                <div class="rounded-lg bg-[#fef2f2] border border-[#fca5a5] p-5 shadow-level1 animate-fade-in text-[#991b1b]">
-                    <p class="text-xs font-semibold tracking-wide uppercase text-[#dc2626]">Gagal Memproses</p>
-                    <p class="text-sm font-medium leading-relaxed mt-1">{{ $lastResult['message'] }}</p>
+                <div class="rounded-lg bg-[#fef2f2] border border-[#fca5a5] p-6 text-center shadow-level1 animate-fade-in">
+                    <p class="text-sm font-medium text-[#991b1b] leading-relaxed">{{ $lastResult['message'] }}</p>
                 </div>
             @endif
         @endif

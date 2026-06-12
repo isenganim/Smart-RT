@@ -3,10 +3,16 @@
 use App\Models\Resident;
 use App\Models\RondaSchedule;
 use App\Support\Audit;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use function Livewire\Volt\{state, computed, layout, mount, title};
 
-state(['schedule' => null, 'residentId' => null]);
+use function Livewire\Volt\computed;
+use function Livewire\Volt\layout;
+use function Livewire\Volt\mount;
+use function Livewire\Volt\state;
+use function Livewire\Volt\title;
+
+state(['schedule' => null, 'residentId' => null, 'pendingRemovalId' => null]);
 
 layout('components.layouts.app');
 title('Kelola Jadwal Ronda');
@@ -16,6 +22,10 @@ mount(function (RondaSchedule $schedule) {
 });
 
 $assignments = computed(fn () => $this->schedule->assignments()->with('resident.household')->get());
+
+$pendingRemoval = computed(fn () => $this->pendingRemovalId
+    ? $this->schedule->assignments()->with('resident')->find($this->pendingRemovalId)
+    : null);
 
 $availableResidents = computed(fn () => Resident::query()
     ->with('household')
@@ -41,12 +51,53 @@ $assign = function () {
     $this->reset('residentId');
 };
 
-$remove = function (int $assignmentId) {
+$startRemove = function (int $assignmentId) {
     $assignment = $this->schedule->assignments()->findOrFail($assignmentId);
-    $residentId = $assignment->resident_id;
-    $assignment->delete();
 
-    Audit::record(auth()->user(), 'ronda.assignment.removed', 'ronda_schedule', $this->schedule->id, ['resident_id' => $residentId]);
+    if ($assignment->hasCheckedIn()) {
+        $this->addError('removal', 'Petugas yang sudah check-in tidak dapat dihapus.');
+
+        return;
+    }
+
+    $this->pendingRemovalId = $assignment->id;
+    $this->resetValidation('removal');
+};
+
+$cancelRemove = function () {
+    $this->pendingRemovalId = null;
+    $this->resetValidation('removal');
+};
+
+$confirmRemove = function () {
+    if (! $this->pendingRemovalId) {
+        return;
+    }
+
+    $removed = DB::transaction(function () {
+        $assignment = $this->schedule->assignments()
+            ->lockForUpdate()
+            ->findOrFail($this->pendingRemovalId);
+
+        if ($assignment->hasCheckedIn()) {
+            $this->pendingRemovalId = null;
+            $this->addError('removal', 'Petugas yang sudah check-in tidak dapat dihapus.');
+
+            return false;
+        }
+
+        $residentId = $assignment->resident_id;
+        $assignment->delete();
+
+        Audit::record(auth()->user(), 'ronda.assignment.removed', 'ronda_schedule', $this->schedule->id, ['resident_id' => $residentId]);
+
+        return true;
+    });
+
+    if ($removed) {
+        $this->pendingRemovalId = null;
+        $this->resetValidation('removal');
+    }
 };
 
 ?>
@@ -87,6 +138,12 @@ $remove = function (int $assignmentId) {
                 <p class="mt-1 text-sm text-slate-500">Warga yang bertugas ronda pada tanggal ini beserta status kehadirannya.</p>
             </div>
 
+            @error('removal')
+                <div class="mx-5 mt-4 rounded-lg border border-ruby/20 bg-ruby/10 px-4 py-3 text-sm font-medium text-ruby">
+                    {{ $message }}
+                </div>
+            @enderror
+
             <div class="hidden overflow-hidden sm:block">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-50 text-left text-slate-500">
@@ -116,7 +173,9 @@ $remove = function (int $assignmentId) {
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <button wire:click="remove({{ $assignment->id }})" class="rounded-full bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-100 transition">Hapus</button>
+                                    @unless ($assignment->hasCheckedIn())
+                                        <button type="button" wire:click="startRemove({{ $assignment->id }})" class="rounded-full bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-100 transition">Hapus</button>
+                                    @endunless
                                 </td>
                             </tr>
                         @empty
@@ -141,13 +200,33 @@ $remove = function (int $assignmentId) {
                                 {{ $assignment->hasCheckedIn() ? 'Hadir ('.$assignment->checked_in_at->format('H:i').' WIB)' : 'Belum Check-in' }}
                             </span>
                         </div>
-                        <div class="mt-4 flex justify-end">
-                            <button wire:click="remove({{ $assignment->id }})" class="rounded-full bg-red-50 px-4 py-2 text-xs font-bold text-red-700 hover:bg-red-100">Hapus Petugas</button>
-                        </div>
+                        @unless ($assignment->hasCheckedIn())
+                            <div class="mt-4 flex justify-end">
+                                <button type="button" wire:click="startRemove({{ $assignment->id }})" class="rounded-full bg-red-50 px-4 py-2 text-xs font-bold text-red-700 hover:bg-red-100">Hapus Petugas</button>
+                            </div>
+                        @endunless
                     </article>
                 @empty
                     <p class="p-5 text-center text-slate-500">Belum ada warga yang ditugaskan untuk tanggal ini.</p>
                 @endforelse
             </div>
         </section>
+
+        @if ($this->pendingRemoval)
+            <div wire:keydown.escape.window="cancelRemove" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-6" role="dialog" aria-modal="true" aria-labelledby="remove-assignment-title" aria-describedby="remove-assignment-description">
+                <button type="button" wire:click="cancelRemove" class="absolute inset-0 cursor-default bg-ink/45 backdrop-blur-sm" aria-label="Tutup konfirmasi"></button>
+
+                <section class="relative z-10 w-full max-w-md rounded-xl border border-hairline bg-white p-6 shadow-level2">
+                    <h2 id="remove-assignment-title" class="text-xl font-medium text-ink">Hapus Petugas Ronda</h2>
+                    <p id="remove-assignment-description" class="mt-3 text-sm leading-6 text-ink-mute">
+                        Hapus <span class="font-medium text-ink">{{ $this->pendingRemoval->resident?->name }}</span> dari jadwal ronda ini? Tindakan ini tidak dapat dibatalkan.
+                    </p>
+
+                    <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <x-admin.button type="button" variant="secondary" wire:click="cancelRemove">Batal</x-admin.button>
+                        <x-admin.button type="button" variant="danger" wire:click="confirmRemove">Ya, Hapus Petugas</x-admin.button>
+                    </div>
+                </section>
+            </div>
+        @endif
 </div>
