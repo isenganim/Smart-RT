@@ -8,7 +8,7 @@ use App\Models\RondaSchedule;
 use App\Services\KasReport;
 
 beforeEach(function () {
-    $this->report = new KasReport();
+    $this->report = new KasReport;
 });
 
 it('sums active transactions for a single day', function () {

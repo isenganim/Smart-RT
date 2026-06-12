@@ -180,6 +180,29 @@ it('keeps inactive family members inactive when saving the modal', function () {
     expect($resident->ronda_notes)->toBe('Catatan diperbarui');
 });
 
+it('allows saving an inactive family member whose phone is used by an active resident', function () {
+    Resident::factory()->create([
+        'phone' => '81267676767',
+        'is_active' => true,
+    ]);
+
+    $resident = Resident::factory()->for($this->household)->create([
+        'name' => 'Anggota Tidak Aktif',
+        'phone' => '81267676767',
+        'is_active' => false,
+    ]);
+
+    $this->actingAs($this->admin);
+
+    Volt::test('residents.index')
+        ->call('openFamilyModal', $this->household->id)
+        ->set('memberRows.0.ronda_notes', 'Catatan diperbarui')
+        ->call('saveFamilyMembers')
+        ->assertHasNoErrors();
+
+    expect($resident->fresh()->ronda_notes)->toBe('Catatan diperbarui');
+});
+
 it('deactivates an existing family member when removed from the modal', function () {
     $resident = Resident::factory()->for($this->household)->create([
         'name' => 'Anggota Dihapus',
@@ -247,6 +270,35 @@ it('rejects duplicate active phone numbers within the same family modal submissi
         ->assertHasErrors('memberRows.1.phone');
 
     expect(Resident::query()->where('household_id', $this->household->id)->count())->toBe(0);
+});
+
+it('allows an inactive row to share a phone with an active row in the same submission', function () {
+    $this->actingAs($this->admin);
+
+    Volt::test('residents.index')
+        ->call('openFamilyModal', $this->household->id)
+        ->set('memberRows', [
+            [
+                'id' => null,
+                'name' => 'Anggota Aktif',
+                'phone' => '081288888888',
+                'ronda_notes' => '',
+                'is_active' => true,
+                '_delete' => false,
+            ],
+            [
+                'id' => null,
+                'name' => 'Anggota Tidak Aktif',
+                'phone' => '+62 812 8888 8888',
+                'ronda_notes' => '',
+                'is_active' => false,
+                '_delete' => false,
+            ],
+        ])
+        ->call('saveFamilyMembers')
+        ->assertHasNoErrors();
+
+    expect(Resident::query()->where('household_id', $this->household->id)->count())->toBe(2);
 });
 
 it('allows editing a resident keeping its own phone', function () {

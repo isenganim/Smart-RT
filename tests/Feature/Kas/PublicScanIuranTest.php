@@ -59,6 +59,16 @@ it('guards scanner startup against overlapping initialization', function () {
         ->toContain('isStarting = false;');
 });
 
+it('cancels scanner startup when stop or navigation happens during initialization', function () {
+    $source = file_get_contents(resource_path('js/app.js'));
+
+    expect($source)
+        ->toContain('let startGeneration = 0;')
+        ->toContain('const generation = ++startGeneration;')
+        ->toContain('generation !== startGeneration')
+        ->toContain('startGeneration++;');
+});
+
 it('rejects an expired pin', function () {
     $this->session->update(['ends_at' => now()->subHour(), 'starts_at' => now()->subHours(3)]);
 

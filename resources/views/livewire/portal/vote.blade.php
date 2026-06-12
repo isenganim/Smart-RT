@@ -74,7 +74,7 @@ $submit = function (VotingService $voting) {
                             <input wire:model="optionId" type="radio" value="{{ $option->id }}" class="text-[#533afd] focus:ring-[#533afd]">
                             <span class="font-medium text-sm">{{ $option->label }}</span>
                         </label>
-                    @endforeach 
+                    @endforeach
                     @error('optionId')
                         <p class="text-sm text-[#ea2261] font-medium">{{ $message }}</p>
                     @enderror

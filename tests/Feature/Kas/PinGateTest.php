@@ -4,7 +4,7 @@ use App\Models\RondaScanSession;
 use App\Services\PinGate;
 
 beforeEach(function () {
-    $this->gate = new PinGate();
+    $this->gate = new PinGate;
 });
 
 it('unlocks with a valid active pin', function () {

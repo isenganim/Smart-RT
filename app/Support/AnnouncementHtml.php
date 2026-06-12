@@ -12,7 +12,7 @@ final class AnnouncementHtml
 
     public function __construct()
     {
-        $config = (new HtmlSanitizerConfig())
+        $config = (new HtmlSanitizerConfig)
             ->defaultAction(HtmlSanitizerAction::Block)
             ->allowElement('div')
             ->allowElement('br')

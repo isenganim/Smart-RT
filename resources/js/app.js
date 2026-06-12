@@ -59,6 +59,7 @@ function initIuranScanner() {
   let scanner     = null;
   let isSubmitting = false;
   let isStarting = false;
+  let startGeneration = 0;
 
   function setStatus(msg) {
     if (statusEl) statusEl.textContent = msg;
@@ -75,14 +76,16 @@ function initIuranScanner() {
   }
 
   async function stopScanner() {
+    startGeneration++;
     isStarting = false;
-    if (!scanner) return;
+    const currentScanner = scanner;
+    scanner = null;
+    if (!currentScanner) return;
     try {
-      await scanner.stop();
+      await currentScanner.stop();
     } catch (_) {
       // ignore cleanup errors
     }
-    scanner = null;
     showStartBtn();
     setStatus('Kamera dimatikan.');
   }
@@ -95,8 +98,14 @@ function initIuranScanner() {
     }
 
     isStarting = true;
-    import('html5-qrcode').then(({ Html5Qrcode, Html5QrcodeSupportedFormats }) => {
-      scanner = new Html5Qrcode('iuran-qr-reader');
+    const generation = ++startGeneration;
+
+    try {
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode');
+      if (generation !== startGeneration) return;
+
+      const currentScanner = new Html5Qrcode('iuran-qr-reader');
+      scanner = currentScanner;
 
       const config = {
         fps: 10,
@@ -109,10 +118,12 @@ function initIuranScanner() {
       setStatus('Memulai kamera...');
       showStopBtn();
 
-      scanner.start(
+      await currentScanner.start(
         { facingMode: 'environment' },
         config,
         (decodedText) => {
+          if (generation !== startGeneration) return;
+
           // Duplicate-scan guard.
           if (isSubmitting) return;
           const token = (decodedText || '').trim();
@@ -130,27 +141,34 @@ function initIuranScanner() {
         () => {
           // Per-frame error — ignore, camera keeps scanning.
         }
-      )
-      .then(() => {
-        isStarting = false;
-        setStatus('Arahkan kamera ke QR rumah.');
-      })
-      .catch((err) => {
-        isStarting = false;
-        scanner = null;
-        showStartBtn();
-        if (err && err.message && err.message.toLowerCase().includes('permission')) {
-          setStatus('Izin kamera ditolak. Aktifkan izin kamera atau masukkan kode secara manual.');
-        } else if (err && err.message && err.message.toLowerCase().includes('notfound')) {
-          setStatus('Kamera tidak ditemukan. Gunakan masukan manual.');
-        } else {
-          setStatus('Pemindai gagal dimulai. Coba muat ulang halaman atau gunakan masukan manual.');
+      );
+
+      if (generation !== startGeneration) {
+        try {
+          await currentScanner.stop();
+        } catch (_) {
+          // ignore cleanup errors
         }
-      });
-    }).catch(() => {
+        if (scanner === currentScanner) scanner = null;
+        return;
+      }
+
       isStarting = false;
-      setStatus('Pemindai gagal dimuat. Gunakan masukan manual.');
-    });
+      setStatus('Arahkan kamera ke QR rumah.');
+    } catch (err) {
+      if (generation !== startGeneration) return;
+
+      isStarting = false;
+      scanner = null;
+      showStartBtn();
+      if (err && err.message && err.message.toLowerCase().includes('permission')) {
+        setStatus('Izin kamera ditolak. Aktifkan izin kamera atau masukkan kode secara manual.');
+      } else if (err && err.message && err.message.toLowerCase().includes('notfound')) {
+        setStatus('Kamera tidak ditemukan. Gunakan masukan manual.');
+      } else {
+        setStatus('Pemindai gagal dimulai. Coba muat ulang halaman atau gunakan masukan manual.');
+      }
+    }
   }
 
   startBtn.addEventListener('click', startScanner);

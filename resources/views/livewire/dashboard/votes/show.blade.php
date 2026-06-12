@@ -61,4 +61,3 @@ $total = computed(fn () => array_sum($this->tally));
         </div>
     </x-admin.panel>
 </div>
-

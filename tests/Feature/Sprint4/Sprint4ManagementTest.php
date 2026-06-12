@@ -217,7 +217,7 @@ it('edits an existing draft vote and its options', function () {
     Volt::test('dashboard.votes.index')
         ->call('edit', $vote->id)
         ->assertSet('question', 'Original Question')
-        ->assertSet('optionsText', "Original Option")
+        ->assertSet('optionsText', 'Original Option')
         ->set('question', 'Updated Question')
         ->set('optionsText', "Updated Option 1\nUpdated Option 2")
         ->call('save')
@@ -230,6 +230,33 @@ it('edits an existing draft vote and its options', function () {
         ->and(AuditLog::query()->where('action', 'vote.updated')->exists())->toBeTrue();
 });
 
+it('locks and rechecks a draft vote inside the update transaction', function () {
+    $source = file_get_contents(resource_path('views/livewire/dashboard/votes/index.blade.php'));
+
+    expect($source)
+        ->toMatch("/Vote::query\\(\\)\\s*->lockForUpdate\\(\\)\\s*->withCount\\('ballots'\\)\\s*->findOrFail/");
+});
+
+it('does not reactivate a completed vote', function () {
+    $vote = Vote::factory()->create(['status' => VoteStatus::SELESAI]);
+    VoteOption::factory()->count(2)->for($vote)->create();
+
+    Volt::test('dashboard.votes.index')
+        ->call('activate', $vote->id)
+        ->assertHasErrors(['activation']);
+
+    expect($vote->fresh()->status)->toBe(VoteStatus::SELESAI);
+});
+
+it('does not close a draft vote', function () {
+    $vote = Vote::factory()->create(['status' => VoteStatus::DRAFT]);
+
+    Volt::test('dashboard.votes.index')
+        ->call('close', $vote->id)
+        ->assertHasErrors(['activation']);
+
+    expect($vote->fresh()->status)->toBe(VoteStatus::DRAFT);
+});
 
 it('protects all sprint four dashboard routes', function (string $uri) {
     auth()->logout();

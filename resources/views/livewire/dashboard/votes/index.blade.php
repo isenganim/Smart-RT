@@ -20,23 +20,25 @@ $save = function () {
     $options = collect(preg_split('/\r\n|\r|\n/', $this->optionsText))->map(fn ($line) => trim($line))->filter()->unique()->values();
     if ($options->count() < 2) { $this->addError('optionsText', 'Minimal dua pilihan berbeda.'); return; }
 
-    $editingVote = null;
-    if ($this->editingId) {
-        $editingVote = Vote::withCount('ballots')->findOrFail($this->editingId);
+    $saved = DB::transaction(function () use ($options) {
+        if ($this->editingId) {
+            $editingVote = Vote::query()
+                ->lockForUpdate()
+                ->withCount('ballots')
+                ->findOrFail($this->editingId);
 
-        if ($editingVote->status !== VoteStatus::DRAFT) {
-            $this->addError('question', 'Voting sudah aktif atau selesai dan tidak dapat diubah.');
-            return;
-        }
+            if ($editingVote->status !== VoteStatus::DRAFT) {
+                $this->addError('question', 'Voting sudah aktif atau selesai dan tidak dapat diubah.');
 
-        if ($editingVote->ballots_count > 0) {
-            $this->addError('question', 'Voting sudah memiliki suara dan tidak dapat diubah.');
-            return;
-        }
-    }
+                return false;
+            }
 
-    DB::transaction(function () use ($options, $editingVote) {
-        if ($editingVote) {
+            if ($editingVote->ballots_count > 0) {
+                $this->addError('question', 'Voting sudah memiliki suara dan tidak dapat diubah.');
+
+                return false;
+            }
+
             $editingVote->update([
                 'question' => $this->question,
                 'starts_at' => $this->starts_at ?: null,
@@ -50,7 +52,13 @@ $save = function () {
             $options->each(fn ($label) => $vote->options()->create(['label' => $label]));
             Audit::record(auth()->user(), 'vote.created', 'vote', $vote->id, ['question' => $vote->question]);
         }
+
+        return true;
     });
+
+    if (! $saved) {
+        return;
+    }
 
     $this->resetForm();
 };
@@ -74,17 +82,44 @@ $resetForm = function () {
     $this->resetValidation();
 };
 $activate = function (int $id) {
-    $vote = Vote::withCount('options')->findOrFail($id);
+    DB::transaction(function () use ($id) {
+        $vote = Vote::query()
+            ->lockForUpdate()
+            ->withCount('options')
+            ->findOrFail($id);
 
-    if ($vote->options_count < 2) {
-        $this->addError('activation', 'Minimal dua pilihan diperlukan untuk mengaktifkan voting.');
-        return;
-    }
+        if ($vote->status !== VoteStatus::DRAFT) {
+            $this->addError('activation', 'Hanya voting draft yang dapat diaktifkan.');
 
-    $vote->update(['status' => VoteStatus::AKTIF]);
-    Audit::record(auth()->user(), 'vote.activated', 'vote', $id);
+            return;
+        }
+
+        if ($vote->options_count < 2) {
+            $this->addError('activation', 'Minimal dua pilihan diperlukan untuk mengaktifkan voting.');
+
+            return;
+        }
+
+        $vote->update(['status' => VoteStatus::AKTIF]);
+        Audit::record(auth()->user(), 'vote.activated', 'vote', $id);
+        $this->resetValidation('activation');
+    });
 };
-$close = function (int $id) { $vote = Vote::findOrFail($id); $vote->update(['status' => VoteStatus::SELESAI]); Audit::record(auth()->user(), 'vote.closed', 'vote', $id); };
+$close = function (int $id) {
+    DB::transaction(function () use ($id) {
+        $vote = Vote::query()->lockForUpdate()->findOrFail($id);
+
+        if ($vote->status !== VoteStatus::AKTIF) {
+            $this->addError('activation', 'Hanya voting aktif yang dapat ditutup.');
+
+            return;
+        }
+
+        $vote->update(['status' => VoteStatus::SELESAI]);
+        Audit::record(auth()->user(), 'vote.closed', 'vote', $id);
+        $this->resetValidation('activation');
+    });
+};
 ?>
 <div class="space-y-7">
     <x-admin.page-header
@@ -175,9 +210,9 @@ $close = function (int $id) { $vote = Vote::findOrFail($id); $vote->update(['sta
                         <p class="mt-2 text-sm leading-6 text-ink-mute">{{ $item->ballots_count }} suara</p>
                         @if ($item->starts_at || $item->ends_at)
                             <p class="tnum mt-2 text-xs text-ink-mute">
-                                Periode: 
+                                Periode:
                                 {{ $item->starts_at ? \Carbon\Carbon::parse($item->starts_at)->translatedFormat('d M Y') : 'Mulai sekarang' }}
-                                - 
+                                -
                                 {{ $item->ends_at ? \Carbon\Carbon::parse($item->ends_at)->translatedFormat('d M Y') : 'Selesai tanpa batas' }}
                             </p>
                         @endif
@@ -207,4 +242,3 @@ $close = function (int $id) { $vote = Vote::findOrFail($id); $vote->update(['sta
         @endif
     </x-admin.panel>
 </div>
-

@@ -106,7 +106,10 @@ $validateFamilyMembers = function (): array {
 
         $rules["memberRows.$index.id"] = ['nullable', 'integer', 'exists:residents,id'];
         $rules["memberRows.$index.name"] = ['required', 'string', 'max:255'];
-        $rules["memberRows.$index.phone"] = ['required', 'string', 'max:30', app(UniqueActivePhone::class, ['ignoreResidentId' => $residentId])];
+        $rules["memberRows.$index.phone"] = ['required', 'string', 'max:30'];
+        if ((bool) ($row['is_active'] ?? true)) {
+            $rules["memberRows.$index.phone"][] = app(UniqueActivePhone::class, ['ignoreResidentId' => $residentId]);
+        }
         $rules["memberRows.$index.ronda_notes"] = ['nullable', 'string', 'max:500'];
         $rules["memberRows.$index._delete"] = ['boolean'];
     }
@@ -119,6 +122,10 @@ $rejectDuplicatePhonesInRows = function (): bool {
 
     foreach ($this->memberRows as $index => $row) {
         if (! empty($row['_delete'])) {
+            continue;
+        }
+
+        if (! (bool) ($row['is_active'] ?? true)) {
             continue;
         }
 

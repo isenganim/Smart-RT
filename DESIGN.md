@@ -240,4 +240,3 @@ Product UI composites use `srcset` with art-direction crops at major breakpoints
 5. Default body to `{typography.body-md}` (15px); use `{typography.body-tabular}` for any money / numeric cell.
 6. Apply `ss01` globally on the body; apply `tnum` per-element on numeric content.
 7. The gradient mesh is non-negotiable on marketing heroes — bare-canvas heroes break the brand.
-

@@ -14,9 +14,7 @@ use Illuminate\Support\Collection;
 
 class AdminDashboardSummary
 {
-    public function __construct(private readonly KasReport $kasReport)
-    {
-    }
+    public function __construct(private readonly KasReport $kasReport) {}
 
     public function forDate(CarbonInterface $date): array
     {

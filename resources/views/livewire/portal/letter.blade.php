@@ -45,9 +45,9 @@ $submit = function (ResidentLookup $lookup) {
             <h1 class="display-md text-[#0d253d]">Surat Pengantar</h1>
             <p class="mt-1 text-sm text-[#64748d]">Ajukan surat menggunakan nomor HP terdaftar.</p>
         </div>
-        
+
         <x-portal.phone-field model="phone" />
-        
+
         <div>
             <label class="text-sm font-semibold text-[#273951]">Jenis Surat</label>
             <select wire:model="type" class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-3 text-base text-[#0d253d] focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300">
@@ -60,7 +60,7 @@ $submit = function (ResidentLookup $lookup) {
                 <p class="mt-1 text-sm text-[#ea2261] font-medium">{{ $message }}</p>
             @enderror
         </div>
-        
+
         <div>
             <label class="text-sm font-semibold text-[#273951]">Keperluan</label>
             <textarea wire:model="purpose" rows="4" class="mt-2 w-full rounded-sm border border-[#a8c3de] bg-white px-4 py-3 text-base text-[#0d253d] placeholder-[#64748d] focus:border-[#533afd] focus:ring-1 focus:ring-[#533afd] transition-all duration-300" placeholder="Tuliskan keperluan pengajuan surat pengantar..."></textarea>
@@ -68,12 +68,12 @@ $submit = function (ResidentLookup $lookup) {
                 <p class="mt-1 text-sm text-[#ea2261] font-medium">{{ $message }}</p>
             @enderror
         </div>
-        
+
         <button class="w-full rounded-full bg-[#533afd] py-3.5 font-sans font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] transition-all duration-150">
             Ajukan Surat
         </button>
     </form>
-    
+
     @if ($done)
         <div class="rounded-lg border border-[#a7f3d0] bg-[#ecfdf5] p-5 text-center text-[#065f46] shadow-level1">
             <strong>Pengajuan terkirim</strong>
