@@ -5,7 +5,7 @@ use App\Models\LetterRequest;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use function Livewire\Volt\{computed, layout, rules, state, title, usesPagination, with};
+use function Livewire\Volt\{computed, layout, rules, state, title, updated, usesPagination, with};
 
 usesPagination();
 
@@ -15,9 +15,7 @@ title('Surat Pengantar');
 state(['updateId' => null, 'status' => '', 'notes' => '', 'filter' => 'pending']);
 rules(['status' => ['required', Rule::enum(LetterStatus::class)], 'notes' => ['nullable', 'string', 'max:2000']]);
 
-$updatedFilter = function () {
-    $this->resetPage();
-};
+updated(['filter' => fn () => $this->resetPage()]);
 
 with(function () {
     $query = LetterRequest::with('resident')->latest();

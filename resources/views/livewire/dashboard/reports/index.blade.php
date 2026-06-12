@@ -5,7 +5,7 @@ use App\Models\Report;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use function Livewire\Volt\{computed, layout, rules, state, title, usesPagination, with};
+use function Livewire\Volt\{computed, layout, rules, state, title, updated, usesPagination, with};
 
 usesPagination();
 
@@ -15,9 +15,7 @@ title('Laporan Warga');
 state(['updateId' => null, 'status' => '', 'notes' => '', 'filter' => 'open']);
 rules(['status' => ['required', Rule::enum(ReportStatus::class)], 'notes' => ['nullable', 'string', 'max:2000']]);
 
-$updatedFilter = function () {
-    $this->resetPage();
-};
+updated(['filter' => fn () => $this->resetPage()]);
 
 with(function () {
     $query = Report::with('resident')->latest();
