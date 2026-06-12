@@ -42,64 +42,118 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
 
 ?>
 
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-white sm:text-slate-900">Daftar Transaksi Kas</h1>
-        <a href="{{ route('kas.index') }}" class="text-sm text-emerald-300 hover:underline sm:text-emerald-700">Rekap Kas</a>
-    </div>
+<div class="space-y-7">
+    <x-admin.page-header
+        title="Daftar Transaksi Kas"
+        description="Riwayat 100 transaksi terbaru beserta status dan tindakan koreksinya."
+    >
+        <x-slot:actions>
+            <x-admin.button variant="secondary" href="{{ route('kas.index') }}">Rekap Kas</x-admin.button>
+        </x-slot:actions>
+    </x-admin.page-header>
 
-    <div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50 text-left text-slate-500">
-                <tr>
-                    <th class="px-4 py-2">Tanggal</th>
-                    <th class="px-4 py-2">Jenis</th>
-                    <th class="px-4 py-2">Rumah/Warga</th>
-                    <th class="px-4 py-2 text-right">Nominal</th>
-                    <th class="px-4 py-2">Status</th>
-                    <th class="px-4 py-2 text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($this->transactions as $tx)
-                    <tr class="{{ $tx->isCancelled() ? 'bg-slate-50 text-slate-400' : '' }}">
-                        <td class="px-4 py-2">{{ $tx->date->format('d/m/Y') }}</td>
-                        <td class="px-4 py-2">{{ $tx->type->label() }}</td>
-                        <td class="px-4 py-2">{{ $tx->household?->house_number ?? $tx->resident?->name ?? '-' }}</td>
-                        <td class="px-4 py-2 text-right">{{ $this->rupiah($tx->amount) }}</td>
-                        <td class="px-4 py-2">
-                            @if ($tx->isCancelled())
-                                <span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs">Dibatalkan</span>
-                            @else
-                                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">{{ $tx->status }}</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-2 text-right">
+    <x-admin.panel :padding="false" aria-labelledby="transactions-title">
+        <div class="border-b border-hairline px-5 py-4 sm:px-6">
+            <h2 id="transactions-title" class="text-lg font-medium text-ink">Transaksi terbaru</h2>
+            <p class="mt-1 text-sm text-ink-mute">Pembatalan membuat transaksi koreksi dan tidak menghapus catatan asli.</p>
+        </div>
+
+        @if ($this->transactions->isEmpty())
+            <x-admin.empty-state
+                title="Belum ada transaksi"
+                description="Transaksi iuran, denda, dan koreksi akan muncul di sini."
+            />
+        @else
+            <div class="hidden md:block">
+                <table class="min-w-full text-sm">
+                    <thead class="border-b border-hairline bg-canvas-soft text-left text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">
+                        <tr>
+                            <th class="px-5 py-3 sm:px-6">Tanggal</th>
+                            <th class="px-4 py-3">Jenis</th>
+                            <th class="px-4 py-3">Rumah/Warga</th>
+                            <th class="px-4 py-3 text-right">Nominal</th>
+                            <th class="px-4 py-3">Status</th>
+                            <th class="px-5 py-3 text-right sm:px-6">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-hairline">
+                        @foreach ($this->transactions as $tx)
+                            <tr wire:key="transaction-desktop-{{ $tx->id }}" @class(['text-ink', 'bg-canvas-soft/60 text-ink-mute' => $tx->isCancelled()])>
+                                <td class="tnum whitespace-nowrap px-5 py-4 sm:px-6">{{ $tx->date->format('d/m/Y') }}</td>
+                                <td class="px-4 py-4 font-medium">{{ $tx->type->label() }}</td>
+                                <td class="px-4 py-4">{{ $tx->household?->house_number ?? $tx->resident?->name ?? '-' }}</td>
+                                <td class="tnum whitespace-nowrap px-4 py-4 text-right font-medium">{{ $this->rupiah($tx->amount) }}</td>
+                                <td class="px-4 py-4">
+                                    @if ($tx->isCancelled())
+                                        <x-admin.status-badge tone="neutral">Dibatalkan</x-admin.status-badge>
+                                    @elseif ($tx->type->value === 'koreksi')
+                                        <x-admin.status-badge tone="info">Koreksi</x-admin.status-badge>
+                                    @else
+                                        <x-admin.status-badge tone="success">{{ ucfirst($tx->status) }}</x-admin.status-badge>
+                                    @endif
+                                </td>
+                                <td class="px-5 py-4 text-right sm:px-6">
+                                    @if (! $tx->isCancelled() && $tx->type->value !== 'koreksi')
+                                        <x-admin.button variant="danger" wire:click="startCancel({{ $tx->id }})">Batalkan</x-admin.button>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="divide-y divide-hairline md:hidden">
+                @foreach ($this->transactions as $tx)
+                    <article wire:key="transaction-mobile-{{ $tx->id }}" class="px-5 py-4">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-ink">{{ $tx->type->label() }}</p>
+                                <p class="mt-1 text-xs text-ink-mute">{{ $tx->household?->house_number ?? $tx->resident?->name ?? '-' }}</p>
+                            </div>
+                            <p class="tnum shrink-0 text-sm font-medium text-ink">{{ $this->rupiah($tx->amount) }}</p>
+                        </div>
+                        <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <time class="tnum text-xs text-ink-mute" datetime="{{ $tx->date->toDateString() }}">{{ $tx->date->format('d/m/Y') }}</time>
+                                @if ($tx->isCancelled())
+                                    <x-admin.status-badge tone="neutral">Dibatalkan</x-admin.status-badge>
+                                @elseif ($tx->type->value === 'koreksi')
+                                    <x-admin.status-badge tone="info">Koreksi</x-admin.status-badge>
+                                @else
+                                    <x-admin.status-badge tone="success">{{ ucfirst($tx->status) }}</x-admin.status-badge>
+                                @endif
+                            </div>
                             @if (! $tx->isCancelled() && $tx->type->value !== 'koreksi')
-                                <button wire:click="startCancel({{ $tx->id }})" class="text-red-600 hover:underline">Batalkan</button>
+                                <x-admin.button variant="danger" wire:click="startCancel({{ $tx->id }})">Batalkan</x-admin.button>
                             @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada transaksi.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        @endif
+    </x-admin.panel>
 
     @if ($cancelId)
-        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-red-200">
-            <h2 class="font-medium text-slate-900">Batalkan Transaksi #{{ $cancelId }}</h2>
-            <p class="text-sm text-slate-600">Transaksi tidak dihapus. Sistem mencatat koreksi dengan alasan.</p>
-            <div class="mt-3">
-                <label class="block text-sm font-medium text-slate-700">Alasan</label>
-                <textarea wire:model="reason" rows="2" class="mt-1 w-full rounded-lg border-slate-300"></textarea>
-                @error('reason') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        <x-admin.panel class="border-ruby/30" aria-labelledby="cancel-transaction-title">
+            <div class="max-w-2xl">
+                <h2 id="cancel-transaction-title" class="text-lg font-medium text-ink">Batalkan Transaksi #{{ $cancelId }}</h2>
+                <p class="mt-1 text-sm leading-6 text-ink-mute">Transaksi tidak dihapus. Sistem akan mencatat koreksi dengan alasan yang dapat diaudit.</p>
+                <div class="mt-5">
+                    <label for="cancellation-reason" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Alasan pembatalan</label>
+                    <textarea
+                        id="cancellation-reason"
+                        wire:model="reason"
+                        rows="3"
+                        class="mt-2 w-full rounded-sm border border-hairline-input bg-white px-4 py-3 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
+                    ></textarea>
+                    @error('reason') <p class="mt-2 text-sm font-medium text-ruby">{{ $message }}</p> @enderror
+                </div>
+                <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row">
+                    <x-admin.button variant="secondary" wire:click="$set('cancelId', null)">Batal</x-admin.button>
+                    <x-admin.button variant="danger" wire:click="confirmCancel">Konfirmasi Pembatalan</x-admin.button>
+                </div>
             </div>
-            <div class="mt-3 flex gap-2">
-                <button wire:click="confirmCancel" class="rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700">Konfirmasi Pembatalan</button>
-                <button wire:click="$set('cancelId', null)" class="rounded-lg px-3 py-2 text-slate-600 hover:text-slate-900">Batal</button>
-            </div>
-        </div>
+        </x-admin.panel>
     @endif
 </div>

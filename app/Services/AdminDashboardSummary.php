@@ -87,8 +87,8 @@ class AdminDashboardSummary
         $totals = CashTransaction::query()
             ->active()
             ->whereBetween('date', [
-                $from->toDateString(),
-                $date->toDateString().' 23:59:59',
+                $from->copy()->startOfDay()->toDateTimeString(),
+                $date->copy()->endOfDay()->toDateTimeString(),
             ])
             ->selectRaw('DATE(date) as day, SUM(amount) as total')
             ->groupByRaw('DATE(date)')
