@@ -20,17 +20,31 @@ $save = function () {
     $options = collect(preg_split('/\r\n|\r|\n/', $this->optionsText))->map(fn ($line) => trim($line))->filter()->unique()->values();
     if ($options->count() < 2) { $this->addError('optionsText', 'Minimal dua pilihan berbeda.'); return; }
 
-    DB::transaction(function () use ($options) {
-        if ($this->editingId) {
-            $vote = Vote::findOrFail($this->editingId);
-            $vote->update([
+    $editingVote = null;
+    if ($this->editingId) {
+        $editingVote = Vote::withCount('ballots')->findOrFail($this->editingId);
+
+        if ($editingVote->status !== VoteStatus::DRAFT) {
+            $this->addError('question', 'Voting sudah aktif atau selesai dan tidak dapat diubah.');
+            return;
+        }
+
+        if ($editingVote->ballots_count > 0) {
+            $this->addError('question', 'Voting sudah memiliki suara dan tidak dapat diubah.');
+            return;
+        }
+    }
+
+    DB::transaction(function () use ($options, $editingVote) {
+        if ($editingVote) {
+            $editingVote->update([
                 'question' => $this->question,
                 'starts_at' => $this->starts_at ?: null,
                 'ends_at' => $this->ends_at ?: null,
             ]);
-            $vote->options()->delete();
-            $options->each(fn ($label) => $vote->options()->create(['label' => $label]));
-            Audit::record(auth()->user(), 'vote.updated', 'vote', $vote->id, ['question' => $vote->question]);
+            $editingVote->options()->delete();
+            $options->each(fn ($label) => $editingVote->options()->create(['label' => $label]));
+            Audit::record(auth()->user(), 'vote.updated', 'vote', $editingVote->id, ['question' => $editingVote->question]);
         } else {
             $vote = Vote::create(['question' => $this->question, 'status' => VoteStatus::DRAFT, 'starts_at' => $this->starts_at ?: null, 'ends_at' => $this->ends_at ?: null, 'created_by' => auth()->id()]);
             $options->each(fn ($label) => $vote->options()->create(['label' => $label]));
@@ -42,6 +56,12 @@ $save = function () {
 };
 $edit = function (int $id) {
     $vote = Vote::with('options')->findOrFail($id);
+
+    if ($vote->status !== VoteStatus::DRAFT) {
+        $this->addError('question', 'Hanya voting draft yang dapat diedit.');
+        return;
+    }
+
     $this->editingId = $id;
     $this->question = $vote->question;
     $this->optionsText = $vote->options->pluck('label')->implode("\n");
