@@ -25,10 +25,14 @@ class PinGate
 
         $session = $sessions->first(fn (RondaScanSession $session) => $session->isActive());
 
-        if (! $session) {
-            return PinGateResult::deny('PIN sudah kedaluwarsa.');
+        if ($session) {
+            return PinGateResult::open($session);
         }
 
-        return PinGateResult::open($session);
+        $upcoming = $sessions->first(fn (RondaScanSession $session) => now()->lt($session->starts_at));
+
+        return $upcoming
+            ? PinGateResult::deny('Sesi pindai belum dimulai.')
+            : PinGateResult::deny('PIN sudah kedaluwarsa.');
     }
 }

@@ -24,7 +24,7 @@ it('rejects a duplicate phone for active residents', function () {
 
     $validator = Validator::make(
         ['phone' => '0812-3456-7890'],
-        ['phone' => [new UniqueActivePhone()]],
+        ['phone' => [new UniqueActivePhone]],
     );
 
     expect($validator->fails())->toBeTrue();
@@ -36,7 +36,7 @@ it('allows reusing a phone held only by an inactive resident', function () {
 
     $validator = Validator::make(
         ['phone' => '81234567890'],
-        ['phone' => [new UniqueActivePhone()]],
+        ['phone' => [new UniqueActivePhone]],
     );
 
     expect($validator->fails())->toBeFalse();

@@ -30,7 +30,7 @@ it('checks in a scheduled resident from the portal', function () {
     Volt::test('portal.checkin')
         ->set('phone', '0812-3456-7890')
         ->call('submit')
-        ->assertSee('Check-in Berhasil');
+        ->assertSee('Kehadiran Tercatat');
 
     expect(RondaAssignment::query()->whereNotNull('checked_in_at')->count())->toBe(1);
 });

@@ -7,7 +7,7 @@ use App\Models\RondaScanSession;
 use App\Services\IuranScan;
 
 beforeEach(function () {
-    $this->service = new IuranScan();
+    $this->service = new IuranScan;
     $this->session = RondaScanSession::factory()->active()->create(['date' => today()]);
     $this->household = Household::factory()->create(['qr_token' => 'HOUSE-TOKEN-1', 'is_active' => true]);
 });

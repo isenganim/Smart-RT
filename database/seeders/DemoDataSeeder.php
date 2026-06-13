@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\UserRole;
 use App\Models\Household;
 use App\Models\Resident;
+use App\Models\RondaSchedule;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +31,7 @@ class DemoDataSeeder extends Seeder
 
         $residents = Resident::query()->where('is_active', true)->take(4)->get();
         if ($residents->count() >= 2) {
-            $scheduleToday = \App\Models\RondaSchedule::query()->firstOrCreate(
+            $scheduleToday = RondaSchedule::query()->firstOrCreate(
                 ['date' => today()->toDateString()],
                 ['notes' => 'Ronda Malam Wajib']
             );
@@ -38,7 +39,7 @@ class DemoDataSeeder extends Seeder
             $scheduleToday->assignments()->firstOrCreate(['resident_id' => $residents[1]->id]);
 
             if ($residents->count() >= 3) {
-                $scheduleTomorrow = \App\Models\RondaSchedule::query()->firstOrCreate(
+                $scheduleTomorrow = RondaSchedule::query()->firstOrCreate(
                     ['date' => today()->addDay()->toDateString()],
                     ['notes' => 'Ronda Akhir Pekan']
                 );

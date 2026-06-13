@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\RondaScanSession;
+use Illuminate\Support\Carbon;
 
 it('generates a numeric pin on create', function () {
     $session = RondaScanSession::factory()->create(['pin' => null]);
@@ -15,7 +16,7 @@ it('does not overwrite an explicit pin', function () {
 });
 
 it('reports active when now is inside the window', function () {
-    \Illuminate\Support\Carbon::setTestNow('2026-06-09 07:00:00');
+    Carbon::setTestNow('2026-06-09 07:00:00');
 
     $session = RondaScanSession::factory()->create([
         'starts_at' => now()->subHour(),
@@ -24,11 +25,11 @@ it('reports active when now is inside the window', function () {
 
     expect($session->isActive())->toBeTrue();
 
-    \Illuminate\Support\Carbon::setTestNow();
+    Carbon::setTestNow();
 });
 
 it('reports expired when now is past the window', function () {
-    \Illuminate\Support\Carbon::setTestNow('2026-06-09 07:00:00');
+    Carbon::setTestNow('2026-06-09 07:00:00');
 
     $session = RondaScanSession::factory()->create([
         'starts_at' => now()->subHours(3),
@@ -37,5 +38,5 @@ it('reports expired when now is past the window', function () {
 
     expect($session->isActive())->toBeFalse();
 
-    \Illuminate\Support\Carbon::setTestNow();
+    Carbon::setTestNow();
 });

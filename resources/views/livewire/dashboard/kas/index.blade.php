@@ -10,7 +10,10 @@ title('Rekap Kas');
 state(['date' => null]);
 
 mount(function () {
-    $this->date = request()->query('date', today()->toDateString());
+    $requestedDate = (string) request()->query('date', today()->toDateString());
+    $this->date = Carbon::canBeCreatedFromFormat($requestedDate, 'Y-m-d')
+        ? $requestedDate
+        : today()->toDateString();
 });
 
 $report = fn () => app(KasReport::class);
@@ -32,52 +35,139 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
 
 ?>
 
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-white sm:text-slate-900">Rekap Kas</h1>
-        <a href="{{ route('kas.transactions') }}" class="text-sm text-emerald-300 hover:underline sm:text-emerald-700">Daftar Transaksi</a>
-    </div>
+<div class="space-y-7">
+    <x-admin.page-header
+        title="Rekap Kas"
+        :description="'Ringkasan penerimaan dan pekerjaan kas untuk '.$this->ref()->translatedFormat('d F Y').'.'"
+    >
+        <x-slot:actions>
+            <x-admin.button href="{{ route('kas.transactions') }}">Daftar Transaksi</x-admin.button>
+        </x-slot:actions>
+    </x-admin.page-header>
 
-    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <label class="block text-sm font-medium text-slate-700">Tanggal Acuan</label>
-        <input wire:model.live="date" type="date" class="mt-1 rounded-lg border-slate-300">
-    </div>
+    <x-admin.panel>
+        <div
+            class="flex max-w-lg flex-col gap-3 sm:flex-row sm:items-end"
+            x-data="{
+                raw: @js($this->date),
+                get display() {
+                    if (!this.raw) return '';
+                    const [y, m, d] = this.raw.split('-');
+                    return d + '/' + m + '/' + y;
+                },
+                openPicker() {
+                    const picker = this.$refs.datePicker;
 
-    <div class="grid gap-4 sm:grid-cols-3">
-        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <p class="text-sm text-slate-500">Total Harian</p>
-            <p class="mt-1 text-2xl font-semibold text-emerald-700">{{ $this->rupiah($this->daily['total']) }}</p>
-            <p class="mt-1 text-xs text-slate-400">Iuran {{ $this->rupiah($this->daily['iuran']) }} · Denda {{ $this->rupiah($this->daily['denda']) }} · Koreksi {{ $this->rupiah($this->daily['koreksi']) }}</p>
+                    try {
+                        if (picker.showPicker) {
+                            picker.showPicker();
+                        } else {
+                            picker.click();
+                        }
+                    } catch (error) {
+                        picker.click();
+                    }
+                }
+            }"
+        >
+            <div class="min-w-0 flex-1">
+                <label for="kas-reference-date-display" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Tanggal acuan</label>
+                <div class="relative mt-2">
+                    <input
+                        id="kas-reference-date-display"
+                        :value="display"
+                        type="text"
+                        readonly
+                        class="tnum min-h-11 w-full rounded-sm border border-hairline-input bg-white py-2.5 pl-4 pr-12 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
+                    >
+                    <input
+                        x-ref="datePicker"
+                        x-model="raw"
+                        type="date"
+                        tabindex="-1"
+                        aria-label="Pilih tanggal acuan"
+                        class="pointer-events-none absolute h-px w-px opacity-0"
+                    >
+                    <button
+                        type="button"
+                        aria-label="Buka kalender tanggal acuan"
+                        class="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-sm text-ink-mute transition hover:bg-canvas-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                        @click="openPicker()"
+                    >
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="pointer-events-none absolute left-1/2 top-1/2 size-5 -translate-x-1/2 -translate-y-1/2 text-ink-mute">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3.75 9h16.5M5.25 4.5h13.5a1.5 1.5 0 0 1 1.5 1.5v12.75a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V6a1.5 1.5 0 0 1 1.5-1.5Z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <x-admin.button
+                href="#"
+                x-bind:href="'{{ route('kas.index') }}?date=' + raw"
+            >Tampilkan</x-admin.button>
         </div>
-        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <p class="text-sm text-slate-500">Total Mingguan</p>
-            <p class="mt-1 text-2xl font-semibold text-emerald-700">{{ $this->rupiah($this->weekly) }}</p>
-        </div>
-        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <p class="text-sm text-slate-500">Total Bulanan</p>
-            <p class="mt-1 text-2xl font-semibold text-emerald-700">{{ $this->rupiah($this->monthly) }}</p>
-        </div>
-    </div>
+    </x-admin.panel>
 
-    <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <h2 class="font-medium text-slate-900">Rumah Belum Bayar ({{ $this->ref()->format('d M Y') }})</h2>
-        <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+    <section aria-label="Ringkasan kas" class="grid gap-4 sm:grid-cols-3">
+        <x-admin.metric
+            label="Total Harian"
+            :value="$this->rupiah($this->daily['total'])"
+            :description="'Iuran '.$this->rupiah($this->daily['iuran']).' · Denda '.$this->rupiah($this->daily['denda']).' · Koreksi '.$this->rupiah($this->daily['koreksi'])"
+        />
+        <x-admin.metric
+            label="Total Mingguan"
+            :value="$this->rupiah($this->weekly)"
+            description="Akumulasi transaksi aktif pada minggu berjalan"
+        />
+        <x-admin.metric
+            label="Total Bulanan"
+            :value="$this->rupiah($this->monthly)"
+            description="Akumulasi transaksi aktif pada bulan berjalan"
+        />
+    </section>
+
+    <div class="grid gap-6 xl:grid-cols-2">
+        <x-admin.panel :padding="false" aria-labelledby="unpaid-households-title">
+            <div class="border-b border-hairline px-5 py-4 sm:px-6">
+                <h2 id="unpaid-households-title" class="text-lg font-medium text-ink">Rumah belum bayar</h2>
+                <p class="mt-1 text-sm text-ink-mute">{{ $this->ref()->translatedFormat('d F Y') }}</p>
+            </div>
+
             @forelse ($this->unpaid as $household)
-                <li class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{{ $household->house_number }} - {{ $household->head_name }}</li>
+                <div class="flex min-h-16 items-center justify-between gap-4 border-b border-hairline px-5 py-3 last:border-b-0 sm:px-6">
+                    <div class="min-w-0">
+                        <p class="tnum text-sm font-medium text-ink">{{ $household->house_number }}</p>
+                        <p class="mt-1 truncate text-xs text-ink-mute">{{ $household->head_name }}</p>
+                    </div>
+                    <x-admin.status-badge tone="warning">Belum bayar</x-admin.status-badge>
+                </div>
             @empty
-                <li class="text-sm text-slate-400">Semua rumah aktif sudah bayar.</li>
+                <x-admin.empty-state
+                    title="Semua rumah sudah bayar"
+                    description="Tidak ada rumah aktif dengan iuran tertunda pada tanggal acuan ini."
+                />
             @endforelse
-        </ul>
-    </div>
+        </x-admin.panel>
 
-    <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <h2 class="font-medium text-slate-900">Warga Belum Check-in</h2>
-        <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+        <x-admin.panel :padding="false" aria-labelledby="missing-checkins-title">
+            <div class="border-b border-hairline px-5 py-4 sm:px-6">
+                <h2 id="missing-checkins-title" class="text-lg font-medium text-ink">Warga belum check-in</h2>
+                <p class="mt-1 text-sm text-ink-mute">Petugas ronda yang belum mencatat kehadiran.</p>
+            </div>
+
             @forelse ($this->missingCheckins as $assignment)
-                <li class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{{ $assignment->resident?->name }} - {{ $assignment->resident?->household?->house_number }}</li>
+                <div class="flex min-h-16 items-center justify-between gap-4 border-b border-hairline px-5 py-3 last:border-b-0 sm:px-6">
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-medium text-ink">{{ $assignment->resident?->name }}</p>
+                        <p class="tnum mt-1 text-xs text-ink-mute">{{ $assignment->resident?->household?->house_number }}</p>
+                    </div>
+                    <x-admin.status-badge tone="danger">Belum check-in</x-admin.status-badge>
+                </div>
             @empty
-                <li class="text-sm text-slate-400">Tidak ada warga terjadwal yang belum check-in.</li>
+                <x-admin.empty-state
+                    title="Tidak ada check-in tertunda"
+                    description="Semua warga terjadwal sudah check-in atau tidak ada jadwal pada tanggal ini."
+                />
             @endforelse
-        </ul>
+        </x-admin.panel>
     </div>
 </div>

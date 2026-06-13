@@ -33,6 +33,18 @@ it('shows only published announcements publicly', function () {
         ->assertDontSee('Draft Rahasia');
 });
 
+it('renders sanitized announcement formatting publicly', function () {
+    Announcement::factory()->published()->create([
+        'title' => 'Kerja Bakti',
+        'body' => '<div><strong>Minggu pagi</strong></div><ul><li>Bawa alat kebersihan</li></ul>',
+    ]);
+
+    $this->get('/pengumuman')
+        ->assertOk()
+        ->assertSee('<strong>Minggu pagi</strong>', false)
+        ->assertSee('<ul><li>Bawa alat kebersihan</li></ul>', false);
+});
+
 it('accepts reports and letters only from registered active phones', function () {
     Volt::test('portal.report')
         ->set('phone', '0812-3456-7890')

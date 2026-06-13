@@ -1,86 +1,119 @@
 <?php
 
-use App\Models\Household;
-use App\Models\Resident;
-use App\Services\KasReport;
+use App\Services\AdminDashboardSummary;
 use function Livewire\Volt\{computed, layout, title};
 
 layout('components.layouts.app');
 title('Dashboard Pengurus');
 
-$householdCount = computed(fn () => Household::query()->where('is_active', true)->count());
-$residentCount = computed(fn () => Resident::query()->where('is_active', true)->count());
-$kasToday = computed(fn () => app(KasReport::class)->daily(today())['total']);
+$summary = computed(fn () => app(AdminDashboardSummary::class)->forDate(today()));
+$rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
 
 ?>
 
-<div class="space-y-6 sm:space-y-8">
-        <div class="grid gap-4 sm:hidden">
-            <a href="{{ route('households.index') }}" class="rounded-[1.25rem] bg-white p-5 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200">
-                <p class="text-sm font-semibold text-slate-500">Rumah/KK Aktif</p>
-                <p class="mt-2 text-4xl font-bold tracking-tight text-slate-950">{{ $this->householdCount }}</p>
-            </a>
-            <a href="{{ route('residents.index') }}" class="rounded-[1.25rem] bg-white p-5 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200">
-                <p class="text-sm font-semibold text-slate-500">Warga Aktif</p>
-                <p class="mt-2 text-4xl font-bold tracking-tight text-slate-950">{{ $this->residentCount }}</p>
-            </a>
-        </div>
+<div class="space-y-7">
+    <x-admin.page-header
+        :title="'Selamat datang, '.auth()->user()->name"
+        :description="now()->translatedFormat('l, d F Y').' · Ringkasan operasional Smart RT'"
+    >
+        <x-slot:actions>
+            <x-admin.button href="{{ route('scan-sessions.index') }}">Buka sesi scan</x-admin.button>
+        </x-slot:actions>
+    </x-admin.page-header>
 
-        <section class="overflow-hidden rounded-[1.5rem] bg-white shadow-xl shadow-slate-900/10 ring-1 ring-slate-200 sm:rounded-[2rem]">
-            <div class="grid gap-6 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-900 p-6 text-white sm:gap-8 sm:p-10 lg:grid-cols-[1fr_20rem]">
+    <section aria-label="Ringkasan utama" class="grid grid-cols-2 gap-4 max-[359px]:grid-cols-1 xl:grid-cols-4">
+        <x-admin.metric
+            label="Rumah aktif"
+            :value="$this->summary['metrics']['households']"
+            description="Rumah yang digunakan dalam operasional RT"
+            :href="route('households.index')"
+        />
+        <x-admin.metric
+            label="Warga aktif"
+            :value="$this->summary['metrics']['residents']"
+            description="Warga aktif dengan identitas terdaftar"
+            :href="route('residents.index')"
+        />
+        <x-admin.metric
+            label="Kas bulan ini"
+            :value="$this->rupiah($this->summary['metrics']['month_cash'])"
+            description="Total transaksi aktif bulan berjalan"
+            :href="route('kas.index')"
+        />
+        <x-admin.metric
+            label="Perlu tindakan"
+            :value="$this->summary['metrics']['action_count']"
+            description="Gabungan pekerjaan operasional terbuka"
+        />
+    </section>
+
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
+        <x-admin.panel :padding="false" aria-labelledby="action-queue-title">
+            <div class="border-b border-hairline px-5 py-4 sm:px-6">
+                <h2 id="action-queue-title" class="text-lg font-medium text-ink">Yang perlu ditangani</h2>
+                <p class="mt-1 text-sm text-ink-mute">Prioritas berdasarkan data operasional saat ini.</p>
+            </div>
+            <div class="divide-y divide-hairline">
+                @foreach ($this->summary['actions'] as $action)
+                    <a href="{{ route($action['route'], $action['query']) }}" class="flex min-h-20 items-center gap-4 px-5 py-4 transition hover:bg-canvas-soft sm:px-6">
+                        <x-admin.status-badge :tone="$action['tone']">{{ $action['count'] }}</x-admin.status-badge>
+                        <span class="min-w-0 flex-1">
+                            <span class="block text-sm font-medium text-ink">{{ $action['label'] }}</span>
+                            <span class="mt-1 block text-xs text-ink-mute">{{ $action['description'] }}</span>
+                        </span>
+                        <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-ink-mute" viewBox="0 0 20 20" fill="none">
+                            <path d="M7 4.5 12.5 10 7 15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                @endforeach
+            </div>
+        </x-admin.panel>
+
+        <x-admin.panel aria-labelledby="cash-trend-title">
+            <div class="flex items-start justify-between gap-4">
                 <div>
-                    <p class="inline-flex rounded-full bg-emerald-400/10 px-3 py-1 text-sm font-semibold text-emerald-300 ring-1 ring-emerald-300/20">Sprint 1 siap digunakan</p>
-                    <h1 class="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:mt-5 sm:text-5xl">Dashboard Pengurus RT yang rapi dan cepat.</h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:mt-4 sm:text-base sm:leading-7">Pantau data rumah, warga aktif, dan fondasi audit Smart RT dari satu tempat.</p>
-                    <div class="mt-5 grid gap-3 sm:mt-7 sm:flex sm:flex-wrap">
-                        <a href="{{ route('households.index') }}" class="rounded-2xl bg-emerald-400 px-5 py-3 text-center text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/25 transition hover:-translate-y-0.5 hover:bg-emerald-300">Kelola Rumah</a>
-                        <a href="{{ route('residents.index') }}" class="rounded-2xl bg-white/10 px-5 py-3 text-center text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15">Kelola Warga</a>
-                    </div>
+                    <h2 id="cash-trend-title" class="text-lg font-medium text-ink">Arus kas 30 hari</h2>
+                    <p class="mt-1 text-sm text-ink-mute">Transaksi aktif per hari.</p>
                 </div>
-                <div class="rounded-[1.5rem] bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur">
-                    <p class="text-sm font-medium text-slate-300">Status sistem</p>
-                    <div class="mt-5 space-y-4">
-                        <div class="flex items-center justify-between rounded-2xl bg-white/10 px-4 py-3">
-                            <span class="text-sm text-slate-300">Auth Pengurus</span>
-                            <span class="text-sm font-bold text-emerald-300">Aktif</span>
-                        </div>
-                        <div class="flex items-center justify-between rounded-2xl bg-white/10 px-4 py-3">
-                            <span class="text-sm text-slate-300">Audit Log</span>
-                            <span class="text-sm font-bold text-emerald-300">Aktif</span>
-                        </div>
-                        <div class="flex items-center justify-between rounded-2xl bg-white/10 px-4 py-3">
-                            <span class="text-sm text-slate-300">PWA</span>
-                            <span class="text-sm font-bold text-emerald-300">Ready</span>
-                        </div>
-                    </div>
-                </div>
+                <x-admin.button variant="ghost" href="{{ route('kas.transactions') }}">Detail</x-admin.button>
             </div>
-        </section>
 
-        <div class="hidden gap-5 sm:grid sm:grid-cols-2">
-            <div class="group rounded-[1.5rem] bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-900/10">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-semibold text-slate-500">Rumah/KK Aktif</p>
-                    <span class="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">⌂</span>
-                </div>
-                <p class="mt-5 text-5xl font-bold tracking-tight text-slate-950">{{ $this->householdCount }}</p>
-                <p class="mt-2 text-sm text-slate-500">Rumah terdaftar dan aktif untuk operasional RT.</p>
+            @php($maxCash = max(1, collect($this->summary['cash_trend'])->max('total')))
+            <div class="mt-6 flex h-44 items-end gap-1" aria-label="Grafik arus kas 30 hari">
+                @foreach ($this->summary['cash_trend'] as $day)
+                    @php($height = $day['total'] > 0 ? max(3, round(($day['total'] / $maxCash) * 100)) : 0)
+                    <div class="group relative flex h-full min-w-0 flex-1 items-end">
+                        <div
+                            class="w-full rounded-t-xs bg-primary/25 transition group-hover:bg-primary"
+                            style="height: {{ $height }}%"
+                            title="{{ $day['label'] }}: {{ $this->rupiah($day['total']) }}"
+                        ></div>
+                    </div>
+                @endforeach
             </div>
-            <div class="group rounded-[1.5rem] bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-900/10">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-semibold text-slate-500">Warga Aktif</p>
-                    <span class="grid h-11 w-11 place-items-center rounded-2xl bg-sky-50 text-sky-700">👥</span>
-                </div>
-                <p class="mt-5 text-5xl font-bold tracking-tight text-slate-950">{{ $this->residentCount }}</p>
-                <p class="mt-2 text-sm text-slate-500">Warga dengan nomor HP unik dan status aktif.</p>
+            <div class="mt-3 flex justify-between text-xs text-ink-mute">
+                <span>{{ collect($this->summary['cash_trend'])->first()['label'] }}</span>
+                <span>{{ collect($this->summary['cash_trend'])->last()['label'] }}</span>
             </div>
-            <div class="group rounded-[1.5rem] bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-900/10">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm font-semibold text-slate-500">Kas Hari Ini</p>
-                    <span class="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">Rp</span>
-                </div>
-                <p class="mt-5 text-5xl font-bold tracking-tight text-slate-950">Rp{{ number_format($this->kasToday, 0, ',', '.') }}</p>
-                <p class="mt-2 text-sm text-slate-500">Total iuran, denda, dan koreksi aktif hari ini.</p>
-            </div>
+        </x-admin.panel>
+    </div>
+
+    <x-admin.panel :padding="false" aria-labelledby="recent-activity-title">
+        <div class="border-b border-hairline px-5 py-4 sm:px-6">
+            <h2 id="recent-activity-title" class="text-lg font-medium text-ink">Aktivitas terbaru</h2>
+            <p class="mt-1 text-sm text-ink-mute">Perubahan penting yang tercatat dalam audit log.</p>
         </div>
+
+        @forelse ($this->summary['recent_activity'] as $activity)
+            <div class="grid gap-1 border-b border-hairline px-5 py-4 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_12rem_9rem] sm:px-6">
+                <p class="text-sm font-medium text-ink">{{ $activity['label'] }}</p>
+                <p class="text-sm text-ink-mute">{{ $activity['actor'] }}</p>
+                <time class="tnum text-xs text-ink-mute sm:text-right" datetime="{{ $activity['time']->toIso8601String() }}">
+                    {{ $activity['time']->diffForHumans() }}
+                </time>
+            </div>
+        @empty
+            <x-admin.empty-state title="Belum ada aktivitas" description="Perubahan administratif akan muncul di sini setelah dicatat." />
+        @endforelse
+    </x-admin.panel>
 </div>

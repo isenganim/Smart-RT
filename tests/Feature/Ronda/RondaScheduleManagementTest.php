@@ -128,6 +128,74 @@ it('shows checked in times with the wib timezone label', function () {
         ->assertSee('Hadir (20:15 WIB)');
 });
 
+it('does not allow deleting a checked in assignment', function () {
+    $schedule = RondaSchedule::factory()->create();
+    $assignment = RondaAssignment::factory()
+        ->for($schedule)
+        ->for(Resident::factory()->for($this->household))
+        ->checkedIn()
+        ->create();
+
+    $this->actingAs($this->admin);
+
+    Volt::test('dashboard.ronda.show', ['schedule' => $schedule])
+        ->call('startRemove', $assignment->id)
+        ->assertSet('pendingRemovalId', null)
+        ->assertHasErrors(['removal']);
+
+    expect($assignment->fresh())->not->toBeNull();
+});
+
+it('requires custom modal confirmation before deleting an unchecked assignment', function () {
+    $schedule = RondaSchedule::factory()->create();
+    $assignment = RondaAssignment::factory()
+        ->for($schedule)
+        ->for(Resident::factory()->for($this->household)->state(['name' => 'Petugas Belum Hadir']))
+        ->create();
+
+    $this->actingAs($this->admin);
+
+    Volt::test('dashboard.ronda.show', ['schedule' => $schedule])
+        ->call('startRemove', $assignment->id)
+        ->assertSet('pendingRemovalId', $assignment->id)
+        ->assertSee('Hapus Petugas Ronda')
+        ->assertSee('Petugas Belum Hadir')
+        ->call('confirmRemove')
+        ->assertSet('pendingRemovalId', null)
+        ->assertHasNoErrors(['removal']);
+
+    expect($assignment->fresh())->toBeNull();
+    expect(AuditLog::query()->where('action', 'ronda.assignment.removed')->exists())->toBeTrue();
+});
+
+it('locks an assignment while confirming removal', function () {
+    $source = file_get_contents(resource_path('views/livewire/dashboard/ronda/show.blade.php'));
+
+    expect($source)
+        ->toMatch('/DB::transaction\\(function \\(\\).*lockForUpdate\\(\\).*hasCheckedIn\\(\\)/s');
+});
+
+it('hides delete actions for checked in assignments', function () {
+    $schedule = RondaSchedule::factory()->create();
+    $checkedIn = RondaAssignment::factory()
+        ->for($schedule)
+        ->for(Resident::factory()->for($this->household))
+        ->checkedIn()
+        ->create();
+    $unchecked = RondaAssignment::factory()
+        ->for($schedule)
+        ->for(Resident::factory()->for($this->household))
+        ->create();
+
+    $this->actingAs($this->admin);
+
+    $this->get(route('ronda.show', $schedule))
+        ->assertOk()
+        ->assertDontSee('startRemove('.$checkedIn->id.')', false)
+        ->assertSee('startRemove('.$unchecked->id.')', false)
+        ->assertDontSee('window.confirm', false);
+});
+
 it('does not assign the same resident twice', function () {
     $schedule = RondaSchedule::factory()->create();
     $resident = Resident::factory()->for($this->household)->create(['is_active' => true]);

@@ -12,6 +12,10 @@ use function Livewire\Volt\layout;
 use function Livewire\Volt\rules;
 use function Livewire\Volt\state;
 use function Livewire\Volt\title;
+use function Livewire\Volt\usesPagination;
+use function Livewire\Volt\with;
+
+usesPagination();
 
 layout('components.layouts.app');
 title('Inventaris');
@@ -33,7 +37,9 @@ rules([
     'notes' => ['nullable', 'string', 'max:2000'],
 ]);
 
-$items = computed(fn () => InventoryItem::query()->orderBy('name')->get());
+with(fn () => [
+    'items' => InventoryItem::query()->orderBy('name')->paginate(10),
+]);
 $conditions = computed(fn () => ItemCondition::cases());
 
 $edit = function (int $id) {
@@ -163,121 +169,152 @@ $toggleActive = function (int $id) {
 
 ?>
 
-<div class="space-y-6">
-    <div>
-        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300 sm:text-emerald-700">Aset RT</p>
-        <h1 class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-slate-900">Inventaris</h1>
-        <p class="mt-2 max-w-2xl text-sm text-slate-300 sm:text-slate-600">Catat kondisi, lokasi, dan peminjaman barang milik RT.</p>
-    </div>
+<div class="space-y-7">
+    <x-admin.page-header
+        title="Inventaris"
+        description="Catat kondisi, lokasi, dan peminjaman barang milik RT."
+    />
 
-    <form wire:submit="save" class="grid gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:grid-cols-2 lg:grid-cols-6">
-        <div class="sm:col-span-2 lg:col-span-2">
-            <label for="inventory-name" class="block text-sm font-medium text-slate-700">Nama barang</label>
-            <input id="inventory-name" wire:model="name" type="text" class="mt-1 w-full rounded-xl border-slate-300" placeholder="Contoh: Tenda biru">
-            @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-        </div>
-
-        <div>
-            <label for="inventory-condition" class="block text-sm font-medium text-slate-700">Kondisi</label>
-            <select id="inventory-condition" wire:model="condition" class="mt-1 w-full rounded-xl border-slate-300">
-                @foreach ($this->conditions as $conditionOption)
-                    <option value="{{ $conditionOption->value }}">{{ $conditionOption->label() }}</option>
-                @endforeach
-            </select>
-            @error('condition') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-        </div>
-
-        <div class="sm:col-span-2 lg:col-span-2">
-            <label for="inventory-location" class="block text-sm font-medium text-slate-700">Lokasi</label>
-            <input id="inventory-location" wire:model="location" type="text" class="mt-1 w-full rounded-xl border-slate-300" placeholder="Gudang atau sekretariat">
-            @error('location') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-        </div>
-
-        <div class="sm:col-span-2 lg:col-span-5">
-            <label for="inventory-notes" class="block text-sm font-medium text-slate-700">Catatan</label>
-            <textarea id="inventory-notes" wire:model="notes" rows="2" class="mt-1 w-full rounded-xl border-slate-300" placeholder="Nomor aset atau detail tambahan"></textarea>
-            @error('notes') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-        </div>
-
-        <div class="flex items-end gap-2">
-            <button type="submit" class="rounded-xl bg-emerald-600 px-4 py-2.5 font-semibold text-white transition hover:bg-emerald-700">
-                {{ $editingId ? 'Perbarui' : 'Tambah' }}
-            </button>
-            @if ($editingId)
-                <button type="button" wire:click="resetForm" class="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100">Batal</button>
-            @endif
-        </div>
-    </form>
-
-    <div class="grid gap-4 md:grid-cols-2">
-        @forelse ($this->items as $item)
-            <article wire:key="inventory-{{ $item->id }}" class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <h2 class="text-lg font-semibold text-slate-900">{{ $item->name }}</h2>
-                        <p class="mt-1 text-sm text-slate-500">
-                            {{ $item->isOnLoan() ? 'Peminjam: '.$item->holder : ($item->location ?: 'Lokasi belum dicatat') }}
-                        </p>
-                    </div>
-                    <span @class([
-                        'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
-                        'bg-emerald-100 text-emerald-700' => $item->status === ItemStatus::TERSEDIA,
-                        'bg-amber-100 text-amber-700' => $item->status === ItemStatus::DIPINJAM,
-                        'bg-slate-100 text-slate-500' => $item->status === ItemStatus::TIDAK_AKTIF,
-                    ])>
-                        {{ $item->status->label() }}
-                    </span>
+    <x-admin.panel>
+        <form wire:submit="save" class="grid gap-5">
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                    <label for="inventory-name" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Nama Barang</label>
+                    <input
+                        id="inventory-name"
+                        wire:model="name"
+                        type="text"
+                        class="mt-2 min-h-11 w-full rounded-sm border border-hairline-input bg-white px-4 py-2.5 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
+                        placeholder="Contoh: Tenda biru"
+                    >
+                    @error('name') <p class="mt-2 text-sm font-medium text-ruby">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
-                    <span @class([
-                        'rounded-full px-2.5 py-1 font-medium',
-                        'bg-sky-100 text-sky-700' => $item->condition === ItemCondition::BAIK,
-                        'bg-orange-100 text-orange-700' => $item->condition === ItemCondition::RUSAK_RINGAN,
-                        'bg-red-100 text-red-700' => $item->condition === ItemCondition::RUSAK_BERAT,
-                    ])>
-                        {{ $item->condition->label() }}
-                    </span>
-                    @if ($item->notes)
-                        <span class="text-slate-500">{{ $item->notes }}</span>
-                    @endif
+                <div>
+                    <label for="inventory-condition" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Kondisi</label>
+                    <select
+                        id="inventory-condition"
+                        wire:model="condition"
+                        class="mt-2 min-h-11 w-full rounded-sm border border-hairline-input bg-white px-4 py-2.5 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
+                    >
+                        @foreach ($this->conditions as $conditionOption)
+                            <option value="{{ $conditionOption->value }}">{{ $conditionOption->label() }}</option>
+                        @endforeach
+                    </select>
+                    @error('condition') <p class="mt-2 text-sm font-medium text-ruby">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="mt-5 flex flex-wrap gap-3 border-t border-slate-100 pt-4 text-sm font-medium">
-                    <button wire:click="edit({{ $item->id }})" class="text-slate-600 hover:text-slate-900">Edit</button>
-
-                    @if ($item->isOnLoan())
-                        <button wire:click="returnItem({{ $item->id }})" class="text-emerald-700 hover:text-emerald-900">Kembalikan</button>
-                    @elseif ($item->status === ItemStatus::TERSEDIA)
-                        <button wire:click="startLend({{ $item->id }})" class="text-emerald-700 hover:text-emerald-900">Pinjamkan</button>
-                    @endif
-
-                    @if (! $item->isOnLoan())
-                        <button wire:click="toggleActive({{ $item->id }})" class="text-slate-500 hover:text-slate-800">
-                            {{ $item->status === ItemStatus::TIDAK_AKTIF ? 'Aktifkan' : 'Nonaktifkan' }}
-                        </button>
-                    @endif
+                <div>
+                    <label for="inventory-location" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Lokasi</label>
+                    <input
+                        id="inventory-location"
+                        wire:model="location"
+                        type="text"
+                        class="mt-2 min-h-11 w-full rounded-sm border border-hairline-input bg-white px-4 py-2.5 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
+                        placeholder="Contoh: Gudang sekretariat"
+                    >
+                    @error('location') <p class="mt-2 text-sm font-medium text-ruby">{{ $message }}</p> @enderror
                 </div>
-            </article>
-        @empty
-            <div class="rounded-2xl border border-dashed border-slate-300 bg-white/80 p-8 text-center text-slate-500 md:col-span-2">
-                Belum ada barang inventaris.
             </div>
-        @endforelse
-    </div>
 
+            <div>
+                <label for="inventory-notes" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Catatan</label>
+                <textarea
+                    id="inventory-notes"
+                    wire:model="notes"
+                    rows="2"
+                    class="mt-2 w-full rounded-sm border border-hairline-input bg-white px-4 py-2.5 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
+                    placeholder="Nomor aset atau detail tambahan..."
+                ></textarea>
+                @error('notes') <p class="mt-2 text-sm font-medium text-ruby">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="flex flex-col-reverse gap-2 sm:flex-row">
+                @if ($editingId)
+                    <x-admin.button type="button" variant="secondary" wire:click="resetForm">Batal</x-admin.button>
+                @endif
+                <x-admin.button type="submit">{{ $editingId ? 'Perbarui' : 'Tambah Barang' }}</x-admin.button>
+            </div>
+        </form>
+    </x-admin.panel>
+
+    <x-admin.panel :padding="false" aria-labelledby="inventory-list-title">
+        <div class="border-b border-hairline px-5 py-4 sm:px-6">
+            <h2 id="inventory-list-title" class="text-lg font-medium text-ink">Daftar Inventaris</h2>
+            <p class="mt-1 text-sm text-ink-mute">Kelola aset barang milik RT dan status ketersediaannya.</p>
+        </div>
+
+        <div class="divide-y divide-hairline">
+            @forelse ($items as $item)
+                <article wire:key="inventory-{{ $item->id }}" class="px-5 py-5 sm:px-6 hover:bg-canvas-soft/50 transition">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="text-base font-medium text-ink">{{ $item->name }}</h3>
+                                <x-admin.status-badge :tone="$item->status === ItemStatus::TERSEDIA ? 'success' : ($item->status === ItemStatus::DIPINJAM ? 'warning' : 'neutral')">
+                                    {{ $item->status->label() }}
+                                </x-admin.status-badge>
+                                <x-admin.status-badge :tone="$item->condition === ItemCondition::BAIK ? 'info' : ($item->condition === ItemCondition::RUSAK_RINGAN ? 'warning' : 'danger')">
+                                    {{ $item->condition->label() }}
+                                </x-admin.status-badge>
+                            </div>
+                            <p class="mt-2 text-sm text-ink-mute">
+                                <span class="font-medium text-ink-secondary">Lokasi:</span> {{ $item->location ?: 'Belum dicatat' }}
+                                @if($item->isOnLoan())
+                                    <span class="mx-1.5 text-hairline-input">&middot;</span>
+                                    <span class="font-medium text-ink-secondary">Peminjam:</span> {{ $item->holder }}
+                                @endif
+                            </p>
+                            @if ($item->notes)
+                                <p class="mt-1.5 text-xs text-ink-mute italic">Catatan: {{ $item->notes }}</p>
+                            @endif
+                        </div>
+
+                        <div class="flex shrink-0 flex-wrap gap-2">
+                            <x-admin.button variant="secondary" wire:click="edit({{ $item->id }})">Edit</x-admin.button>
+
+                            @if ($item->isOnLoan())
+                                <x-admin.button wire:click="returnItem({{ $item->id }})">Kembalikan</x-admin.button>
+                            @elseif ($item->status === ItemStatus::TERSEDIA)
+                                <x-admin.button wire:click="startLend({{ $item->id }})">Pinjamkan</x-admin.button>
+                            @endif
+
+                            @if (! $item->isOnLoan())
+                                <x-admin.button variant="danger" wire:click="toggleActive({{ $item->id }})">
+                                    {{ $item->status === ItemStatus::TIDAK_AKTIF ? 'Aktifkan' : 'Nonaktifkan' }}
+                                </x-admin.button>
+                            @endif
+                        </div>
+                    </div>
+                </article>
+            @empty
+                <x-admin.empty-state
+                    title="Belum ada barang inventaris"
+                    description="Tambahkan barang pertama untuk mulai mendata aset RT."
+                />
+            @endforelse
+        </div>
+
+        @if ($items->hasPages())
+            <div class="border-t border-hairline px-5 py-4 sm:px-6">
+                {{ $items->links() }}
+            </div>
+        @endif
+    </x-admin.panel>
+
+    <!-- Loan Dialog -->
     @if ($lendId)
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-2 ring-emerald-200">
-            <h2 class="font-semibold text-slate-900">Catat peminjaman</h2>
+        <div class="rounded-lg bg-white border border-hairline p-5 shadow-level2">
+            <h2 class="text-base font-semibold text-ink">Catat peminjaman</h2>
             <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
                 <div class="flex-1">
-                    <label for="inventory-holder" class="block text-sm font-medium text-slate-700">Nama peminjam</label>
-                    <input id="inventory-holder" wire:model="holder" type="text" class="mt-1 w-full rounded-xl border-slate-300">
-                    @error('holder') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    <label for="inventory-holder" class="block text-xs font-semibold text-ink-mute uppercase tracking-wider">Nama peminjam</label>
+                    <input id="inventory-holder" wire:model="holder" type="text" class="mt-2 w-full rounded-sm border border-hairline-input bg-white px-4 py-2.5 text-ink focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base">
+                    @error('holder') <p class="mt-1 text-xs text-ruby font-medium">{{ $message }}</p> @enderror
                 </div>
                 <div class="flex gap-2">
-                    <button type="button" wire:click="lend" class="rounded-xl bg-emerald-600 px-4 py-2.5 font-semibold text-white hover:bg-emerald-700">Pinjamkan</button>
-                    <button type="button" wire:click="cancelLend" class="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100">Batal</button>
+                    <x-admin.button type="button" wire:click="lend">Pinjamkan</x-admin.button>
+                    <x-admin.button type="button" variant="secondary" wire:click="cancelLend">Batal</x-admin.button>
                 </div>
             </div>
         </div>

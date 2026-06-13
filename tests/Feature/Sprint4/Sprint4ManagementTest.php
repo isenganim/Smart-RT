@@ -20,6 +20,14 @@ beforeEach(function () {
     $this->actingAs($this->admin);
 });
 
+it('renders the announcement management page before a publication action is selected', function () {
+    Announcement::factory()->create(['title' => 'Kerja Bakti']);
+
+    $this->get('/dashboard/pengumuman')
+        ->assertOk()
+        ->assertSee('Kerja Bakti');
+});
+
 it('creates and publishes announcements with audit logs', function () {
     Volt::test('dashboard.announcements.index')
         ->set('title', 'Kerja Bakti')
@@ -28,11 +36,46 @@ it('creates and publishes announcements with audit logs', function () {
         ->assertHasNoErrors();
 
     $announcement = Announcement::query()->firstOrFail();
-    Volt::test('dashboard.announcements.index')->call('togglePublish', $announcement->id);
+    Volt::test('dashboard.announcements.index')
+        ->call('startToggle', $announcement->id)
+        ->call('confirmToggle');
 
     expect($announcement->fresh()->is_published)->toBeTrue()
         ->and(AuditLog::query()->where('action', 'announcement.created')->exists())->toBeTrue()
         ->and(AuditLog::query()->where('action', 'announcement.published')->exists())->toBeTrue();
+});
+
+it('sanitizes rich announcement content before saving', function () {
+    Volt::test('dashboard.announcements.index')
+        ->set('title', 'Kerja Bakti')
+        ->set('body', '<div><strong>Minggu pagi</strong></div><script>alert(1)</script><a href="javascript:alert(1)">Detail</a>')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $body = Announcement::query()->firstOrFail()->body;
+
+    expect($body)
+        ->toContain('<strong>Minggu pagi</strong>')
+        ->not->toContain('<script')
+        ->not->toContain('javascript:');
+});
+
+it('uses a rich text editor and explicit announcement publication controls', function () {
+    $source = file_get_contents(resource_path('views/livewire/dashboard/announcements/index.blade.php'));
+
+    expect($source)
+        ->toContain('<trix-editor')
+        ->toContain('data-announcement-editor')
+        ->toContain('<x-admin.page-header')
+        ->toContain('<x-admin.status-badge')
+        ->toContain('Tampilkan')
+        ->toContain('Sembunyikan')
+        ->toContain("\$this->dispatch('announcement-edit-started')")
+        ->toContain('@announcement-edit-started.window')
+        ->toContain("scrollIntoView({ behavior: 'smooth'")
+        ->toContain('$refs.title.focus()')
+        ->toContain('x-ref="title"')
+        ->not->toContain('<textarea wire:model="body"');
 });
 
 it('updates report and letter workflows with audit logs', function () {
@@ -182,6 +225,54 @@ it('clears activation feedback after a vote is activated successfully', function
     expect($vote->fresh()->status)->toBe(VoteStatus::AKTIF);
 });
 
+it('edits an existing draft vote and its options', function () {
+    $vote = Vote::factory()->create(['question' => 'Original Question']);
+    VoteOption::factory()->for($vote)->create(['label' => 'Original Option']);
+
+    Volt::test('dashboard.votes.index')
+        ->call('edit', $vote->id)
+        ->assertSet('question', 'Original Question')
+        ->assertSet('optionsText', 'Original Option')
+        ->set('question', 'Updated Question')
+        ->set('optionsText', "Updated Option 1\nUpdated Option 2")
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $vote = $vote->fresh();
+    expect($vote->question)->toBe('Updated Question')
+        ->and($vote->options()->count())->toBe(2)
+        ->and($vote->options()->pluck('label')->toArray())->toBe(['Updated Option 1', 'Updated Option 2'])
+        ->and(AuditLog::query()->where('action', 'vote.updated')->exists())->toBeTrue();
+});
+
+it('locks and rechecks a draft vote inside the update transaction', function () {
+    $source = file_get_contents(resource_path('views/livewire/dashboard/votes/index.blade.php'));
+
+    expect($source)
+        ->toMatch("/Vote::query\\(\\)\\s*->lockForUpdate\\(\\)\\s*->withCount\\('ballots'\\)\\s*->findOrFail/");
+});
+
+it('does not reactivate a completed vote', function () {
+    $vote = Vote::factory()->create(['status' => VoteStatus::SELESAI]);
+    VoteOption::factory()->count(2)->for($vote)->create();
+
+    Volt::test('dashboard.votes.index')
+        ->call('activate', $vote->id)
+        ->assertHasErrors(['activation']);
+
+    expect($vote->fresh()->status)->toBe(VoteStatus::SELESAI);
+});
+
+it('does not close a draft vote', function () {
+    $vote = Vote::factory()->create(['status' => VoteStatus::DRAFT]);
+
+    Volt::test('dashboard.votes.index')
+        ->call('close', $vote->id)
+        ->assertHasErrors(['activation']);
+
+    expect($vote->fresh()->status)->toBe(VoteStatus::DRAFT);
+});
+
 it('protects all sprint four dashboard routes', function (string $uri) {
     auth()->logout();
     $this->get($uri)->assertRedirect('/login');
@@ -203,10 +294,12 @@ it('denies dashboard routes to users without a pengurus role', function (string 
     '/dashboard/voting',
 ]);
 
-it('keeps dashboard navigation available from the small breakpoint', function () {
+it('keeps dashboard navigation available across desktop and mobile layouts', function () {
     $source = file_get_contents(resource_path('views/components/layouts/app.blade.php'));
 
     expect($source)
-        ->toContain('ring-white/10 sm:flex')
-        ->not->toContain('ring-white/10 lg:flex');
+        ->toContain('lg:grid-cols-[16rem_minmax(0,1fr)]')
+        ->toContain('aria-label="Navigasi utama"')
+        ->toContain('lg:hidden')
+        ->toContain('Lainnya');
 });
