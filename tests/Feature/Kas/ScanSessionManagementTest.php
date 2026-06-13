@@ -4,6 +4,7 @@ use App\Enums\UserRole;
 use App\Models\AuditLog;
 use App\Models\RondaScanSession;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Livewire\Volt\Volt;
 
 beforeEach(function () {
@@ -53,4 +54,22 @@ it('regenerates a pin and audits the change', function () {
 
     expect($session->fresh()->pin)->not->toBe('111111');
     expect(AuditLog::query()->where('action', 'ronda.scan_session.pin_regenerated')->exists())->toBeTrue();
+});
+
+it('shows a future session as not started instead of expired', function () {
+    Carbon::setTestNow('2026-06-13 15:00:00');
+
+    RondaScanSession::factory()->create([
+        'date' => '2026-06-13',
+        'starts_at' => '2026-06-13 19:00:00',
+        'ends_at' => '2026-06-13 22:00:00',
+    ]);
+
+    $this->actingAs($this->admin);
+
+    Volt::test('dashboard.scan.index')
+        ->assertSee('Belum Mulai')
+        ->assertDontSee('Kedaluwarsa');
+
+    Carbon::setTestNow();
 });

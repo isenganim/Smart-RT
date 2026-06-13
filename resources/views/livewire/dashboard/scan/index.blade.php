@@ -91,13 +91,21 @@ $regenerate = function (int $id) {
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse ($this->sessions as $session)
+                    @php
+                        $isActive = $session->isActive();
+                        $isUpcoming = now()->lt($session->starts_at);
+                        $statusLabel = $isActive ? 'Aktif' : ($isUpcoming ? 'Belum Mulai' : 'Kedaluwarsa');
+                        $statusClasses = $isActive
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : ($isUpcoming ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500');
+                    @endphp
                     <tr>
                         <td class="px-4 py-2">{{ $session->date->format('d M Y') }}</td>
                         <td class="px-4 py-2 font-mono text-base tracking-widest text-emerald-700">{{ $session->pin }}</td>
                         <td class="px-4 py-2 text-slate-500">{{ $session->starts_at->format('d/m H:i') }} - {{ $session->ends_at->format('d/m H:i') }}</td>
                         <td class="px-4 py-2">
-                            <span class="rounded-full px-2 py-0.5 text-xs {{ $session->isActive() ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
-                                {{ $session->isActive() ? 'Aktif' : 'Kedaluwarsa' }}
+                            <span class="rounded-full px-2 py-0.5 text-xs {{ $statusClasses }}">
+                                {{ $statusLabel }}
                             </span>
                         </td>
                         <td class="px-4 py-2">Rp{{ number_format((int) $session->transactions_sum_amount, 0, ',', '.') }} ({{ $session->transactions_count }})</td>
