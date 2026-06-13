@@ -10,7 +10,10 @@ title('Rekap Kas');
 state(['date' => null]);
 
 mount(function () {
-    $this->date = request()->query('date', today()->toDateString());
+    $requestedDate = (string) request()->query('date', today()->toDateString());
+    $this->date = Carbon::canBeCreatedFromFormat($requestedDate, 'Y-m-d')
+        ? $requestedDate
+        : today()->toDateString();
 });
 
 $report = fn () => app(KasReport::class);
@@ -43,14 +46,64 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
     </x-admin.page-header>
 
     <x-admin.panel>
-        <div class="max-w-xs">
-            <label for="kas-reference-date" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Tanggal acuan</label>
-            <input
-                id="kas-reference-date"
-                wire:model.live="date"
-                type="date"
-                class="mt-2 min-h-11 w-full rounded-sm border border-hairline-input bg-white px-4 py-2.5 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
-            >
+        <div
+            class="flex max-w-lg flex-col gap-3 sm:flex-row sm:items-end"
+            x-data="{
+                raw: @js($this->date),
+                get display() {
+                    if (!this.raw) return '';
+                    const [y, m, d] = this.raw.split('-');
+                    return d + '/' + m + '/' + y;
+                },
+                openPicker() {
+                    const picker = this.$refs.datePicker;
+
+                    try {
+                        if (picker.showPicker) {
+                            picker.showPicker();
+                        } else {
+                            picker.click();
+                        }
+                    } catch (error) {
+                        picker.click();
+                    }
+                }
+            }"
+        >
+            <div class="min-w-0 flex-1">
+                <label for="kas-reference-date-display" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Tanggal acuan</label>
+                <div class="relative mt-2">
+                    <input
+                        id="kas-reference-date-display"
+                        :value="display"
+                        type="text"
+                        readonly
+                        class="tnum min-h-11 w-full rounded-sm border border-hairline-input bg-white py-2.5 pl-4 pr-12 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
+                    >
+                    <input
+                        x-ref="datePicker"
+                        x-model="raw"
+                        type="date"
+                        tabindex="-1"
+                        aria-label="Pilih tanggal acuan"
+                        class="pointer-events-none absolute h-px w-px opacity-0"
+                    >
+                    <button
+                        type="button"
+                        aria-label="Buka kalender tanggal acuan"
+                        class="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-sm text-ink-mute transition hover:bg-canvas-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                        @click="openPicker()"
+                    >
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="pointer-events-none absolute left-1/2 top-1/2 size-5 -translate-x-1/2 -translate-y-1/2 text-ink-mute">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3.75 9h16.5M5.25 4.5h13.5a1.5 1.5 0 0 1 1.5 1.5v12.75a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V6a1.5 1.5 0 0 1 1.5-1.5Z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <x-admin.button
+                href="#"
+                x-bind:href="'{{ route('kas.index') }}?date=' + raw"
+            >Tampilkan</x-admin.button>
         </div>
     </x-admin.panel>
 
