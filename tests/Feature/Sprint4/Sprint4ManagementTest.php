@@ -20,6 +20,14 @@ beforeEach(function () {
     $this->actingAs($this->admin);
 });
 
+it('renders the announcement management page before a publication action is selected', function () {
+    Announcement::factory()->create(['title' => 'Kerja Bakti']);
+
+    $this->get('/dashboard/pengumuman')
+        ->assertOk()
+        ->assertSee('Kerja Bakti');
+});
+
 it('creates and publishes announcements with audit logs', function () {
     Volt::test('dashboard.announcements.index')
         ->set('title', 'Kerja Bakti')
@@ -28,7 +36,9 @@ it('creates and publishes announcements with audit logs', function () {
         ->assertHasNoErrors();
 
     $announcement = Announcement::query()->firstOrFail();
-    Volt::test('dashboard.announcements.index')->call('togglePublish', $announcement->id);
+    Volt::test('dashboard.announcements.index')
+        ->call('startToggle', $announcement->id)
+        ->call('confirmToggle');
 
     expect($announcement->fresh()->is_published)->toBeTrue()
         ->and(AuditLog::query()->where('action', 'announcement.created')->exists())->toBeTrue()
@@ -60,6 +70,11 @@ it('uses a rich text editor and explicit announcement publication controls', fun
         ->toContain('<x-admin.status-badge')
         ->toContain('Tampilkan')
         ->toContain('Sembunyikan')
+        ->toContain("\$this->dispatch('announcement-edit-started')")
+        ->toContain('@announcement-edit-started.window')
+        ->toContain("scrollIntoView({ behavior: 'smooth'")
+        ->toContain('$refs.title.focus()')
+        ->toContain('x-ref="title"')
         ->not->toContain('<textarea wire:model="body"');
 });
 

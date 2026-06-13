@@ -41,6 +41,11 @@ $startCancel = function (int $id) {
     $this->reset('reason');
 };
 
+$cancelCancel = function () {
+    $this->reset('cancelId', 'reason');
+    $this->resetValidation('reason');
+};
+
 $confirmCancel = function () {
     $this->validate();
 
@@ -223,25 +228,60 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
     </x-admin.panel>
 
     @if ($cancelId)
-        <x-admin.panel class="border-ruby/30" aria-labelledby="cancel-transaction-title">
-            <div class="max-w-2xl">
+        <div
+            wire:keydown.escape.window="cancelCancel"
+            class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cancel-transaction-title"
+            aria-describedby="cancel-transaction-description"
+            x-data="{
+                trapFocus(event) {
+                    const focusable = [...this.$refs.dialog.querySelectorAll('textarea, button:not([disabled])')];
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+
+                    if (event.shiftKey && document.activeElement === first) {
+                        event.preventDefault();
+                        last.focus();
+                    } else if (!event.shiftKey && document.activeElement === last) {
+                        event.preventDefault();
+                        first.focus();
+                    }
+                }
+            }"
+            x-init="$nextTick(() => $refs.reason.focus())"
+        >
+            <button
+                type="button"
+                wire:click="cancelCancel"
+                class="absolute inset-0 cursor-default bg-ink/45 backdrop-blur-sm"
+                aria-label="Tutup konfirmasi pembatalan"
+            ></button>
+
+            <section
+                x-ref="dialog"
+                @keydown.tab="trapFocus($event)"
+                class="relative z-10 w-full max-w-lg rounded-xl border border-hairline bg-white p-6 shadow-level2"
+            >
                 <h2 id="cancel-transaction-title" class="text-lg font-medium text-ink">Batalkan Transaksi #{{ $cancelId }}</h2>
-                <p class="mt-1 text-sm leading-6 text-ink-mute">Transaksi tidak dihapus. Sistem akan mencatat koreksi dengan alasan yang dapat diaudit.</p>
+                <p id="cancel-transaction-description" class="mt-2 text-sm leading-6 text-ink-mute">Transaksi tidak dihapus. Sistem akan mencatat koreksi dengan alasan yang dapat diaudit.</p>
                 <div class="mt-5">
                     <label for="cancellation-reason" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Alasan pembatalan</label>
                     <textarea
                         id="cancellation-reason"
+                        x-ref="reason"
                         wire:model="reason"
                         rows="3"
                         class="mt-2 w-full rounded-sm border border-hairline-input bg-white px-4 py-3 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
                     ></textarea>
                     @error('reason') <p class="mt-2 text-sm font-medium text-ruby">{{ $message }}</p> @enderror
                 </div>
-                <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row">
-                    <x-admin.button variant="secondary" wire:click="$set('cancelId', null)">Batal</x-admin.button>
-                    <x-admin.button variant="danger" wire:click="confirmCancel">Konfirmasi Pembatalan</x-admin.button>
+                <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <x-admin.button type="button" variant="secondary" wire:click="cancelCancel">Batal</x-admin.button>
+                    <x-admin.button type="button" variant="danger" wire:click="confirmCancel">Konfirmasi Pembatalan</x-admin.button>
                 </div>
-            </div>
-        </x-admin.panel>
+            </section>
+        </div>
     @endif
 </div>

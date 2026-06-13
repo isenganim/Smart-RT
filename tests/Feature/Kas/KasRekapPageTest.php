@@ -79,6 +79,19 @@ it('provides responsive transaction presentations without mobile table overflow'
         ->toContain('<x-admin.button');
 });
 
+it('shows cancellation confirmation in an accessible dismissible dialog', function () {
+    $source = file_get_contents(resource_path('views/livewire/dashboard/kas/transactions.blade.php'));
+
+    expect($source)
+        ->toContain('role="dialog"')
+        ->toContain('aria-modal="true"')
+        ->toContain('aria-labelledby="cancel-transaction-title"')
+        ->toContain('aria-describedby="cancel-transaction-description"')
+        ->toContain('wire:keydown.escape.window="cancelCancel"')
+        ->toContain('wire:click="cancelCancel"')
+        ->toContain('@keydown.tab="trapFocus($event)"');
+});
+
 it('cancels a transaction with a reason from the transactions page', function () {
     $tx = CashTransaction::factory()->create(['amount' => 500]);
 

@@ -12,6 +12,7 @@ title('Pengumuman');
 
 state([
     'editingId' => null,
+    'pendingToggleId' => null,
     'title' => '',
     'body' => '',
 ]);
@@ -23,6 +24,7 @@ rules([
 
 with(fn () => [
     'announcements' => Announcement::query()->latest()->paginate(10),
+    'pendingAnnouncement' => $this->pendingToggleId ? Announcement::find($this->pendingToggleId) : null,
 ]);
 
 $edit = function (int $id) {
@@ -32,6 +34,7 @@ $edit = function (int $id) {
     $this->title = $item->title;
     $this->body = $item->body;
     $this->resetValidation();
+    $this->dispatch('announcement-edit-started');
 };
 
 $resetForm = function () {
@@ -65,8 +68,16 @@ $save = function () {
     $this->resetForm();
 };
 
-$togglePublish = function (int $id) {
-    $item = Announcement::findOrFail($id);
+$startToggle = function (int $id) {
+    $this->pendingToggleId = $id;
+};
+
+$cancelToggle = function () {
+    $this->pendingToggleId = null;
+};
+
+$confirmToggle = function () {
+    $item = Announcement::findOrFail($this->pendingToggleId);
     $publish = ! $item->is_published;
 
     $item->update([
@@ -80,6 +91,8 @@ $togglePublish = function (int $id) {
         'announcement',
         $item->id,
     );
+
+    $this->pendingToggleId = null;
 };
 
 ?>
@@ -90,12 +103,22 @@ $togglePublish = function (int $id) {
         description="Tulis informasi untuk warga, simpan sebagai draft, lalu tampilkan saat siap dipublikasikan."
     />
 
-    <x-admin.panel>
+    <x-admin.panel
+        x-data
+        @announcement-edit-started.window="
+            $nextTick(() => {
+                $el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                $refs.title.focus();
+                $refs.title.select();
+            })
+        "
+    >
         <form wire:submit="save" class="grid gap-5">
             <div>
                 <label for="announcement-title" class="block text-xs font-medium uppercase tracking-[0.08em] text-ink-mute">Judul</label>
                 <input
                     id="announcement-title"
+                    x-ref="title"
                     wire:model="title"
                     type="text"
                     class="mt-2 min-h-11 w-full rounded-sm border border-hairline-input bg-white px-4 py-2.5 text-base text-ink transition focus:border-primary focus:ring-1 focus:ring-primary"
@@ -166,9 +189,9 @@ $togglePublish = function (int $id) {
                     <div class="flex shrink-0 flex-wrap gap-2">
                         <x-admin.button variant="secondary" wire:click="edit({{ $item->id }})">Edit</x-admin.button>
                         @if ($item->is_published)
-                            <x-admin.button variant="danger" wire:click="togglePublish({{ $item->id }})">Sembunyikan</x-admin.button>
+                            <x-admin.button variant="danger" wire:click="startToggle({{ $item->id }})">Sembunyikan</x-admin.button>
                         @else
-                            <x-admin.button wire:click="togglePublish({{ $item->id }})">Tampilkan</x-admin.button>
+                            <x-admin.button wire:click="startToggle({{ $item->id }})">Tampilkan</x-admin.button>
                         @endif
                     </div>
                 </div>
@@ -186,4 +209,44 @@ $togglePublish = function (int $id) {
             </div>
         @endif
     </x-admin.panel>
+
+    @if ($pendingAnnouncement)
+        <div
+            wire:keydown.escape.window="cancelToggle"
+            class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="toggle-announcement-title"
+            aria-describedby="toggle-announcement-description"
+        >
+            <button
+                type="button"
+                wire:click="cancelToggle"
+                class="absolute inset-0 cursor-default bg-ink/45 backdrop-blur-sm"
+                aria-label="Tutup konfirmasi"
+            ></button>
+
+            <section class="relative z-10 w-full max-w-md rounded-xl border border-hairline bg-white p-6 shadow-level2">
+                <h2 id="toggle-announcement-title" class="text-xl font-medium text-ink">
+                    {{ $pendingAnnouncement->is_published ? 'Sembunyikan Pengumuman?' : 'Tampilkan Pengumuman?' }}
+                </h2>
+                <p id="toggle-announcement-description" class="mt-3 text-sm leading-6 text-ink-mute">
+                    {{ $pendingAnnouncement->is_published
+                        ? 'Pengumuman ini tidak akan terlihat di Portal Warga setelah disembunyikan.'
+                        : 'Pengumuman ini akan terlihat di Portal Warga setelah ditampilkan.' }}
+                </p>
+
+                <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <x-admin.button type="button" variant="secondary" wire:click="cancelToggle">Batal</x-admin.button>
+                    <x-admin.button
+                        type="button"
+                        variant="{{ $pendingAnnouncement->is_published ? 'danger' : 'primary' }}"
+                        wire:click="confirmToggle"
+                    >
+                        {{ $pendingAnnouncement->is_published ? 'Ya, Sembunyikan' : 'Ya, Tampilkan' }}
+                    </x-admin.button>
+                </div>
+            </section>
+        </div>
+    @endif
 </div>
