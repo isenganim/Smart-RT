@@ -34,6 +34,19 @@ it('rejects an expired pin', function () {
     expect($result->message)->toBe('PIN sudah kedaluwarsa.');
 });
 
+it('rejects a pin for a session that has not started', function () {
+    RondaScanSession::factory()->create([
+        'pin' => '654321',
+        'starts_at' => now()->addHour(),
+        'ends_at' => now()->addHours(3),
+    ]);
+
+    $result = $this->gate->unlock('654321');
+
+    expect($result->ok())->toBeFalse();
+    expect($result->message)->toBe('Sesi pindai belum dimulai.');
+});
+
 it('unlocks an active session when an older duplicate pin is expired', function () {
     RondaScanSession::factory()->expired()->create(['date' => today()->subDay(), 'pin' => '654321']);
     $active = RondaScanSession::factory()->active()->create(['date' => today(), 'pin' => '654321']);

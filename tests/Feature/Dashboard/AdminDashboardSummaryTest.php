@@ -92,6 +92,18 @@ it('builds truthful dashboard metrics actions trend and activity', function () {
 
 it('renders known audit actions with Indonesian labels', function () {
     AuditLog::query()->create([
+        'action' => 'announcement.created',
+        'metadata' => [],
+    ]);
+    AuditLog::query()->create([
+        'action' => 'announcement.updated',
+        'metadata' => [],
+    ]);
+    AuditLog::query()->create([
+        'action' => 'announcement.unpublished',
+        'metadata' => [],
+    ]);
+    AuditLog::query()->create([
         'action' => 'kas.iuran.scanned',
         'metadata' => [],
     ]);
@@ -105,6 +117,9 @@ it('renders known audit actions with Indonesian labels', function () {
         ->pluck('label');
 
     expect($labels)
+        ->toContain('Pengumuman dibuat')
+        ->toContain('Pengumuman diperbarui')
+        ->toContain('Pengumuman disembunyikan')
         ->toContain('Petugas ronda check-in')
         ->toContain('Iuran dipindai');
 });

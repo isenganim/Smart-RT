@@ -131,7 +131,10 @@ class AdminDashboardSummary
             'ronda.assignment.checked_in' => 'Petugas ronda check-in',
             'report.status_changed' => 'Status laporan diperbarui',
             'letter.status_changed' => 'Status surat diperbarui',
+            'announcement.created' => 'Pengumuman dibuat',
+            'announcement.updated' => 'Pengumuman diperbarui',
             'announcement.published' => 'Pengumuman diterbitkan',
+            'announcement.unpublished' => 'Pengumuman disembunyikan',
             default => str($action)->replace('.', ' ')->headline()->toString(),
         };
     }

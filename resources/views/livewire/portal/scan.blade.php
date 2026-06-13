@@ -4,6 +4,7 @@ use App\Models\RondaScanSession;
 use App\Services\IuranScan;
 use App\Services\PinGate;
 use App\Services\ResidentLookup;
+use App\Services\ScanOfficerGate;
 use App\Support\Audit;
 use Illuminate\Support\Facades\RateLimiter;
 use function Livewire\Volt\{layout, rules, state, title};
@@ -26,7 +27,7 @@ rules([
     'pin' => ['required', 'string', 'max:6'],
 ]);
 
-$unlock = function (PinGate $gate, ResidentLookup $lookup) {
+$unlock = function (PinGate $gate, ResidentLookup $lookup, ScanOfficerGate $officerGate) {
     $this->validate();
 
     $key = 'scan-unlock:'.request()->ip();
@@ -52,6 +53,16 @@ $unlock = function (PinGate $gate, ResidentLookup $lookup) {
     $result = $gate->unlock($this->pin);
 
     if ($result->ok()) {
+        $authorization = $officerGate->authorize($lookupResult->resident, $result->session);
+
+        if (! $authorization->ok()) {
+            $this->unlocked = false;
+            $this->sessionId = null;
+            $this->unlockError = $authorization->message;
+
+            return;
+        }
+
         $this->unlocked = true;
         $this->sessionId = $result->session->id;
         $this->unlockError = null;
@@ -63,7 +74,7 @@ $unlock = function (PinGate $gate, ResidentLookup $lookup) {
 };
 
 // Shared logic used by both manual scan() and camera-triggered scanDetectedToken().
-$processScan = function (string $token, IuranScan $iuran, ResidentLookup $lookup) {
+$processScan = function (string $token, IuranScan $iuran, ResidentLookup $lookup, ScanOfficerGate $officerGate) {
     if (! $this->unlocked || ! $this->sessionId) {
         return;
     }
@@ -83,6 +94,16 @@ $processScan = function (string $token, IuranScan $iuran, ResidentLookup $lookup
         $this->unlocked = false;
         $this->sessionId = null;
         $this->unlockError = 'PIN sudah kedaluwarsa.';
+
+        return;
+    }
+
+    $authorization = $officerGate->authorize($lookupResult->resident, $session);
+
+    if (! $authorization->ok()) {
+        $this->unlocked = false;
+        $this->sessionId = null;
+        $this->unlockError = $authorization->message;
 
         return;
     }
@@ -116,14 +137,14 @@ $processScan = function (string $token, IuranScan $iuran, ResidentLookup $lookup
 };
 
 // Manual form submission.
-$scan = function (IuranScan $iuran, ResidentLookup $lookup) {
-    $this->processScan($this->token, $iuran, $lookup);
+$scan = function (IuranScan $iuran, ResidentLookup $lookup, ScanOfficerGate $officerGate) {
+    $this->processScan($this->token, $iuran, $lookup, $officerGate);
 };
 
 // Camera-detected token from the JS scanner.
-$scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $lookup) {
+$scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $lookup, ScanOfficerGate $officerGate) {
     $this->token = $token;
-    $this->processScan($token, $iuran, $lookup);
+    $this->processScan($token, $iuran, $lookup, $officerGate);
 };
 
 ?>
