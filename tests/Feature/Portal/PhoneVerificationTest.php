@@ -50,3 +50,22 @@ it('blocks excessive verification attempts', function () {
 
     $component->assertSee('Terlalu banyak percobaan');
 });
+
+it('redirects unverified users from gated portal routes to verify page', function () {
+    $this->get('/checkin-ronda')->assertRedirect(route('portal.verify'));
+    $this->get('/lapor')->assertRedirect(route('portal.verify'));
+    $this->get('/surat')->assertRedirect(route('portal.verify'));
+    $this->get('/voting')->assertRedirect(route('portal.verify'));
+    $this->get('/scan-iuran')->assertRedirect(route('portal.verify'));
+});
+
+it('allows verified users to access gated portal routes', function () {
+    Resident::factory()->for($this->household)->create([
+        'phone' => '81234567890',
+        'is_active' => true,
+    ]);
+
+    $this->withSession(['portal_verified_phone' => '81234567890'])
+        ->get('/checkin-ronda')
+        ->assertOk();
+});

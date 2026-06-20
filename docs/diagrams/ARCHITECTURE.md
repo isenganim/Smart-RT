@@ -422,9 +422,12 @@ graph LR
         HOME["/ portal.home"]
         VERIFY["/cek-nomor portal.verify"]
         RONDA["/jadwal-ronda portal.ronda (feature:ronda)"]
+        ANNOUNCE["/pengumuman portal.announcements (feature:announcements)"]
+    end
+
+    subgraph PhoneGated["Portal Action Routes (registered_phone middleware)"]
         CHECKIN["/checkin-ronda portal.checkin (feature:ronda)"]
         SCAN["/scan-iuran portal.scan (feature:kas)"]
-        ANNOUNCE["/pengumuman portal.announcements (feature:announcements)"]
         REPORT["/lapor portal.report (feature:reports)"]
         LETTER["/surat portal.letter (feature:letters)"]
         VOTE_LIST["/voting portal.votes (feature:voting)"]
@@ -456,6 +459,7 @@ graph LR
     end
 
     style Public fill:#ecfdf5,stroke:#059669
+    style PhoneGated fill:#f0fdf4,stroke:#16a34a
     style Auth fill:#fefce8,stroke:#ca8a04
     style DashboardRoutes fill:#eff6ff,stroke:#2563eb
 ```

@@ -97,7 +97,9 @@ it('does not expose draft votes publicly', function () {
     $vote = Vote::factory()->create();
     VoteOption::factory()->for($vote)->create();
 
-    $this->get(route('portal.vote', $vote))->assertNotFound();
+    $this->withSession(['portal_verified_phone' => $this->resident->phone])
+        ->get(route('portal.vote', $vote))
+        ->assertNotFound();
 });
 
 it('scopes vote throttling to each poll', function () {

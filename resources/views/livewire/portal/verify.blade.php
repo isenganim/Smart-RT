@@ -32,8 +32,14 @@ $check = function (ResidentLookup $lookup) {
     $result = $lookup->resolve($this->phone);
 
     if ($result->found()) {
+        session(['portal_verified_phone' => $result->resident->phone]);
         $this->verified = true;
         $this->feedback = null;
+
+        $intended = session()->pull('portal_intended');
+        if ($intended) {
+            $this->redirect($intended, navigate: true);
+        }
 
         return;
     }

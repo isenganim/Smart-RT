@@ -3,6 +3,8 @@
 use App\Enums\UserRole;
 use App\Models\AuditLog;
 use App\Models\FeatureSetting;
+use App\Models\Household;
+use App\Models\Resident;
 use App\Models\User;
 use App\Support\Feature;
 use Illuminate\Support\Facades\Cache;
@@ -41,9 +43,16 @@ it('allows an enabled dashboard route', function () {
 });
 
 it('blocks a disabled portal route with 403', function () {
+    $household = Household::factory()->create();
+    $resident = Resident::factory()->for($household)->create([
+        'phone' => '81234567890',
+        'is_active' => true,
+    ]);
     FeatureSetting::create(['key' => 'voting', 'is_enabled' => false]);
 
-    $this->get('/voting')->assertForbidden();
+    $this->withSession(['portal_verified_phone' => $resident->phone])
+        ->get('/voting')
+        ->assertForbidden();
 });
 
 it('hides a disabled module from the sidebar', function () {

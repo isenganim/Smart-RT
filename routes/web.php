@@ -10,13 +10,16 @@ Volt::route('/', 'portal.home')->name('portal.home');
 Volt::route('/cek-nomor', 'portal.verify')->name('portal.verify');
 
 Volt::route('/jadwal-ronda', 'portal.ronda')->middleware('feature:ronda')->name('portal.ronda');
-Volt::route('/checkin-ronda', 'portal.checkin')->middleware('feature:ronda')->name('portal.checkin');
-Volt::route('/scan-iuran', 'portal.scan')->middleware('feature:kas')->name('portal.scan');
 Volt::route('/pengumuman', 'portal.announcements')->middleware('feature:announcements')->name('portal.announcements');
-Volt::route('/lapor', 'portal.report')->middleware('feature:reports')->name('portal.report');
-Volt::route('/surat', 'portal.letter')->middleware('feature:letters')->name('portal.letter');
-Volt::route('/voting', 'portal.votes')->middleware('feature:voting')->name('portal.votes');
-Volt::route('/voting/{vote}', 'portal.vote')->middleware('feature:voting')->name('portal.vote');
+
+Route::middleware('registered_phone')->group(function () {
+    Volt::route('/checkin-ronda', 'portal.checkin')->middleware('feature:ronda')->name('portal.checkin');
+    Volt::route('/scan-iuran', 'portal.scan')->middleware('feature:kas')->name('portal.scan');
+    Volt::route('/lapor', 'portal.report')->middleware('feature:reports')->name('portal.report');
+    Volt::route('/surat', 'portal.letter')->middleware('feature:letters')->name('portal.letter');
+    Volt::route('/voting', 'portal.votes')->middleware('feature:voting')->name('portal.votes');
+    Volt::route('/voting/{vote}', 'portal.vote')->middleware('feature:voting')->name('portal.vote');
+});
 
 Volt::route('/login', 'auth.login')->name('login');
 

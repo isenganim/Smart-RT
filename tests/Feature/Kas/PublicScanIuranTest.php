@@ -23,7 +23,8 @@ beforeEach(function () {
 });
 
 it('serves the scan page without login', function () {
-    $this->get('/scan-iuran')
+    $this->withSession(['portal_verified_phone' => $this->resident->phone])
+        ->get('/scan-iuran')
         ->assertOk()
         ->assertSee('Scan Iuran')
         ->assertSee('type="password"', false)
@@ -31,7 +32,8 @@ it('serves the scan page without login', function () {
 });
 
 it('does not show scanner controls on the locked page', function () {
-    $this->get('/scan-iuran')
+    $this->withSession(['portal_verified_phone' => $this->resident->phone])
+        ->get('/scan-iuran')
         ->assertOk()
         ->assertDontSee('Mulai Kamera')
         ->assertDontSee('data-iuran-scanner', false);
