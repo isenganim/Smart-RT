@@ -53,7 +53,7 @@ $regenerate = function (int $id) {
 <div class="space-y-6">
     <div>
         <h1 class="text-2xl font-semibold text-white sm:text-slate-900">Sesi Scan Ronda</h1>
-        <p class="mt-1 text-sm text-slate-300 sm:text-slate-600">Buat sesi harian untuk membuka mode scan iuran Rp500. Bagikan PIN ke regu ronda lewat WhatsApp.</p>
+        <p class="mt-1 text-sm text-slate-300 sm:text-slate-600">Buat sesi harian untuk membuka mode scan iuran Rp{{ number_format((int) \App\Support\Setting::get('iuran_amount', 500), 0, ',', '.') }}. Bagikan PIN ke regu ronda lewat WhatsApp.</p>
     </div>
 
     <form wire:submit="save" class="grid gap-3 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:grid-cols-4">

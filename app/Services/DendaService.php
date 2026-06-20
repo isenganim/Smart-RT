@@ -7,12 +7,18 @@ use App\Models\CashTransaction;
 use App\Models\RondaAssignment;
 use App\Models\User;
 use App\Support\Audit;
+use App\Support\Setting;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
 class DendaService
 {
     public const AMOUNT = 5000;
+
+    public function amount(): int
+    {
+        return (int) Setting::get('denda_amount', self::AMOUNT);
+    }
 
     public function candidates(CarbonInterface $date): Collection
     {
@@ -39,6 +45,8 @@ class DendaService
         $assignment->loadMissing('resident', 'rondaSchedule');
         $date = $assignment->rondaSchedule->date->toDateString();
 
+        $amount = $this->amount();
+
         $existing = CashTransaction::query()
             ->active()
             ->denda()
@@ -52,7 +60,7 @@ class DendaService
                 'household_id' => $assignment->resident?->household_id,
                 'ronda_assignment_id' => $assignment->id,
                 'date' => $date,
-                'amount' => self::AMOUNT,
+                'amount' => $amount,
             ]);
 
             return $existing;
@@ -63,7 +71,7 @@ class DendaService
             'household_id' => $assignment->resident?->household_id,
             'resident_id' => $assignment->resident_id,
             'type' => TransactionType::DENDA,
-            'amount' => self::AMOUNT,
+            'amount' => $amount,
             'status' => 'lunas',
             'source' => 'denda_review',
             'recorded_by' => $actor?->id,
@@ -76,7 +84,7 @@ class DendaService
             'household_id' => $assignment->resident?->household_id,
             'ronda_assignment_id' => $assignment->id,
             'date' => $date,
-            'amount' => self::AMOUNT,
+            'amount' => $amount,
         ]);
 
         return $transaction;

@@ -6,8 +6,9 @@ use App\Services\PinGate;
 use App\Services\ResidentLookup;
 use App\Services\ScanOfficerGate;
 use App\Support\Audit;
+use App\Support\Setting;
 use Illuminate\Support\Facades\RateLimiter;
-use function Livewire\Volt\{layout, rules, state, title};
+use function Livewire\Volt\{layout, mount, rules, state, title};
 
 layout('components.layouts.public');
 title('Scan Iuran');
@@ -20,7 +21,12 @@ state([
     'unlockError' => null,
     'token' => '',
     'lastResult' => null,
+    'iuranAmount' => 500,
 ]);
+
+mount(function () {
+    $this->iuranAmount = (int) Setting::get('iuran_amount', 500);
+});
 
 rules([
     'phone' => ['required', 'string', 'max:30'],
@@ -234,7 +240,7 @@ $scanDetectedToken = function (string $token, IuranScan $iuran, ResidentLookup $
                     >
                 </div>
                 <button class="w-full rounded-full bg-[#533afd] py-3.5 font-sans font-semibold text-white shadow-level1 hover:bg-[#4434d4] active:bg-[#2e2b8c] transition-all duration-150">
-                    Terima Tunai Rp500
+                    Terima Tunai Rp{{ number_format($iuranAmount, 0, ',', '.') }}
                 </button>
             </form>
         </div>

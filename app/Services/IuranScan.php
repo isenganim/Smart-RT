@@ -8,11 +8,17 @@ use App\Models\Household;
 use App\Models\RondaScanSession;
 use App\Models\User;
 use App\Support\Audit;
+use App\Support\Setting;
 use Illuminate\Support\Facades\DB;
 
 class IuranScan
 {
     public const AMOUNT = 500;
+
+    public function amount(): int
+    {
+        return (int) Setting::get('iuran_amount', self::AMOUNT);
+    }
 
     public function record(RondaScanSession $session, ?string $token, ?User $actor = null): IuranResult
     {
@@ -45,12 +51,14 @@ class IuranScan
                 return IuranResult::alreadyPaid($household, $existing);
             }
 
+            $amount = $this->amount();
+
             $transaction = CashTransaction::query()->create([
                 'date' => $session->date->toDateString(),
                 'household_id' => $household->id,
                 'ronda_scan_session_id' => $session->id,
                 'type' => TransactionType::IURAN_HARIAN,
-                'amount' => self::AMOUNT,
+                'amount' => $amount,
                 'status' => 'lunas',
                 'source' => 'scan',
                 'recorded_by' => $actor?->id,
@@ -59,7 +67,7 @@ class IuranScan
             Audit::record($actor, 'kas.iuran.created', 'cash_transaction', $transaction->id, [
                 'household_id' => $household->id,
                 'ronda_scan_session_id' => $session->id,
-                'amount' => self::AMOUNT,
+                'amount' => $amount,
             ]);
 
             return IuranResult::recorded($household, $transaction);
