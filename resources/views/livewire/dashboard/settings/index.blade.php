@@ -1,11 +1,11 @@
 <?php
 
 use App\Enums\UserRole;
-use App\Models\AppSetting;
 use App\Models\FeatureSetting;
 use App\Support\Audit;
 use App\Support\Feature;
 use App\Support\Setting;
+use Illuminate\Support\Facades\DB;
 use function Livewire\Volt\{layout, mount, state, title};
 
 layout('components.layouts.app');
@@ -56,41 +56,34 @@ $save = function () {
         'denda_amount' => ['required', 'integer', 'min:1', 'max:1000000'],
     ]);
 
-    foreach (Feature::OPTIONAL_FEATURES as $key) {
-        $setting = FeatureSetting::firstOrCreate(['key' => $key], ['is_enabled' => true]);
-        $target = (bool) ($this->flags[$key] ?? true);
+    DB::transaction(function () {
+        foreach (Feature::OPTIONAL_FEATURES as $key) {
+            $setting = FeatureSetting::firstOrCreate(['key' => $key], ['is_enabled' => true]);
+            $target = (bool) ($this->flags[$key] ?? true);
 
-        if ($setting->is_enabled !== $target) {
-            $previous = $setting->is_enabled;
-            $setting->update(['is_enabled' => $target, 'updated_by' => auth()->id()]);
+            if ($setting->is_enabled !== $target) {
+                $previous = $setting->is_enabled;
+                $setting->update(['is_enabled' => $target, 'updated_by' => auth()->id()]);
 
-            Audit::record(
-                auth()->user(),
-                $target ? 'feature.enabled' : 'feature.disabled',
-                'feature_setting',
-                $setting->id,
-                ['key' => $key, 'from' => $previous, 'to' => $target],
-            );
+                Audit::record(
+                    auth()->user(),
+                    $target ? 'feature.enabled' : 'feature.disabled',
+                    'feature_setting',
+                    $setting->id,
+                    ['key' => $key, 'from' => $previous, 'to' => $target],
+                );
+            }
         }
-    }
 
-    foreach (['iuran_amount', 'denda_amount'] as $key) {
-        $previous = (int) Setting::get($key, $key === 'iuran_amount' ? 500 : 5000);
-        $value = (int) $this->{$key};
+        foreach (['iuran_amount', 'denda_amount'] as $key) {
+            $previous = (int) Setting::get($key, $key === 'iuran_amount' ? 500 : 5000);
+            $value = (int) $this->{$key};
 
-        if ($previous !== $value) {
-            Setting::set($key, (string) $value, auth()->id());
-
-            $record = AppSetting::where('key', $key)->first();
-            Audit::record(
-                auth()->user(),
-                'setting.updated',
-                'app_setting',
-                $record?->id,
-                ['key' => $key, 'from' => $previous, 'to' => $value],
-            );
+            if ($previous !== $value) {
+                Setting::set($key, (string) $value, auth()->id());
+            }
         }
-    }
+    });
 
     Feature::flush();
     $this->showConfirm = false;

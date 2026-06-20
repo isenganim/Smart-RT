@@ -20,10 +20,14 @@ class Feature
 
     public static function enabled(string $key): bool
     {
+        if (! in_array($key, self::OPTIONAL_FEATURES, true)) {
+            return false;
+        }
+
         return Cache::remember(
             "feature.{$key}",
             3600,
-            fn () => FeatureSetting::query()->where('key', $key)->value('is_enabled') ?? true,
+            fn () => (bool) (FeatureSetting::query()->where('key', $key)->value('is_enabled') ?? true),
         );
     }
 

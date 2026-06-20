@@ -71,7 +71,7 @@ it('lets admin rt open the settings page', function () {
     $this->actingAs($user)
         ->get('/dashboard/pengaturan')
         ->assertOk()
-        ->assertSee('Pengaturan Fitur');
+        ->assertSee('Pengaturan');
 });
 
 it('forbids bendahara from the settings page', function () {

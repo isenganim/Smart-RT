@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\AppSetting;
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 
 class Setting
@@ -14,6 +15,8 @@ class Setting
 
     public static function get(string $key, mixed $default = null): mixed
     {
+        self::assertKnownKey($key);
+
         return Cache::remember(
             "setting.{$key}",
             3600,
@@ -23,12 +26,31 @@ class Setting
 
     public static function set(string $key, mixed $value, ?int $updatedBy = null): void
     {
-        AppSetting::updateOrCreate(
+        self::assertKnownKey($key);
+
+        $previous = AppSetting::query()->where('key', $key)->value('value');
+
+        $setting = AppSetting::updateOrCreate(
             ['key' => $key],
             ['value' => $value, 'updated_by' => $updatedBy],
         );
 
         Cache::forget("setting.{$key}");
+
+        Audit::record(
+            $updatedBy ? User::find($updatedBy) : null,
+            'setting.updated',
+            'app_setting',
+            $setting->id,
+            ['key' => $key, 'from' => $previous, 'to' => $value],
+        );
+    }
+
+    private static function assertKnownKey(string $key): void
+    {
+        if (! in_array($key, self::KEYS, true)) {
+            throw new \InvalidArgumentException("Unknown setting key [{$key}]");
+        }
     }
 
     public static function flush(): void

@@ -312,6 +312,7 @@ sequenceDiagram
     autonumber
     participant Admin as Admin RT
     participant Dashboard as Dashboard
+    participant Portal as Portal Warga
     participant Services as Services
     participant DB as MariaDB
     participant Warga as Warga (Phone)
@@ -332,8 +333,8 @@ sequenceDiagram
 
     Note over Warga,DB: Evening - Officers Check In
 
-    Warga->>Dashboard: POST /checkin-ronda (phone)
-    Dashboard->>Services: RondaCheckin.execute(phone)
+    Warga->>Portal: POST /checkin-ronda (phone)
+    Portal->>Services: RondaCheckin.execute(phone)
     Services->>DB: SELECT residents WHERE phone = ? AND is_active
     Services->>DB: SELECT ronda_schedules WHERE date = today
     Services->>DB: UPDATE ronda_assignments SET checked_in_at = NOW()
@@ -341,8 +342,8 @@ sequenceDiagram
 
     Note over Warga,DB: Evening - Collect Iuran (Rp500 per house)
 
-    Warga->>Dashboard: POST /scan-iuran (QR token + PIN)
-    Dashboard->>Services: PinGate.validate(pin)
+    Warga->>Portal: POST /scan-iuran (QR token + PIN)
+    Portal->>Services: PinGate.validate(pin)
     Services->>DB: SELECT ronda_scan_sessions WHERE pin = ? AND active window
     Services->>Services: ScanOfficerGate.validate(phone)
     Services->>DB: SELECT ronda_assignments WHERE checked_in_at IS NOT NULL
@@ -420,14 +421,14 @@ graph LR
     subgraph Public["Public Routes (No Auth)"]
         HOME["/ portal.home"]
         VERIFY["/cek-nomor portal.verify"]
-        RONDA["/jadwal-ronda portal.ronda"]
-        CHECKIN["/checkin-ronda portal.checkin"]
-        SCAN["/scan-iuran portal.scan"]
-        ANNOUNCE["/pengumuman portal.announcements"]
-        REPORT["/lapor portal.report"]
-        LETTER["/surat portal.letter"]
-        VOTE_LIST["/voting portal.votes"]
-        VOTE_DETAIL["/voting id portal.vote"]
+        RONDA["/jadwal-ronda portal.ronda (feature:ronda)"]
+        CHECKIN["/checkin-ronda portal.checkin (feature:ronda)"]
+        SCAN["/scan-iuran portal.scan (feature:kas)"]
+        ANNOUNCE["/pengumuman portal.announcements (feature:announcements)"]
+        REPORT["/lapor portal.report (feature:reports)"]
+        LETTER["/surat portal.letter (feature:letters)"]
+        VOTE_LIST["/voting portal.votes (feature:voting)"]
+        VOTE_DETAIL["/voting id portal.vote (feature:voting)"]
     end
 
     subgraph Auth["Auth Route"]
@@ -439,18 +440,19 @@ graph LR
         HH["/dashboard/rumah households.index"]
         HHQR["/dashboard/rumah id qr households.qr"]
         RES["/dashboard/warga residents.index"]
-        RONDA_MGR["/dashboard/ronda ronda.index"]
-        RONDA_DETAIL["/dashboard/ronda id ronda.show"]
-        SCAN_MGR["/dashboard/sesi-scan scan.index"]
-        DENDA["/dashboard/denda denda.index"]
-        KAS["/dashboard/kas kas.index"]
-        KAS_TX["/dashboard/kas/transaksi kas.transactions"]
-        ANN_MGR["/dashboard/pengumuman announcements.index"]
-        REPORT_MGR["/dashboard/laporan reports.index"]
-        LETTER_MGR["/dashboard/surat letters.index"]
-        VOTE_MGR["/dashboard/voting votes.index"]
-        VOTE_RESULT["/dashboard/voting id votes.show"]
-        INV["/dashboard/inventaris inventory.index"]
+        SETTINGS["/dashboard/pengaturan settings.index (admin_rt only)"]
+        RONDA_MGR["/dashboard/ronda ronda.index (feature:ronda)"]
+        RONDA_DETAIL["/dashboard/ronda id ronda.show (feature:ronda)"]
+        SCAN_MGR["/dashboard/sesi-scan scan.index (feature:ronda)"]
+        DENDA["/dashboard/denda denda.index (feature:ronda)"]
+        KAS["/dashboard/kas kas.index (feature:kas)"]
+        KAS_TX["/dashboard/kas/transaksi kas.transactions (feature:kas)"]
+        ANN_MGR["/dashboard/pengumuman announcements.index (feature:announcements)"]
+        REPORT_MGR["/dashboard/laporan reports.index (feature:reports)"]
+        LETTER_MGR["/dashboard/surat letters.index (feature:letters)"]
+        VOTE_MGR["/dashboard/voting votes.index (feature:voting)"]
+        VOTE_RESULT["/dashboard/voting id votes.show (feature:voting)"]
+        INV["/dashboard/inventaris inventory.index (feature:inventory)"]
     end
 
     style Public fill:#ecfdf5,stroke:#059669

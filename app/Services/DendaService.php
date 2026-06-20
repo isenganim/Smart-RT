@@ -60,7 +60,7 @@ class DendaService
                 'household_id' => $assignment->resident?->household_id,
                 'ronda_assignment_id' => $assignment->id,
                 'date' => $date,
-                'amount' => $amount,
+                'amount' => $existing->amount,
             ]);
 
             return $existing;
