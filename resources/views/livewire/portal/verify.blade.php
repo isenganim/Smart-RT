@@ -37,7 +37,10 @@ $check = function (ResidentLookup $lookup) {
         $this->feedback = null;
 
         $intended = session()->pull('portal_intended');
-        if ($intended) {
+        // Guard against open redirects: only accept a relative path that starts
+        // with a single "/". Rejects full URLs (https://evil) and protocol-
+        // relative URLs (//evil) that could exist from stale or spoofed sessions.
+        if ($intended && str_starts_with($intended, '/') && ! str_starts_with($intended, '//')) {
             $this->redirect($intended, navigate: true);
         }
 

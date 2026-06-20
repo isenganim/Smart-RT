@@ -16,7 +16,9 @@ class EnsureRegisteredPhone
         $phone = $request->session()->get('portal_verified_phone');
 
         if ($phone === null || ! $this->lookup->resolve($phone)->found()) {
-            $request->session()->put('portal_intended', $request->url());
+            // Store only the relative request URI (path + query string) so the
+            // Host header cannot inject an external host into the redirect target.
+            $request->session()->put('portal_intended', $request->getRequestUri());
 
             return redirect()->route('portal.verify');
         }

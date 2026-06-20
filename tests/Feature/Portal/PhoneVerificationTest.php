@@ -69,3 +69,54 @@ it('allows verified users to access gated portal routes', function () {
         ->get('/checkin-ronda')
         ->assertOk();
 });
+
+it('stores only the relative path as the intended url', function () {
+    $this->get('/checkin-ronda');
+
+    expect(session()->get('portal_intended'))->toBe('/checkin-ronda');
+});
+
+it('redirects back to the intended relative path after verification', function () {
+    Resident::factory()->for($this->household)->create([
+        'phone' => '81234567890',
+        'is_active' => true,
+    ]);
+
+    $this->get('/checkin-ronda');
+
+    Volt::test('portal.verify')
+        ->set('phone', '0812-3456-7890')
+        ->call('check')
+        ->assertSet('verified', true)
+        ->assertRedirect('/checkin-ronda');
+});
+
+it('rejects an external url stored in the intended session', function () {
+    Resident::factory()->for($this->household)->create([
+        'phone' => '81234567890',
+        'is_active' => true,
+    ]);
+
+    session(['portal_intended' => 'https://evil.example.com/phish']);
+
+    Volt::test('portal.verify')
+        ->set('phone', '0812-3456-7890')
+        ->call('check')
+        ->assertSet('verified', true)
+        ->assertNoRedirect();
+});
+
+it('rejects a protocol-relative url stored in the intended session', function () {
+    Resident::factory()->for($this->household)->create([
+        'phone' => '81234567890',
+        'is_active' => true,
+    ]);
+
+    session(['portal_intended' => '//evil.example.com']);
+
+    Volt::test('portal.verify')
+        ->set('phone', '0812-3456-7890')
+        ->call('check')
+        ->assertSet('verified', true)
+        ->assertNoRedirect();
+});
