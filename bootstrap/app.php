@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsureFeatureEnabled;
 use App\Http\Middleware\EnsurePengurus;
+use App\Http\Middleware\EnsureRegisteredPhone;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'pengurus' => EnsurePengurus::class,
+            'feature' => EnsureFeatureEnabled::class,
+            'registered_phone' => EnsureRegisteredPhone::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

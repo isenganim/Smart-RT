@@ -32,8 +32,17 @@ $check = function (ResidentLookup $lookup) {
     $result = $lookup->resolve($this->phone);
 
     if ($result->found()) {
+        session(['portal_verified_phone' => $result->resident->phone]);
         $this->verified = true;
         $this->feedback = null;
+
+        $intended = session()->pull('portal_intended');
+        // Guard against open redirects: only accept a relative path that starts
+        // with a single "/". Rejects full URLs (https://evil) and protocol-
+        // relative URLs (//evil) that could exist from stale or spoofed sessions.
+        if ($intended && str_starts_with($intended, '/') && ! str_starts_with($intended, '//')) {
+            $this->redirect($intended, navigate: true);
+        }
 
         return;
     }
