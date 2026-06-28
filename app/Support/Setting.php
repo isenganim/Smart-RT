@@ -11,6 +11,8 @@ class Setting
     public const KEYS = [
         'iuran_amount',
         'denda_amount',
+        'kas_opening_balance',
+        'kas_opening_date',
     ];
 
     public static function get(string $key, mixed $default = null): mixed

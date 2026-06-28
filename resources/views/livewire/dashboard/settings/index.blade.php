@@ -11,7 +11,7 @@ use function Livewire\Volt\{layout, mount, state, title};
 layout('components.layouts.app');
 title('Pengaturan');
 
-state(['flags' => [], 'iuran_amount' => 500, 'denda_amount' => 5000, 'showConfirm' => false]);
+state(['flags' => [], 'iuran_amount' => 500, 'denda_amount' => 5000, 'kas_opening_balance' => 0, 'kas_opening_date' => '', 'showConfirm' => false]);
 
 mount(function () {
     abort_unless(auth()->user()->role === UserRole::ADMIN_RT, 403);
@@ -27,6 +27,8 @@ mount(function () {
 
     $this->iuran_amount = (int) Setting::get('iuran_amount', 500);
     $this->denda_amount = (int) Setting::get('denda_amount', 5000);
+    $this->kas_opening_balance = (int) Setting::get('kas_opening_balance', 0);
+    $this->kas_opening_date = (string) Setting::get('kas_opening_date', '');
 });
 
 $toggle = function (string $key) {
@@ -39,6 +41,8 @@ $requestSave = function () {
     $this->validate([
         'iuran_amount' => ['required', 'integer', 'min:1', 'max:1000000'],
         'denda_amount' => ['required', 'integer', 'min:1', 'max:1000000'],
+        'kas_opening_balance' => ['required', 'integer', 'min:0', 'max:1000000000'],
+        'kas_opening_date' => ['nullable', 'date'],
     ]);
 
     $this->showConfirm = true;
@@ -54,6 +58,8 @@ $save = function () {
     $this->validate([
         'iuran_amount' => ['required', 'integer', 'min:1', 'max:1000000'],
         'denda_amount' => ['required', 'integer', 'min:1', 'max:1000000'],
+        'kas_opening_balance' => ['required', 'integer', 'min:0', 'max:1000000000'],
+        'kas_opening_date' => ['nullable', 'date'],
     ]);
 
     DB::transaction(function () {
@@ -82,6 +88,17 @@ $save = function () {
             if ($previous !== $value) {
                 Setting::set($key, (string) $value, auth()->id());
             }
+        }
+
+        $previousBalance = (int) Setting::get('kas_opening_balance', 0);
+        if ($previousBalance !== (int) $this->kas_opening_balance) {
+            Setting::set('kas_opening_balance', (string) (int) $this->kas_opening_balance, auth()->id());
+        }
+
+        $previousDate = (string) Setting::get('kas_opening_date', '');
+        $targetDate = (string) $this->kas_opening_date;
+        if ($previousDate !== $targetDate) {
+            Setting::set('kas_opening_date', $targetDate, auth()->id());
         }
     });
 
@@ -152,6 +169,36 @@ $save = function () {
                             class="block w-full rounded-md border border-hairline-input px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         >
                         @error('denda_amount') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="rounded-lg border border-hairline bg-white px-5 py-4">
+                    <label for="kas_opening_balance" class="block text-sm font-medium text-ink">Saldo Awal Kas (Rp)</label>
+                    <p class="mt-0.5 text-xs text-ink-mute">Saldo kas yang sudah ada sebelum dicatat di sistem.</p>
+                    <div class="mt-3">
+                        <input
+                            type="number"
+                            id="kas_opening_balance"
+                            wire:model="kas_opening_balance"
+                            min="0"
+                            max="1000000000"
+                            class="block w-full rounded-md border border-hairline-input px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        >
+                        @error('kas_opening_balance') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="rounded-lg border border-hairline bg-white px-5 py-4">
+                    <label for="kas_opening_date" class="block text-sm font-medium text-ink">Tanggal Saldo Awal</label>
+                    <p class="mt-0.5 text-xs text-ink-mute">Tanggal berlaku saldo awal. Kosongkan untuk menghitung dari awal.</p>
+                    <div class="mt-3">
+                        <input
+                            type="date"
+                            id="kas_opening_date"
+                            wire:model="kas_opening_date"
+                            class="block w-full rounded-md border border-hairline-input px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        >
+                        @error('kas_opening_date') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
@@ -226,6 +273,10 @@ $save = function () {
                     <div class="flex items-center justify-between px-4 py-3">
                         <dt class="text-ink-mute">Denda Absen Ronda</dt>
                         <dd class="font-semibold text-ink">Rp{{ number_format($denda_amount, 0, ',', '.') }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <dt class="text-ink-mute">Saldo Awal Kas</dt>
+                        <dd class="font-semibold text-ink">Rp{{ number_format($kas_opening_balance, 0, ',', '.') }}</dd>
                     </div>
                     <div class="flex items-center justify-between px-4 py-3">
                         <dt class="text-ink-mute">Modul aktif</dt>
