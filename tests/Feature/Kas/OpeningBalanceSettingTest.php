@@ -24,3 +24,30 @@ it('persists the opening balance and date from settings', function () {
     expect((int) Setting::get('kas_opening_balance'))->toBe(250000)
         ->and((string) Setting::get('kas_opening_date'))->toBe('2026-06-01');
 });
+
+it('rejects an opening date that is not in Y-m-d format', function () {
+    $this->actingAs($this->admin);
+
+    Volt::test('dashboard.settings.index')
+        ->set('iuran_amount', 500)
+        ->set('denda_amount', 5000)
+        ->set('kas_opening_balance', 0)
+        ->set('kas_opening_date', '01-06-2026')
+        ->call('requestSave')
+        ->assertHasErrors(['kas_opening_date']);
+});
+
+it('allows an empty opening date', function () {
+    $this->actingAs($this->admin);
+
+    Volt::test('dashboard.settings.index')
+        ->set('iuran_amount', 500)
+        ->set('denda_amount', 5000)
+        ->set('kas_opening_balance', 0)
+        ->set('kas_opening_date', '')
+        ->call('requestSave')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect((string) Setting::get('kas_opening_date'))->toBe('');
+});

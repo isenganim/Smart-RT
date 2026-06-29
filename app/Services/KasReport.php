@@ -99,7 +99,11 @@ class KasReport
             $query->whereDate('date', '>=', $openingDate);
         }
 
-        return $openingBalance + (int) $query->sum('amount');
+        $effectiveOpeningBalance = empty($openingDate) || $before->toDateString() >= $openingDate
+            ? $openingBalance
+            : 0;
+
+        return $effectiveOpeningBalance + (int) $query->sum('amount');
     }
 
     public function daily(CarbonInterface $date): array

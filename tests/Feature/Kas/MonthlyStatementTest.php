@@ -84,3 +84,15 @@ it('respects the opening date when computing carryover', function () {
     expect($statement['opening_balance'])->toBe(50000)
         ->and($statement['closing_balance'])->toBe(55000);
 });
+
+it('does not apply the opening balance to periods before the opening date', function () {
+    Setting::set('kas_opening_balance', '50000');
+    Setting::set('kas_opening_date', '2026-06-01');
+
+    CashTransaction::factory()->create(['date' => '2026-05-10', 'type' => TransactionType::IURAN_HARIAN, 'amount' => 5000]);
+
+    $statement = $this->report->monthlyStatement(2026, 5);
+
+    expect($statement['opening_balance'])->toBe(0)
+        ->and($statement['closing_balance'])->toBe(5000);
+});

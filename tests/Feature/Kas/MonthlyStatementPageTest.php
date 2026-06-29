@@ -14,6 +14,10 @@ beforeEach(function () {
     $this->admin = User::factory()->create(['role' => UserRole::BENDAHARA]);
 });
 
+afterEach(function () {
+    Carbon::setTestNow(null);
+});
+
 it('renders the statement totals for a bendahara', function () {
     CashTransaction::factory()->create(['date' => '2026-06-03', 'type' => TransactionType::IURAN_HARIAN, 'amount' => 5000]);
     CashTransaction::factory()->create(['date' => '2026-06-10', 'type' => TransactionType::PENGELUARAN, 'amount' => -2000, 'category' => 'Kebersihan', 'status' => 'keluar', 'source' => 'manual', 'reason' => 'Sapu']);
@@ -28,6 +32,8 @@ it('renders the statement totals for a bendahara', function () {
 });
 
 it('records an expense from the page', function () {
+    $this->actingAs($this->admin);
+
     Volt::test('dashboard.kas.statement')
         ->set('month', '2026-06')
         ->call('openExpense')
@@ -42,6 +48,9 @@ it('records an expense from the page', function () {
         'type' => TransactionType::PENGELUARAN->value,
         'amount' => -25000,
         'category' => 'Perbaikan',
+        'date' => '2026-06-12 00:00:00',
+        'reason' => 'Perbaikan lampu jalan',
+        'recorded_by' => $this->admin->id,
     ]);
 });
 

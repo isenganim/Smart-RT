@@ -12,7 +12,8 @@ class KasStatementExportController extends Controller
 {
     public function __invoke(Request $request, KasReport $report)
     {
-        $month = (string) $request->query('month', now()->format('Y-m'));
+        $month = $request->query('month', now()->format('Y-m'));
+        $month = is_string($month) ? $month : now()->format('Y-m');
 
         $period = CarbonImmutable::canBeCreatedFromFormat($month, 'Y-m')
             ? CarbonImmutable::createFromFormat('Y-m', $month)->startOfMonth()

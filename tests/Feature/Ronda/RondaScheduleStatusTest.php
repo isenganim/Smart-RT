@@ -8,6 +8,10 @@ beforeEach(function () {
     Carbon::setTestNow('2026-06-28 09:00:00');
 });
 
+afterEach(function () {
+    Carbon::setTestNow(null);
+});
+
 it('marks a future schedule as upcoming', function () {
     $schedule = RondaSchedule::factory()->create(['date' => '2026-06-30']);
 

@@ -11,7 +11,7 @@ class AppSettingSeeder extends Seeder
     {
         AppSetting::firstOrCreate(['key' => 'iuran_amount'], ['value' => '500']);
         AppSetting::firstOrCreate(['key' => 'denda_amount'], ['value' => '5000']);
-        AppSetting::firstOrCreate(['key' => 'kas_opening_balance'], ['value' => '250000']);
+        AppSetting::firstOrCreate(['key' => 'kas_opening_balance'], ['value' => '0']);
         AppSetting::firstOrCreate(['key' => 'kas_opening_date'], ['value' => '']);
     }
 }

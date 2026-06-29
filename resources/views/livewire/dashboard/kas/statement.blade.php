@@ -48,7 +48,7 @@ $statement = computed(function () {
 $openExpense = function () {
     $this->reset('expense_amount', 'expense_category', 'expense_description');
     $this->resetValidation();
-    $this->expense_date = today()->toDateString();
+    $this->expense_date = $this->ref()->toDateString();
     $this->showExpense = true;
 };
 
@@ -69,7 +69,10 @@ $saveExpense = function () {
             auth()->user(),
         );
     } catch (\InvalidArgumentException $exception) {
-        $this->addError('expense_amount', $exception->getMessage());
+        // Mirror ExpenseService's guard order: amount is checked first, so a
+        // failure with a valid amount necessarily comes from the description.
+        $field = (int) $this->expense_amount <= 0 ? 'expense_amount' : 'expense_description';
+        $this->addError($field, $exception->getMessage());
 
         return;
     }
@@ -232,7 +235,13 @@ $rupiah = fn (int $value) => 'Rp'.number_format($value, 0, ',', '.');
 
                 <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                     <x-admin.button type="button" variant="secondary" wire:click="closeExpense">Batal</x-admin.button>
-                    <x-admin.button type="button" variant="primary" wire:click="saveExpense">Simpan Pengeluaran</x-admin.button>
+                    <x-admin.button
+                        type="button"
+                        variant="primary"
+                        wire:click="saveExpense"
+                        wire:loading.attr="disabled"
+                        wire:target="saveExpense"
+                    >Simpan Pengeluaran</x-admin.button>
                 </div>
             </section>
         </div>

@@ -42,7 +42,7 @@ $requestSave = function () {
         'iuran_amount' => ['required', 'integer', 'min:1', 'max:1000000'],
         'denda_amount' => ['required', 'integer', 'min:1', 'max:1000000'],
         'kas_opening_balance' => ['required', 'integer', 'min:0', 'max:1000000000'],
-        'kas_opening_date' => ['nullable', 'date'],
+        'kas_opening_date' => ['nullable', 'date_format:Y-m-d'],
     ]);
 
     $this->showConfirm = true;
@@ -59,7 +59,7 @@ $save = function () {
         'iuran_amount' => ['required', 'integer', 'min:1', 'max:1000000'],
         'denda_amount' => ['required', 'integer', 'min:1', 'max:1000000'],
         'kas_opening_balance' => ['required', 'integer', 'min:0', 'max:1000000000'],
-        'kas_opening_date' => ['nullable', 'date'],
+        'kas_opening_date' => ['nullable', 'date_format:Y-m-d'],
     ]);
 
     DB::transaction(function () {
@@ -277,6 +277,10 @@ $save = function () {
                     <div class="flex items-center justify-between px-4 py-3">
                         <dt class="text-ink-mute">Saldo Awal Kas</dt>
                         <dd class="font-semibold text-ink">Rp{{ number_format($kas_opening_balance, 0, ',', '.') }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <dt class="text-ink-mute">Tanggal Saldo Awal</dt>
+                        <dd class="font-semibold text-ink">{{ $kas_opening_date !== '' ? $kas_opening_date : 'Dihitung dari awal' }}</dd>
                     </div>
                     <div class="flex items-center justify-between px-4 py-3">
                         <dt class="text-ink-mute">Modul aktif</dt>

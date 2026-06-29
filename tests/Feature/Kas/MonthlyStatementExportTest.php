@@ -19,6 +19,14 @@ it('exports the monthly statement as a PDF', function () {
     expect($response->headers->get('content-type'))->toContain('application/pdf');
 });
 
+it('falls back to the current month when month is passed as an array', function () {
+    $response = $this->actingAs($this->admin)
+        ->get('/dashboard/kas/laporan-bulanan/export?month[]=2026-06');
+
+    $response->assertOk();
+    expect($response->headers->get('content-type'))->toContain('application/pdf');
+});
+
 it('requires pengurus authentication', function () {
     $this->get('/dashboard/kas/laporan-bulanan/export?month=2026-06')
         ->assertRedirect('/login');
