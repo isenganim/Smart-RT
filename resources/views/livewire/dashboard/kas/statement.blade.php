@@ -60,22 +60,13 @@ $closeExpense = function () {
 $saveExpense = function () {
     $this->validate();
 
-    try {
-        app(ExpenseService::class)->record(
-            Carbon::parse($this->expense_date),
-            (int) $this->expense_amount,
-            (string) $this->expense_description,
-            $this->expense_category !== '' ? (string) $this->expense_category : null,
-            auth()->user(),
-        );
-    } catch (\InvalidArgumentException $exception) {
-        // Mirror ExpenseService's guard order: amount is checked first, so a
-        // failure with a valid amount necessarily comes from the description.
-        $field = (int) $this->expense_amount <= 0 ? 'expense_amount' : 'expense_description';
-        $this->addError($field, $exception->getMessage());
-
-        return;
-    }
+    app(ExpenseService::class)->record(
+        Carbon::parse($this->expense_date),
+        (int) $this->expense_amount,
+        (string) $this->expense_description,
+        $this->expense_category !== '' ? (string) $this->expense_category : null,
+        auth()->user(),
+    );
 
     $this->reset('showExpense', 'expense_amount', 'expense_category', 'expense_description');
     session()->flash('success', 'Pengeluaran berhasil dicatat.');
