@@ -42,6 +42,8 @@ Route::middleware(['auth', 'pengurus'])->group(function () {
     Route::middleware('feature:kas')->group(function () {
         Volt::route('/dashboard/kas', 'dashboard.kas.index')->name('kas.index');
         Volt::route('/dashboard/kas/transaksi', 'dashboard.kas.transactions')->name('kas.transactions');
+        Volt::route('/dashboard/kas/laporan-bulanan', 'dashboard.kas.statement')->name('kas.statement');
+        Route::get('/dashboard/kas/laporan-bulanan/export', \App\Http\Controllers\KasStatementExportController::class)->name('kas.statement.export');
     });
 
     Route::middleware('feature:announcements')->group(function () {

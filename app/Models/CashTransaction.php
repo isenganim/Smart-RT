@@ -27,6 +27,7 @@ class CashTransaction extends Model
         'cancelled_at',
         'cancelled_by',
         'source',
+        'category',
         'recorded_by',
         'reason',
     ];

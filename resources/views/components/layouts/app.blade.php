@@ -13,7 +13,8 @@
             \App\Support\Feature::enabled('ronda') ? ['label' => 'Ronda', 'route' => 'ronda.index', 'active' => request()->routeIs('ronda.*')] : null,
             \App\Support\Feature::enabled('ronda') ? ['label' => 'Sesi Scan', 'route' => 'scan-sessions.index', 'active' => request()->routeIs('scan-sessions.*')] : null,
             \App\Support\Feature::enabled('ronda') ? ['label' => 'Denda', 'route' => 'denda.index', 'active' => request()->routeIs('denda.*')] : null,
-            \App\Support\Feature::enabled('kas') ? ['label' => 'Kas', 'mobile' => 'Kas', 'route' => 'kas.index', 'active' => request()->routeIs('kas.*')] : null,
+            \App\Support\Feature::enabled('kas') ? ['label' => 'Kas', 'mobile' => 'Kas', 'route' => 'kas.index', 'active' => request()->routeIs('kas.index') || request()->routeIs('kas.transactions')] : null,
+            \App\Support\Feature::enabled('kas') ? ['label' => 'Laporan Keuangan', 'route' => 'kas.statement', 'active' => request()->routeIs('kas.statement')] : null,
         ])),
         'Layanan' => array_values(array_filter([
             \App\Support\Feature::enabled('announcements') ? ['label' => 'Pengumuman', 'route' => 'announcements.index', 'active' => request()->routeIs('announcements.*')] : null,
@@ -61,6 +62,9 @@
                     break;
                 case 'kas.index':
                     $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5c.621 0 1.125.504 1.125 1.125v12.125c0 .621-.504 1.125-1.125 1.125H3.75A1.125 1.125 0 012.625 16.5V5.625C2.625 5.004 3.129 4.5 3.75 4.5zM18 10.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6 10.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />';
+                    break;
+                case 'kas.statement':
+                    $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />';
                     break;
                 case 'announcements.index':
                     $svg = '<path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />';

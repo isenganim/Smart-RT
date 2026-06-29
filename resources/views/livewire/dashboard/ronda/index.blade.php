@@ -43,6 +43,31 @@ $save = function () {
     $this->reset('date', 'notes');
 };
 
+// Single source of truth for a schedule's status badge, shared by the desktop
+// and mobile lists so their labels/styles can never diverge.
+$statusFor = function (RondaSchedule $schedule) {
+    $meta = [
+        'upcoming' => ['label' => 'Akan datang', 'classes' => 'bg-sky-100 text-sky-700'],
+        'ongoing' => ['label' => 'Berlangsung', 'classes' => 'bg-amber-100 text-amber-700'],
+        'done' => ['label' => 'Selesai', 'classes' => 'bg-emerald-100 text-emerald-700'],
+        'missed' => ['label' => 'Terlewat', 'classes' => 'bg-rose-100 text-rose-700'],
+    ];
+
+    $key = $schedule->status();
+    $absent = $schedule->absentCount();
+
+    $label = $key === 'missed'
+        ? ($schedule->assignments_count > 0 ? 'Terlewat · '.$absent.' belum check-in' : 'Terlewat · tanpa petugas')
+        : $meta[$key]['label'];
+
+    return [
+        'key' => $key,
+        'classes' => $meta[$key]['classes'],
+        'absent' => $absent,
+        'label' => $label,
+    ];
+};
+
 ?>
 
 <div class="space-y-6">
@@ -83,12 +108,14 @@ $save = function () {
                             <th class="px-4 py-3">Tanggal</th>
                             <th class="px-4 py-3">Petugas Ronda</th>
                             <th class="px-4 py-3">Kehadiran</th>
+                            <th class="px-4 py-3">Status</th>
                             <th class="px-4 py-3">Keterangan</th>
                             <th class="px-4 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach ($this->schedules as $schedule)
+                            @php($status = $this->statusFor($schedule))
                             <tr>
                                 <td class="px-4 py-3 font-semibold text-slate-900">{{ $schedule->date->format('d M Y') }}</td>
                                 <td class="px-4 py-3 text-slate-600">{{ $schedule->assignments_count }} warga bertugas</td>
@@ -97,9 +124,17 @@ $save = function () {
                                         {{ $schedule->checked_in_count }} / {{ $schedule->assignments_count }} Hadir
                                     </span>
                                 </td>
+                                <td class="px-4 py-3">
+                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $status['classes'] }}">{{ $status['label'] }}</span>
+                                </td>
                                 <td class="px-4 py-3 text-slate-500 max-w-xs truncate">{{ $schedule->notes ?? '-' }}</td>
                                 <td class="px-4 py-3 text-right">
-                                    <a href="{{ route('ronda.show', $schedule) }}" class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition">Kelola</a>
+                                    <div class="flex items-center justify-end gap-2">
+                                        @if ($status['key'] === 'missed' && $status['absent'] > 0)
+                                            <a href="{{ route('denda.index', ['date' => $schedule->date->toDateString()]) }}" class="rounded-full bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-200 transition">Proses Denda</a>
+                                        @endif
+                                        <a href="{{ route('ronda.show', $schedule) }}" class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition">Kelola</a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -109,20 +144,27 @@ $save = function () {
 
             <div class="divide-y divide-slate-100 sm:hidden">
                 @foreach ($this->schedules as $schedule)
+                    @php($status = $this->statusFor($schedule))
                     <article class="p-5">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <h3 class="font-bold text-slate-950">{{ $schedule->date->format('d M Y') }}</h3>
                                 <p class="mt-1 text-sm text-slate-500">{{ $schedule->assignments_count }} warga bertugas</p>
                             </div>
-                            <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $schedule->checked_in_count > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
-                                {{ $schedule->checked_in_count }} / {{ $schedule->assignments_count }} Hadir
-                            </span>
+                            <div class="flex shrink-0 flex-col items-end gap-1.5">
+                                <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $status['classes'] }}">{{ $status['label'] }}</span>
+                                <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $schedule->checked_in_count > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
+                                    {{ $schedule->checked_in_count }} / {{ $schedule->assignments_count }} Hadir
+                                </span>
+                            </div>
                         </div>
                         @if ($schedule->notes)
                             <p class="mt-3 rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-600">{{ $schedule->notes }}</p>
                         @endif
-                        <div class="mt-4">
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            @if ($status['key'] === 'missed' && $status['absent'] > 0)
+                                <a href="{{ route('denda.index', ['date' => $schedule->date->toDateString()]) }}" class="inline-block rounded-full bg-rose-100 px-4 py-2 text-xs font-bold text-rose-700">Proses Denda</a>
+                            @endif
                             <a href="{{ route('ronda.show', $schedule) }}" class="inline-block rounded-full bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700">Kelola Jadwal &rarr;</a>
                         </div>
                     </article>
